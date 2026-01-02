@@ -41,10 +41,11 @@ log_info "========================================="
 # Demander confirmation
 log_warn "ATTENTION: Cette opération va supprimer complètement l'installation Essensys"
 log_warn "Les données suivantes seront supprimées:"
-log_warn "  - Services systemd (essensys-backend)"
-log_warn "  - Configuration nginx"
-log_warn "  - Fichiers d'installation dans $INSTALL_DIR"
-log_warn "  - Logs dans /var/logs/Essensys"
+log_warn "  - Services systemd (essensys-backend, traefik, traefik-block-service)"
+log_warn "  - Configuration nginx (essensys, essensys-frontend-internal)"
+log_warn "  - Configuration Traefik (/etc/traefik)"
+log_warn "  - Fichiers d'installation dans $INSTALL_DIR (backend, frontend)"
+log_warn "  - Logs dans /var/logs/Essensys et /var/log/traefik"
 log_warn ""
 read -p "Voulez-vous vraiment continuer? (tapez 'oui' pour confirmer): " confirmation
 
@@ -55,6 +56,8 @@ fi
 
 # Arrêter et désactiver les services
 log_info "Arrêt et désactivation des services..."
+
+# Service backend
 if systemctl is-active --quiet essensys-backend 2>/dev/null; then
     log_info "Arrêt du service essensys-backend..."
     systemctl stop essensys-backend
@@ -65,30 +68,82 @@ if systemctl is-enabled --quiet essensys-backend 2>/dev/null; then
     systemctl disable essensys-backend
 fi
 
+# Service Traefik
+if systemctl is-active --quiet traefik 2>/dev/null; then
+    log_info "Arrêt du service traefik..."
+    systemctl stop traefik
+fi
+
+if systemctl is-enabled --quiet traefik 2>/dev/null; then
+    log_info "Désactivation du service traefik..."
+    systemctl disable traefik
+fi
+
+# Service Traefik Block Service
+if systemctl is-active --quiet traefik-block-service 2>/dev/null; then
+    log_info "Arrêt du service traefik-block-service..."
+    systemctl stop traefik-block-service
+fi
+
+if systemctl is-enabled --quiet traefik-block-service 2>/dev/null; then
+    log_info "Désactivation du service traefik-block-service..."
+    systemctl disable traefik-block-service
+fi
+
 # Supprimer les fichiers de service systemd
 log_info "Suppression des fichiers de service systemd..."
+SERVICES_REMOVED=false
+
 if [ -f "/etc/systemd/system/essensys-backend.service" ]; then
     rm -f /etc/systemd/system/essensys-backend.service
     log_info "✓ Fichier essensys-backend.service supprimé"
+    SERVICES_REMOVED=true
+fi
+
+if [ -f "/etc/systemd/system/traefik.service" ]; then
+    rm -f /etc/systemd/system/traefik.service
+    log_info "✓ Fichier traefik.service supprimé"
+    SERVICES_REMOVED=true
+fi
+
+if [ -f "/etc/systemd/system/traefik-block-service.service" ]; then
+    rm -f /etc/systemd/system/traefik-block-service.service
+    log_info "✓ Fichier traefik-block-service.service supprimé"
+    SERVICES_REMOVED=true
+fi
+
+if [ "$SERVICES_REMOVED" = true ]; then
     systemctl daemon-reload
     systemctl reset-failed
-else
-    log_info "Le fichier essensys-backend.service n'existe pas"
 fi
 
 # Supprimer la configuration nginx
 log_info "Suppression de la configuration nginx..."
 NGINX_CONFIG_REMOVED=false
 
+# Configuration principale essensys
 if [ -f "/etc/nginx/sites-available/essensys" ]; then
     rm -f /etc/nginx/sites-available/essensys
-    log_info "✓ Configuration nginx supprimée"
+    log_info "✓ Configuration nginx essensys supprimée"
     NGINX_CONFIG_REMOVED=true
 fi
 
 if [ -L "/etc/nginx/sites-enabled/essensys" ]; then
     rm -f /etc/nginx/sites-enabled/essensys
-    log_info "✓ Lien symbolique nginx supprimé"
+    log_info "✓ Lien symbolique nginx essensys supprimé"
+    NGINX_CONFIG_REMOVED=true
+fi
+
+# Configuration frontend interne (pour Traefik)
+if [ -f "/etc/nginx/sites-available/essensys-frontend-internal" ]; then
+    rm -f /etc/nginx/sites-available/essensys-frontend-internal
+    log_info "✓ Configuration nginx frontend interne supprimée"
+    NGINX_CONFIG_REMOVED=true
+fi
+
+if [ -L "/etc/nginx/sites-enabled/essensys-frontend-internal" ]; then
+    rm -f /etc/nginx/sites-enabled/essensys-frontend-internal
+    log_info "✓ Lien symbolique nginx frontend interne supprimé"
     NGINX_CONFIG_REMOVED=true
 fi
 
@@ -139,6 +194,36 @@ else
     log_info "Le répertoire de logs n'existe pas"
 fi
 
+# Supprimer la configuration Traefik
+log_info "Suppression de la configuration Traefik..."
+if [ -d "/etc/traefik" ]; then
+    rm -rf /etc/traefik
+    log_info "✓ Configuration Traefik supprimée (/etc/traefik)"
+else
+    log_info "Le répertoire /etc/traefik n'existe pas"
+fi
+
+# Supprimer le binaire Traefik
+if [ -f "/usr/local/bin/traefik" ]; then
+    rm -f /usr/local/bin/traefik
+    log_info "✓ Binaire Traefik supprimé"
+fi
+
+# Supprimer le script de service de blocage
+if [ -f "/usr/local/bin/traefik-block-service.py" ]; then
+    rm -f /usr/local/bin/traefik-block-service.py
+    log_info "✓ Script traefik-block-service.py supprimé"
+fi
+
+# Supprimer les logs Traefik
+log_info "Suppression des logs Traefik..."
+if [ -d "/var/log/traefik" ]; then
+    rm -rf /var/log/traefik
+    log_info "✓ Répertoire de logs Traefik supprimé (/var/log/traefik)"
+else
+    log_info "Le répertoire de logs Traefik n'existe pas"
+fi
+
 # Supprimer les logs nginx spécifiques à Essensys
 log_info "Nettoyage des logs nginx..."
 if [ -f "/var/log/nginx/essensys-access.log" ]; then
@@ -148,6 +233,22 @@ fi
 if [ -f "/var/log/nginx/essensys-error.log" ]; then
     rm -f /var/log/nginx/essensys-error.log
     log_info "✓ Log nginx essensys-error.log supprimé"
+fi
+if [ -f "/var/log/nginx/essensys-api-detailed.log" ]; then
+    rm -f /var/log/nginx/essensys-api-detailed.log
+    log_info "✓ Log nginx essensys-api-detailed.log supprimé"
+fi
+if [ -f "/var/log/nginx/essensys-api-trace.log" ]; then
+    rm -f /var/log/nginx/essensys-api-trace.log
+    log_info "✓ Log nginx essensys-api-trace.log supprimé"
+fi
+if [ -f "/var/log/nginx/essensys-api-error.log" ]; then
+    rm -f /var/log/nginx/essensys-api-error.log
+    log_info "✓ Log nginx essensys-api-error.log supprimé"
+fi
+if [ -f "/var/log/nginx/frontend-internal-error.log" ]; then
+    rm -f /var/log/nginx/frontend-internal-error.log
+    log_info "✓ Log nginx frontend-internal-error.log supprimé"
 fi
 
 # Demander si on veut supprimer l'utilisateur et les dépôts
@@ -189,10 +290,12 @@ log_info "Désinstallation terminée avec succès!"
 log_info "=========================================="
 log_info ""
 log_info "Résumé des suppressions:"
-log_info "  ✓ Services systemd supprimés"
-log_info "  ✓ Configuration nginx supprimée"
+log_info "  ✓ Services systemd supprimés (essensys-backend, traefik, traefik-block-service)"
+log_info "  ✓ Configuration nginx supprimée (essensys, essensys-frontend-internal)"
+log_info "  ✓ Configuration Traefik supprimée (/etc/traefik)"
+log_info "  ✓ Binaires supprimés (traefik, traefik-block-service.py)"
 log_info "  ✓ Fichiers d'installation supprimés ($INSTALL_DIR)"
-log_info "  ✓ Logs supprimés (/var/logs/Essensys)"
+log_info "  ✓ Logs supprimés (/var/logs/Essensys, /var/log/traefik, logs nginx)"
 if [ "$delete_user" = "oui" ]; then
     log_info "  ✓ Utilisateur $SERVICE_USER supprimé"
     log_info "  ✓ Dépôts supprimés"
