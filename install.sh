@@ -373,6 +373,7 @@ rm -f /etc/nginx/sites-enabled/default
 # Créer les répertoires de logs si nécessaire
 mkdir -p /var/log/nginx
 touch /var/log/nginx/essensys-api-detailed.log
+touch /var/log/nginx/essensys-api-trace.log
 touch /var/log/nginx/essensys-api-error.log
 chown -R www-data:www-data /var/log/nginx/essensys-*.log 2>/dev/null || chown -R nginx:nginx /var/log/nginx/essensys-*.log 2>/dev/null || true
 

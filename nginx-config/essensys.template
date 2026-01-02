@@ -18,7 +18,8 @@ server {
     
     # Logs détaillés pour les API (diagnostic client legacy)
     access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
-    error_log /var/log/nginx/essensys-api-error.log warn;
+    access_log /var/log/nginx/essensys-api-trace.log essensys_api_trace;
+    error_log /var/log/nginx/essensys-api-error.log debug;
     
     # Gzip compression
     gzip on;
@@ -44,9 +45,14 @@ server {
     # CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
     # Le client nécessite des réponses en un seul paquet TCP
     location /api/ {
-        # Logs détaillés pour diagnostic client legacy
+        # Logs ultra-détaillés pour diagnostic client legacy non-standard
         access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
-        error_log /var/log/nginx/essensys-api-error.log warn;
+        access_log /var/log/nginx/essensys-api-trace.log essensys_api_trace;
+        error_log /var/log/nginx/essensys-api-error.log debug;
+        
+        # Capturer le body de la requête pour diagnostic (limité à 64k)
+        client_body_buffer_size 64k;
+        client_max_body_size 64k;
         
         proxy_pass http://127.0.0.1:8080/api/;
         proxy_http_version 1.1;

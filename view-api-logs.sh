@@ -106,24 +106,55 @@ if [ "$SHOW_ERRORS" = true ]; then
     exit 0
 fi
 
-# Afficher les logs détaillés
-echo -e "${GREEN}=== Logs API détaillés ===${NC}"
-if [ -n "$FILTER" ]; then
-    echo -e "${BLUE}Filtre: $FILTER${NC}"
-fi
-echo ""
+# Vérifier si l'option trace est demandée
+TRACE_MODE=false
+for arg in "$@"; do
+    if [ "$arg" = "-t" ] || [ "$arg" = "--trace" ]; then
+        TRACE_MODE=true
+        break
+    fi
+done
 
-if [ "$FOLLOW" = true ]; then
+# Afficher les logs
+if [ "$TRACE_MODE" = true ]; then
+    echo -e "${GREEN}=== Logs API TRACE (ultra-détaillés) ===${NC}"
     if [ -n "$FILTER" ]; then
-        tail -f "$API_DETAILED_LOG" | grep --line-buffered "$FILTER"
+        echo -e "${BLUE}Filtre: $FILTER${NC}"
+    fi
+    echo ""
+    
+    if [ "$FOLLOW" = true ]; then
+        if [ -n "$FILTER" ]; then
+            tail -f "$API_TRACE_LOG" | grep --line-buffered "$FILTER"
+        else
+            tail -f "$API_TRACE_LOG"
+        fi
     else
-        tail -f "$API_DETAILED_LOG"
+        if [ -n "$FILTER" ]; then
+            grep "$FILTER" "$API_TRACE_LOG" | tail -n "$LINES"
+        else
+            tail -n "$LINES" "$API_TRACE_LOG"
+        fi
     fi
 else
+    echo -e "${GREEN}=== Logs API détaillés ===${NC}"
     if [ -n "$FILTER" ]; then
-        grep "$FILTER" "$API_DETAILED_LOG" | tail -n "$LINES"
+        echo -e "${BLUE}Filtre: $FILTER${NC}"
+    fi
+    echo ""
+    
+    if [ "$FOLLOW" = true ]; then
+        if [ -n "$FILTER" ]; then
+            tail -f "$API_DETAILED_LOG" | grep --line-buffered "$FILTER"
+        else
+            tail -f "$API_DETAILED_LOG"
+        fi
     else
-        tail -n "$LINES" "$API_DETAILED_LOG"
+        if [ -n "$FILTER" ]; then
+            grep "$FILTER" "$API_DETAILED_LOG" | tail -n "$LINES"
+        else
+            tail -n "$LINES" "$API_DETAILED_LOG"
+        fi
     fi
 fi
 
