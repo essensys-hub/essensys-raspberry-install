@@ -302,11 +302,11 @@ WantedBy=multi-user.target
 EOF
 fi
 
-# Créer un service simple pour servir le frontend sur le port 8080
-log_info "Création du service systemd pour le frontend (port 8080)..."
+# Créer un service simple pour servir le frontend sur le port 9090
+log_info "Création du service systemd pour le frontend (port 9090)..."
 cat > /etc/systemd/system/essensys-frontend.service <<EOF
 [Unit]
-Description=Essensys Frontend Server (Port 8080)
+Description=Essensys Frontend Server (Port 9090)
 After=network.target
 
 [Service]
@@ -314,7 +314,7 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$FRONTEND_DIR
-ExecStart=/usr/bin/python3 -m http.server 8080 --directory $FRONTEND_DIR/dist
+ExecStart=/usr/bin/python3 -m http.server 9090 --directory $FRONTEND_DIR/dist
 Restart=always
 RestartSec=5
 
@@ -352,7 +352,7 @@ log_info "=========================================="
 log_info ""
 log_info "Configuration SANS NGINX:"
 log_info "  - Backend: http://localhost:80 (port 80 - pour client legacy)"
-log_info "  - Frontend: http://localhost:8080 (port 8080)"
+log_info "  - Frontend: http://localhost:9090 (port 9090)"
 log_info ""
 log_info "Les clients BP_MQX_ETH doivent se connecter directement au port 80"
 log_info "Le backend Go gère directement les requêtes HTTP (sans proxy nginx)"
@@ -367,6 +367,6 @@ log_info ""
 log_info "Pour tester:"
 log_info "  curl http://localhost:80/health"
 log_info "  curl http://localhost:80/api/serverinfos"
-log_info "  curl http://localhost:8080"
+log_info "  curl http://localhost:9090"
 log_info ""
 

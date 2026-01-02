@@ -1,5 +1,6 @@
+# Configuration pour le frontend sur port 9090
 server {
-    listen 80;
+    listen 9090;
     server_name _;
     
     root {{FRONTEND_DIR}}/dist;
@@ -41,9 +42,57 @@ server {
         add_header Pragma "no-cache";
     }
     
-    # Proxy pour les API vers le backend
-    # CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
-    # Le client nécessite des réponses en un seul paquet TCP
+    # Redirection vers le frontend sur port 9090
+    location / {
+        return 301 http://\$host:9090\$request_uri;
+    }
+}
+
+# Configuration pour le frontend sur port 9090
+server {
+    listen 9090;
+    server_name _;
+    
+    root {{FRONTEND_DIR}}/dist;
+    index index.html index.htm;
+    
+    # Types MIME
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Charset
+    charset utf-8;
+    
+    # Logs généraux
+    access_log /var/log/nginx/essensys-access.log;
+    error_log /var/log/nginx/essensys-error.log warn;
+    
+    # Logs détaillés pour les API (diagnostic client legacy)
+    access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
+    access_log /var/log/nginx/essensys-api-trace.log essensys_api_trace;
+    error_log /var/log/nginx/essensys-api-error.log debug;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript;
+    
+    # Cache pour les assets statiques
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Servir les fichiers HTML directement
+    location ~* \.html$ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+    }
+    
+    # Proxy pour les API vers le backend (depuis le frontend)
     location /api/ {
         # Logs ultra-détaillés pour diagnostic client legacy non-standard
         access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
