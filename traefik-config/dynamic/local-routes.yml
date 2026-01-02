@@ -27,6 +27,14 @@ http:
       service: api@internal
       priority: 100
     
+    # Métriques Prometheus
+    traefik-metrics:
+      rule: "Host(`traefik.essensys.fr`) && Path(`/metrics`)"
+      entryPoints:
+        - web
+      service: prometheus@internal
+      priority: 95
+    
     # Frontend local
     frontend-local:
       rule: "Host(`mon.essensys.fr`)"

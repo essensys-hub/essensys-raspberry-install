@@ -6,6 +6,22 @@ api:
   insecure: false  # Dashboard accessible uniquement via routes sécurisées
   # Le dashboard sera accessible via la route traefik.essensys.fr
 
+# Métriques Prometheus
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+    entryPoint: web
+    # Expose les métriques sur /metrics (accessible via le dashboard)
+
+# Traces (OpenTelemetry)
+tracing:
+  # Configuration basique pour les traces
+  # Les traces sont automatiquement collectées et visibles dans le dashboard
+  serviceName: traefik
+  sampleRate: 1.0  # 100% des requêtes sont tracées
+
 entryPoints:
   web:
     address: ":80"
