@@ -17,7 +17,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -f, --follow      Suivre les logs en temps réel (tail -f)"
-    echo "  -e, --errors       Afficher uniquement les erreurs"
+    echo "  -e, --errors       Afficher uniquement les erreurs (filtre les logs epoll)"
     echo "  -m, --mystatus     Filtrer les requêtes /api/mystatus"
     echo "  -a, --myactions    Filtrer les requêtes /api/myactions"
     echo "  -s, --serverinfos Filtrer les requêtes /api/serverinfos"
@@ -30,7 +30,8 @@ show_help() {
     echo "Exemples:"
     echo "  $0 -f                    # Suivre tous les logs API en temps réel"
     echo "  $0 -m -n 100             # Afficher les 100 dernières requêtes mystatus"
-    echo "  $0 -e                    # Afficher les erreurs"
+    echo "  $0 -e                    # Afficher les erreurs (sans les logs epoll)"
+    echo "  $0 -t -f                 # Suivre les logs trace ultra-détaillés"
     echo "  $0 -s -f                 # Suivre les requêtes serverinfos en temps réel"
 }
 
@@ -102,13 +103,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Afficher les erreurs
+# Afficher les erreurs (en filtrant les logs epoll qui sont trop verbeux)
 if [ "$SHOW_ERRORS" = true ]; then
-    echo -e "${RED}=== Logs d'erreur API ===${NC}"
+    echo -e "${RED}=== Logs d'erreur API (sans les logs epoll) ===${NC}"
+    echo -e "${YELLOW}Note: Les logs epoll (debug) sont filtrés. Pour voir tous les logs, utilisez: tail -f $API_ERROR_LOG${NC}"
+    echo ""
     if [ "$FOLLOW" = true ]; then
-        tail -f "$API_ERROR_LOG"
+        tail -f "$API_ERROR_LOG" | grep -v "epoll" | grep -v "^$" || tail -f "$API_ERROR_LOG"
     else
-        tail -n "$LINES" "$API_ERROR_LOG"
+        tail -n "$LINES" "$API_ERROR_LOG" | grep -v "epoll" | grep -v "^$" || tail -n "$LINES" "$API_ERROR_LOG"
     fi
     exit 0
 fi
