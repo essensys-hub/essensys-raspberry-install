@@ -302,6 +302,17 @@ log_info "Configuration de nginx..."
 # Déterminer le répertoire du script (pour trouver nginx-config)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Vérifier que les fichiers de configuration existent
+if [ ! -f "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" ]; then
+    log_error "Fichier de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys-api-log-format.conf"
+    exit 1
+fi
+
+if [ ! -f "$SCRIPT_DIR/nginx-config/essensys.template" ]; then
+    log_error "Template de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys.template"
+    exit 1
+fi
+
 # Copier le format de log personnalisé pour les API
 log_info "Installation du format de log nginx..."
 cp "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" /etc/nginx/conf.d/essensys-api-log-format.conf
