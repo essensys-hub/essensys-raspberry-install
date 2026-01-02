@@ -4,6 +4,7 @@
 api:
   dashboard: true
   insecure: false  # Dashboard accessible uniquement via routes sécurisées
+  # Le dashboard sera accessible via la route traefik.essensys.fr
 
 entryPoints:
   web:

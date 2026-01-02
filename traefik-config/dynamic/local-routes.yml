@@ -19,6 +19,14 @@ http:
         # mais on peut éviter de l'activer en ne l'utilisant pas
 
   routers:
+    # Dashboard Traefik (console admin)
+    traefik-dashboard:
+      rule: "Host(`traefik.essensys.fr`)"
+      entryPoints:
+        - web
+      service: api@internal
+      priority: 100
+    
     # Frontend local
     frontend-local:
       rule: "Host(`mon.essensys.fr`)"
