@@ -18,7 +18,7 @@ server {
     
     # Logs détaillés pour les API (diagnostic client legacy)
     access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
-    error_log /var/log/nginx/essensys-api-error.log debug;
+    error_log /var/log/nginx/essensys-api-error.log warn;
     
     # Gzip compression
     gzip on;
@@ -46,7 +46,7 @@ server {
     location /api/ {
         # Logs détaillés pour diagnostic client legacy
         access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
-        error_log /var/log/nginx/essensys-api-error.log debug;
+        error_log /var/log/nginx/essensys-api-error.log warn;
         
         proxy_pass http://127.0.0.1:8080/api/;
         proxy_http_version 1.1;
