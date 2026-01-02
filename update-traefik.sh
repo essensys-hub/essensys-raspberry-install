@@ -211,10 +211,23 @@ fi
 
 # Redémarrer Traefik (Traefik ne supporte pas reload, il faut restart)
 log_info "Redémarrage de Traefik..."
+# Vérifier d'abord la configuration Traefik
+if command -v traefik &> /dev/null; then
+    log_info "Vérification de la configuration Traefik..."
+    traefik version 2>&1 | head -1 || true
+    # Traefik ne peut pas valider la config sans démarrer, donc on essaie de démarrer
+fi
+
 systemctl restart traefik
-if [ $? -ne 0 ]; then
-    log_error "Échec du redémarrage de Traefik"
-    exit 1
+sleep 3  # Attendre un peu pour que Traefik démarre
+
+# Vérifier si Traefik a démarré correctement
+if ! systemctl is-active --quiet traefik; then
+    log_error "Échec du démarrage de Traefik"
+    log_error "Vérification des logs Traefik..."
+    journalctl -u traefik -n 50 --no-pager || true
+    log_error "Vérifiez la configuration dans /etc/traefik/traefik.yml"
+    # Ne pas quitter, continuer pour voir les autres services
 fi
 
 # Redémarrer le service de blocage si nécessaire
@@ -235,19 +248,36 @@ fi
 
 # Vérifier le statut des services
 log_info "Vérification du statut des services..."
-sleep 2
+sleep 5  # Augmenter le délai pour laisser le temps aux services de démarrer
+
+# Vérifier le backend
 if systemctl is-active --quiet essensys-backend; then
     log_info "✓ Backend: actif"
 else
     log_error "✗ Backend: inactif"
+    log_error "Logs backend:"
+    journalctl -u essensys-backend -n 10 --no-pager || true
 fi
 
+# Vérifier Traefik avec plusieurs méthodes
 if systemctl is-active --quiet traefik; then
-    log_info "✓ Traefik: actif"
+    log_info "✓ Traefik: actif (systemd)"
+elif pgrep -f "traefik.*configfile" > /dev/null; then
+    log_warn "⚠ Traefik: processus actif mais systemd indique inactif"
+    log_info "Le processus Traefik tourne, mais le service systemd peut avoir un problème"
+    systemctl status traefik --no-pager -l | head -20 || true
 else
     log_error "✗ Traefik: inactif"
+    log_error "Vérification des logs Traefik..."
+    if [ -f "/var/log/traefik/traefik-error.log" ]; then
+        log_error "Dernières erreurs:"
+        tail -20 /var/log/traefik/traefik-error.log || true
+    fi
+    log_error "Journal systemd:"
+    journalctl -u traefik -n 20 --no-pager || true
 fi
 
+# Vérifier Nginx
 if systemctl is-active --quiet nginx; then
     log_info "✓ Nginx: actif"
 else
