@@ -20,6 +20,8 @@ SERVICE_USER="essensys"
 BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
 FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HOME_DIR="/home/essensys"
+DOMAIN_FILE="$HOME_DIR/domain.txt"
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -143,6 +145,19 @@ fi
 log_info "Configuration des permissions..."
 chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
+# Lire le domaine WAN depuis le fichier domain.txt
+WAN_DOMAIN="essensys.acme.com"  # Valeur par défaut
+if [ -f "$DOMAIN_FILE" ]; then
+    WAN_DOMAIN=$(cat "$DOMAIN_FILE" | tr -d '\n\r ' | head -1)
+    if [ -z "$WAN_DOMAIN" ]; then
+        log_warn "Le fichier $DOMAIN_FILE est vide, utilisation du domaine par défaut: $WAN_DOMAIN"
+    else
+        log_info "Domaine WAN lu depuis $DOMAIN_FILE: $WAN_DOMAIN"
+    fi
+else
+    log_warn "Le fichier $DOMAIN_FILE n'existe pas, utilisation du domaine par défaut: $WAN_DOMAIN"
+fi
+
 # Mettre à jour la configuration Traefik si nécessaire
 log_info "Mise à jour de la configuration Traefik..."
 if [ -d "$SCRIPT_DIR/traefik-config" ]; then
@@ -157,15 +172,15 @@ if [ -d "$SCRIPT_DIR/traefik-config" ]; then
         log_info "Configuration Traefik principale mise à jour"
     fi
     
-    # Générer les fichiers de configuration dynamique avec le bon chemin frontend
+    # Générer les fichiers de configuration dynamique avec le bon chemin frontend et domaine WAN
     if [ -f "$SCRIPT_DIR/traefik-config/dynamic/local-routes.yml" ]; then
-        sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$SCRIPT_DIR/traefik-config/dynamic/local-routes.yml" > /etc/traefik/dynamic/local-routes.yml
+        sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$SCRIPT_DIR/traefik-config/dynamic/local-routes.yml" > /etc/traefik/dynamic/local-routes.yml
         log_info "Configuration routes locales mise à jour"
     fi
     
     if [ -f "$SCRIPT_DIR/traefik-config/dynamic/wan-routes.yml" ]; then
-        sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$SCRIPT_DIR/traefik-config/dynamic/wan-routes.yml" > /etc/traefik/dynamic/wan-routes.yml
-        log_info "Configuration routes WAN mise à jour"
+        sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$SCRIPT_DIR/traefik-config/dynamic/wan-routes.yml" > /etc/traefik/dynamic/wan-routes.yml
+        log_info "Configuration routes WAN mise à jour avec domaine: $WAN_DOMAIN"
     fi
     
     # Mettre à jour la configuration nginx pour le frontend interne

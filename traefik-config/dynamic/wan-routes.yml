@@ -1,6 +1,7 @@
-# Configuration des routes WAN (essensys.acme.com)
+# Configuration des routes WAN ({{WAN_DOMAIN}})
 # Accessible depuis Internet avec authentification basique pour / et /api/inject
 # Les autres API sont bloquées
+# Le domaine est remplacé par install-traefik.sh depuis /home/essensys/domain.txt
 
 http:
   middlewares:
@@ -24,7 +25,7 @@ http:
     # Redirection HTTP vers HTTPS pour le WAN
     # Le middleware redirect-to-https fait la redirection avant d'atteindre le service
     frontend-wan-redirect:
-      rule: "Host(`essensys.acme.com`)"
+      rule: "Host(`{{WAN_DOMAIN}}`)"
       entryPoints:
         - web
       service: frontend-service
@@ -34,7 +35,7 @@ http:
     
     # Frontend WAN avec authentification (HTTPS)
     frontend-wan:
-      rule: "Host(`essensys.acme.com`)"
+      rule: "Host(`{{WAN_DOMAIN}}`)"
       entryPoints:
         - websecure
       service: frontend-service
@@ -46,7 +47,7 @@ http:
     
     # API inject WAN avec authentification
     api-inject-wan:
-      rule: "Host(`essensys.acme.com`) && PathPrefix(`/api/inject`)"
+      rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/inject`)"
       entryPoints:
         - websecure
       service: backend-service
@@ -60,7 +61,7 @@ http:
     # Cette route capture toutes les autres requêtes /api/ (sauf /api/inject) et retourne 403
     # On utilise un service HTTP minimal qui retourne toujours 403
     api-block-wan:
-      rule: "Host(`essensys.acme.com`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
+      rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
       entryPoints:
         - websecure
       service: block-service

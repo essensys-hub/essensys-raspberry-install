@@ -23,6 +23,7 @@ SERVICE_USER="essensys"
 HOME_DIR="/home/essensys"
 BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
 FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
+DOMAIN_FILE="$HOME_DIR/domain.txt"
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -43,6 +44,20 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 log_info "Installation de Traefik pour Essensys"
+
+# Lire le domaine WAN depuis le fichier domain.txt
+WAN_DOMAIN="essensys.acme.com"  # Valeur par défaut
+if [ -f "$DOMAIN_FILE" ]; then
+    WAN_DOMAIN=$(cat "$DOMAIN_FILE" | tr -d '\n\r ' | head -1)
+    if [ -z "$WAN_DOMAIN" ]; then
+        log_warn "Le fichier $DOMAIN_FILE est vide, utilisation du domaine par défaut: $WAN_DOMAIN"
+    else
+        log_info "Domaine WAN lu depuis $DOMAIN_FILE: $WAN_DOMAIN"
+    fi
+else
+    log_warn "Le fichier $DOMAIN_FILE n'existe pas, utilisation du domaine par défaut: $WAN_DOMAIN"
+    log_warn "Créez le fichier avec: echo 'essensys.rhinosys.io' > $DOMAIN_FILE"
+fi
 
 # Vérifier que le répertoire de configuration existe
 if [ ! -d "$TRAEFIK_CONFIG_DIR" ]; then
@@ -383,10 +398,11 @@ cp "$TRAEFIK_CONFIG_DIR/traefik.yml" /etc/traefik/traefik.yml
 # Modifier l'email Let's Encrypt dans la configuration
 sed -i "s|admin@acme.com|$ACME_EMAIL|g" /etc/traefik/traefik.yml
 
-# Générer les fichiers de configuration dynamique avec le bon chemin frontend
+# Générer les fichiers de configuration dynamique avec le bon chemin frontend et domaine WAN
 log_info "Génération des fichiers de configuration dynamique..."
-sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$TRAEFIK_CONFIG_DIR/dynamic/local-routes.yml" > /etc/traefik/dynamic/local-routes.yml
-sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$TRAEFIK_CONFIG_DIR/dynamic/wan-routes.yml" > /etc/traefik/dynamic/wan-routes.yml
+sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$TRAEFIK_CONFIG_DIR/dynamic/local-routes.yml" > /etc/traefik/dynamic/local-routes.yml
+sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$TRAEFIK_CONFIG_DIR/dynamic/wan-routes.yml" > /etc/traefik/dynamic/wan-routes.yml
+log_info "Domaine WAN configuré: $WAN_DOMAIN"
 
 # Créer le fichier acme.json pour Let's Encrypt
 log_info "Création du fichier acme.json..."
@@ -500,13 +516,14 @@ log_info "=========================================="
 log_info ""
 log_info "Configuration:"
 log_info "  - Local: http://mon.essensys.fr/ (port 80, sans authentification)"
-log_info "  - WAN: https://essensys.acme.com/ (port 443, avec authentification)"
+log_info "  - WAN: https://$WAN_DOMAIN/ (port 443, avec authentification)"
 log_info ""
 log_info "IMPORTANT:"
 log_info "  1. Configurez le fichier htpasswd:"
 log_info "     sudo $TRAEFIK_CONFIG_DIR/generate-htpasswd.sh"
-log_info "  2. Vérifiez que le DNS essensys.acme.com pointe vers cette machine"
+log_info "  2. Vérifiez que le DNS $WAN_DOMAIN pointe vers cette machine"
 log_info "  3. Les certificats Let's Encrypt seront générés automatiquement"
+log_info "  4. Domaine WAN lu depuis: $DOMAIN_FILE"
 log_info ""
 log_info "Services:"
 log_info "  - Backend: systemctl status essensys-backend"
