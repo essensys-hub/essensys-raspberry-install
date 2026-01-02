@@ -194,11 +194,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Recharger Traefik (reload pour ne pas interrompre les connexions)
-log_info "Rechargement de Traefik..."
-systemctl reload traefik || systemctl restart traefik
+# Redémarrer Traefik (Traefik ne supporte pas reload, il faut restart)
+log_info "Redémarrage de Traefik..."
+systemctl restart traefik
 if [ $? -ne 0 ]; then
-    log_error "Échec du rechargement de Traefik"
+    log_error "Échec du redémarrage de Traefik"
     exit 1
 fi
 
@@ -244,14 +244,33 @@ log_info "Mise à jour du dépôt essensys-raspberry-install..."
 cd "$SCRIPT_DIR"
 if [ -d ".git" ]; then
     # Vérifier s'il y a des changements
-    if [ -n "$(git status --porcelain)" ]; then
+    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+        # Vérifier si git est configuré (sinon, essayer de le configurer avec des valeurs par défaut)
+        if ! git config user.email >/dev/null 2>&1; then
+            log_warn "Git n'est pas configuré, configuration avec des valeurs par défaut..."
+            git config user.email "essensys@essensys.fr" || true
+            git config user.name "Essensys Auto Update" || true
+        fi
+        
         log_info "Commit des changements locaux..."
         git add -A
-        git commit -m "Mise à jour automatique: $(date '+%Y-%m-%d %H:%M:%S')" || true
-        
-        # Push vers le dépôt distant
-        log_info "Push vers le dépôt distant..."
-        git push || log_warn "Échec du push (peut être normal si pas de remote configuré)"
+        if git commit -m "Mise à jour automatique: $(date '+%Y-%m-%d %H:%M:%S')" 2>/dev/null; then
+            log_info "✓ Commit effectué avec succès"
+            
+            # Push vers le dépôt distant (seulement si un remote est configuré)
+            if git remote get-url origin >/dev/null 2>&1; then
+                log_info "Push vers le dépôt distant..."
+                if git push 2>/dev/null; then
+                    log_info "✓ Push effectué avec succès"
+                else
+                    log_warn "⚠ Échec du push (peut nécessiter une authentification)"
+                fi
+            else
+                log_info "Aucun remote configuré, pas de push"
+            fi
+        else
+            log_warn "⚠ Échec du commit (peut nécessiter une configuration git manuelle)"
+        fi
     else
         log_info "Aucun changement à commiter"
     fi
