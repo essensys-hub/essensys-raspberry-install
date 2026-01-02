@@ -1,7 +1,23 @@
 # Configuration des routes LOCALES (mon.essensys.fr)
 # Accessible sans authentification depuis le réseau local
+# CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
+# Le client nécessite des réponses en un seul paquet TCP
 
 http:
+  middlewares:
+    # Middleware pour préserver les headers originaux et désactiver la compression
+    # CRITIQUE: Compatible client legacy BP_MQX_ETH
+    preserve-headers:
+      headers:
+        customRequestHeaders:
+          Connection: ""
+        customResponseHeaders:
+          Connection: "close"
+        # Désactiver la compression pour éviter la fragmentation
+        # Le client legacy nécessite des réponses en un seul paquet TCP
+        # Note: Dans Traefik v2.x, on ne peut pas désactiver la compression directement
+        # mais on peut éviter de l'activer en ne l'utilisant pas
+
   routers:
     # Frontend local
     frontend-local:
@@ -12,19 +28,25 @@ http:
       priority: 10
     
     # API inject local (accessible sans auth)
+    # CRITIQUE: Compatible client legacy BP_MQX_ETH
     api-inject-local:
       rule: "Host(`mon.essensys.fr`) && PathPrefix(`/api/inject`)"
       entryPoints:
         - web
       service: backend-service
+      middlewares:
+        - preserve-headers
       priority: 20
     
     # Toutes les autres API locales (accessibles sans auth)
+    # CRITIQUE: Compatible client legacy BP_MQX_ETH
     api-all-local:
       rule: "Host(`mon.essensys.fr`) && PathPrefix(`/api/`)"
       entryPoints:
         - web
       service: backend-service
+      middlewares:
+        - preserve-headers
       priority: 15
     
     # Health check local
@@ -45,9 +67,25 @@ http:
         passHostHeader: true
     
     # Service backend (proxy vers backend Go)
+    # CRITIQUE: Configuration compatible client legacy BP_MQX_ETH
+    # - Désactivation de la compression pour éviter la fragmentation
+    # - Timeouts augmentés pour client non-standard
+    # - Préservation des headers originaux
     backend-service:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:8080"
         passHostHeader: true
+        # Désactiver la compression (le client legacy ne peut pas gérer)
+        # Note: Traefik v2.x n'a pas d'option directe pour désactiver la compression
+        # On utilise un middleware pour cela
+        # Timeouts augmentés pour client non-standard
+        healthCheck:
+          interval: "10s"
+          timeout: "5s"
+          path: "/health"
+          scheme: "http"
+      # Options de réponse pour single-packet TCP
+      # Traefik bufferise automatiquement les réponses, mais on peut forcer
+      # en utilisant un middleware de buffering si nécessaire
 

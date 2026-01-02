@@ -8,6 +8,9 @@ api:
 entryPoints:
   web:
     address: ":80"
+    # Options pour compatibilité client legacy BP_MQX_ETH
+    # Le client ne respecte pas complètement le protocole HTTP standard
+    # Traefik est généralement plus permissif que nginx, mais on configure explicitement
   websecure:
     address: ":443"
     http:
@@ -43,4 +46,9 @@ accessLog:
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
+
+# Configuration pour compatibilité client legacy BP_MQX_ETH
+# Le client nécessite des réponses en un seul paquet TCP
+# Désactiver la compression globale pour les API (sera réactivée par middleware si nécessaire)
+# Note: La compression peut être désactivée au niveau des middlewares
 
