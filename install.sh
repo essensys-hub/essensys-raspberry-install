@@ -298,6 +298,33 @@ EOF
 
 # Configurer nginx
 log_info "Configuration de nginx..."
+
+# Créer un format de log personnalisé pour les API (détaillé)
+cat > /etc/nginx/conf.d/essensys-api-log-format.conf <<'NGINXLOGEOF'
+log_format essensys_api_detailed '$remote_addr - $remote_user [$time_local] '
+    '"$request" $status $body_bytes_sent '
+    '"$http_referer" "$http_user_agent" '
+    'rt=$request_time uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time" '
+    'request_id="$request_id" '
+    'request_method="$request_method" '
+    'request_uri="$request_uri" '
+    'request_length="$request_length" '
+    'content_type="$content_type" '
+    'http_host="$host" '
+    'http_connection="$http_connection" '
+    'http_content_length="$http_content_length" '
+    'upstream_addr="$upstream_addr" '
+    'upstream_status="$upstream_status" '
+    'upstream_response_length="$upstream_response_length" '
+    'proxy_host="$proxy_host" '
+    'proxy_port="$proxy_port"';
+
+log_format essensys_api_headers '$remote_addr - $remote_user [$time_local] '
+    '"$request" $status '
+    'request_headers="$req_headers" '
+    'response_headers="$resp_headers"';
+NGINXLOGEOF
+
 cat > /etc/nginx/sites-available/essensys <<EOF
 server {
     listen 80;
@@ -313,9 +340,13 @@ server {
     # Charset
     charset utf-8;
     
-    # Logs
+    # Logs généraux
     access_log /var/log/nginx/essensys-access.log;
-    error_log /var/log/nginx/essensys-error.log;
+    error_log /var/log/nginx/essensys-error.log warn;
+    
+    # Logs détaillés pour les API (diagnostic client legacy)
+    access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
+    error_log /var/log/nginx/essensys-api-error.log debug;
     
     # Gzip compression
     gzip on;
@@ -341,6 +372,10 @@ server {
     # CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
     # Le client nécessite des réponses en un seul paquet TCP
     location /api/ {
+        # Logs détaillés pour diagnostic client legacy
+        access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
+        error_log /var/log/nginx/essensys-api-error.log debug;
+        
         proxy_pass http://127.0.0.1:8080/api/;
         proxy_http_version 1.1;
         
@@ -377,6 +412,10 @@ server {
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+        
+        # Logs supplémentaires pour diagnostic
+        # Capturer les erreurs de proxy
+        proxy_intercept_errors on;
         
         # Fermer la connexion après la réponse (compatible avec Connection: close)
         proxy_set_header Connection "close";
@@ -424,6 +463,12 @@ EOF
 # Activer le site nginx
 ln -sf /etc/nginx/sites-available/essensys /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
+
+# Créer les répertoires de logs si nécessaire
+mkdir -p /var/log/nginx
+touch /var/log/nginx/essensys-api-detailed.log
+touch /var/log/nginx/essensys-api-error.log
+chown -R www-data:www-data /var/log/nginx/essensys-*.log 2>/dev/null || chown -R nginx:nginx /var/log/nginx/essensys-*.log 2>/dev/null || true
 
 # Tester la configuration nginx
 log_info "Vérification de la configuration nginx..."
