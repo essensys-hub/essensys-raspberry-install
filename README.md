@@ -405,18 +405,37 @@ sudo systemctl reload nginx
 
 ## Désinstallation
 
-Pour désinstaller complètement :
+### Option 1 : Script automatique (recommandé)
+
+Un script `uninstall.sh` est fourni pour automatiser la désinstallation complète :
+
+```bash
+cd essensys-raspberry-install
+sudo ./uninstall.sh
+```
+
+Le script va :
+- Demander confirmation avant de supprimer
+- Arrêter et désactiver les services
+- Supprimer les fichiers de service systemd
+- Supprimer la configuration nginx
+- Supprimer les fichiers d'installation dans `/opt/essensys`
+- Supprimer les logs dans `/var/logs/Essensys`
+- Optionnellement supprimer l'utilisateur et les dépôts
+
+### Option 2 : Désinstallation manuelle
+
+Si vous préférez désinstaller manuellement :
 
 ```bash
 # Arrêter et désactiver les services
 sudo systemctl stop essensys-backend
 sudo systemctl disable essensys-backend
-sudo systemctl stop nginx
-sudo systemctl disable nginx
 
 # Supprimer les fichiers de service
 sudo rm /etc/systemd/system/essensys-backend.service
 sudo systemctl daemon-reload
+sudo systemctl reset-failed
 
 # Supprimer la configuration nginx
 sudo rm /etc/nginx/sites-available/essensys
@@ -426,8 +445,12 @@ sudo systemctl reload nginx
 # Supprimer les fichiers d'installation
 sudo rm -rf /opt/essensys
 
+# Supprimer les logs
+sudo rm -rf /var/logs/Essensys
+sudo rm -f /var/log/nginx/essensys-*.log
+
 # Supprimer l'utilisateur (optionnel)
-sudo userdel essensys
+sudo userdel -r essensys
 ```
 
 ## Sécurité
