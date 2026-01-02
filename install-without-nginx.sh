@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script d'installation Essensys pour Raspberry Pi 4 SANS NGINX
-# Backend sur port 80, Frontend sur port 8080
+# Backend sur port 80, Frontend sur port 9090
 # Ce script permet de tester si nginx bloque le client legacy
 
 set -e  # Arrêter en cas d'erreur
@@ -42,7 +42,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 log_info "Démarrage de l'installation Essensys SANS NGINX pour Raspberry Pi 4"
-log_info "Backend sur port 80, Frontend sur port 8080"
+log_info "Backend sur port 80, Frontend sur port 9090"
 log_warn "ATTENTION: Ce script installe SANS nginx pour tester si nginx bloque le client legacy"
 
 # Mettre à jour le système
