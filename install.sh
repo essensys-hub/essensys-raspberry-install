@@ -286,16 +286,37 @@ server {
     server_name _;
     
     root $FRONTEND_DIR/dist;
-    index index.html;
+    index index.html index.htm;
+    
+    # Types MIME
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Charset
+    charset utf-8;
     
     # Logs
     access_log /var/log/nginx/essensys-access.log;
     error_log /var/log/nginx/essensys-error.log;
     
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript;
+    
     # Cache pour les assets statiques
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Servir les fichiers HTML directement
+    location ~* \.html$ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
     }
     
     # Proxy pour les API vers le backend
@@ -322,16 +343,36 @@ server {
         proxy_pass http://127.0.0.1:8080/health;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
+        access_log off;
     }
     
-    # SPA fallback - toutes les autres requêtes vers index.html
+    # Servir les fichiers statiques existants
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files \$uri \$uri/ @fallback;
+    }
+    
+    # Fallback pour SPA - rediriger vers index.html si fichier non trouvé
+    location @fallback {
+        try_files /index.html =404;
     }
     
     # Sécurité - bloquer l'accès aux fichiers cachés
     location ~ /\. {
         deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Désactiver les logs pour favicon
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+    
+    # Désactiver les logs pour robots.txt
+    location = /robots.txt {
+        log_not_found off;
+        access_log off;
     }
 }
 EOF
