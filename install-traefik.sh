@@ -254,6 +254,44 @@ fi
 log_info "Configuration des permissions..."
 chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
+# Créer le répertoire de logs
+log_info "Création du répertoire de logs..."
+mkdir -p /var/logs/Essensys/backend
+chown -R "$SERVICE_USER:$SERVICE_USER" /var/logs/Essensys
+
+# Créer le service systemd pour le backend
+log_info "Création du service systemd pour le backend..."
+cat > /etc/systemd/system/essensys-backend.service <<EOF
+[Unit]
+Description=Essensys Backend Server
+After=network.target
+
+[Service]
+Type=simple
+User=$SERVICE_USER
+Group=$SERVICE_USER
+WorkingDirectory=$BACKEND_DIR
+ExecStart=$BACKEND_DIR/server
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/logs/Essensys/backend/console.out.log
+StandardError=append:/var/logs/Essensys/backend/console.out.log
+
+# Environment variables
+Environment="LOG_LEVEL=info"
+Environment="AUTH_ENABLED=false"
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=$INSTALL_DIR /var/logs/Essensys
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 # Télécharger et installer Traefik
 log_info "Téléchargement de Traefik..."
 TRAEFIK_BINARY="/usr/local/bin/traefik"
