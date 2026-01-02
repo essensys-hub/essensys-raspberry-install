@@ -176,6 +176,10 @@ if [ -d "$SCRIPT_DIR/nginx-config" ]; then
         sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$SCRIPT_DIR/nginx-config/essensys.template" > /etc/nginx/sites-available/essensys
         log_info "Configuration nginx mise à jour"
         
+        # Activer le site et désactiver la configuration par défaut
+        ln -sf /etc/nginx/sites-available/essensys /etc/nginx/sites-enabled/
+        rm -f /etc/nginx/sites-enabled/default
+        
         # Tester la configuration nginx
         nginx -t
         if [ $? -ne 0 ]; then
