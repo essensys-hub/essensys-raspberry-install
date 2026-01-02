@@ -57,7 +57,14 @@ fi
 
 # Vérifier ce qui utilise le port 8080
 log_info "Vérification du port 8080..."
-PORT_8080_PID=$(lsof -ti:8080 2>/dev/null || netstat -tlnp 2>/dev/null | grep :8080 | awk '{print $7}' | cut -d'/' -f1 | head -1)
+PORT_8080_PID=""
+if command -v ss &> /dev/null; then
+    PORT_8080_PID=$(ss -tlnp 2>/dev/null | grep ":8080 " | grep -oP 'pid=\K[0-9]+' | head -1)
+elif command -v netstat &> /dev/null; then
+    PORT_8080_PID=$(netstat -tlnp 2>/dev/null | grep ":8080 " | awk '{print $7}' | cut -d'/' -f1 | head -1)
+elif command -v lsof &> /dev/null; then
+    PORT_8080_PID=$(lsof -ti:8080 2>/dev/null)
+fi
 if [ -n "$PORT_8080_PID" ]; then
     log_warn "Le port 8080 est utilisé par le processus PID: $PORT_8080_PID"
     PROCESS_NAME=$(ps -p "$PORT_8080_PID" -o comm= 2>/dev/null || echo "inconnu")
@@ -73,7 +80,14 @@ fi
 
 # Vérifier ce qui utilise le port 80
 log_info "Vérification du port 80..."
-PORT_80_PID=$(lsof -ti:80 2>/dev/null || netstat -tlnp 2>/dev/null | grep :80 | awk '{print $7}' | cut -d'/' -f1 | head -1)
+PORT_80_PID=""
+if command -v ss &> /dev/null; then
+    PORT_80_PID=$(ss -tlnp 2>/dev/null | grep ":80 " | grep -oP 'pid=\K[0-9]+' | head -1)
+elif command -v netstat &> /dev/null; then
+    PORT_80_PID=$(netstat -tlnp 2>/dev/null | grep ":80 " | awk '{print $7}' | cut -d'/' -f1 | head -1)
+elif command -v lsof &> /dev/null; then
+    PORT_80_PID=$(lsof -ti:80 2>/dev/null)
+fi
 if [ -n "$PORT_80_PID" ]; then
     log_warn "Le port 80 est utilisé par le processus PID: $PORT_80_PID"
     PROCESS_NAME=$(ps -p "$PORT_80_PID" -o comm= 2>/dev/null || echo "inconnu")
@@ -133,9 +147,13 @@ log_info "  1. Exécutez: sudo ./install.sh"
 log_info "     (ou relancez l'installation avec nginx)"
 log_info ""
 log_info "  2. Vérifiez que les ports sont libres:"
-log_info "     sudo lsof -i :80"
-log_info "     sudo lsof -i :8080"
-log_info "     sudo lsof -i :9090"
+if command -v ss &> /dev/null; then
+    log_info "     sudo ss -tlnp | grep -E ':(80|8080|9090) '"
+elif command -v netstat &> /dev/null; then
+    log_info "     sudo netstat -tlnp | grep -E ':(80|8080|9090) '"
+else
+    log_info "     sudo ./fix-ports.sh"
+fi
 log_info ""
 log_info "Configuration attendue:"
 log_info "  - Backend: port 8080"

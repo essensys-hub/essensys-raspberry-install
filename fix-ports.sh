@@ -46,17 +46,26 @@ kill_port() {
     
     log_info "Vérification du port $PORT ($PORT_NAME)..."
     
-    # Essayer avec lsof
-    PID=$(lsof -ti:$PORT 2>/dev/null)
+    PID=""
     
-    # Si lsof ne fonctionne pas, essayer avec netstat
-    if [ -z "$PID" ]; then
+    # Essayer avec ss (généralement disponible sur Debian/Raspberry Pi OS)
+    if command -v ss &> /dev/null; then
+        PID=$(ss -tlnp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K[0-9]+' | head -1)
+    fi
+    
+    # Si ss ne fonctionne pas, essayer avec netstat
+    if [ -z "$PID" ] && command -v netstat &> /dev/null; then
         PID=$(netstat -tlnp 2>/dev/null | grep ":$PORT " | awk '{print $7}' | cut -d'/' -f1 | head -1)
     fi
     
-    # Si netstat ne fonctionne pas, essayer avec ss
-    if [ -z "$PID" ]; then
-        PID=$(ss -tlnp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K[0-9]+' | head -1)
+    # Si netstat ne fonctionne pas, essayer avec lsof (peut ne pas être installé)
+    if [ -z "$PID" ] && command -v lsof &> /dev/null; then
+        PID=$(lsof -ti:$PORT 2>/dev/null)
+    fi
+    
+    # Dernière tentative avec fuser (si disponible)
+    if [ -z "$PID" ] && command -v fuser &> /dev/null; then
+        PID=$(fuser $PORT/tcp 2>/dev/null | awk '{print $1}' | head -1)
     fi
     
     if [ -n "$PID" ]; then
@@ -75,7 +84,15 @@ kill_port() {
         
         # Vérifier que le port est libéré
         sleep 1
-        NEW_PID=$(lsof -ti:$PORT 2>/dev/null || netstat -tlnp 2>/dev/null | grep ":$PORT " | awk '{print $7}' | cut -d'/' -f1 | head -1)
+        NEW_PID=""
+        if command -v ss &> /dev/null; then
+            NEW_PID=$(ss -tlnp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K[0-9]+' | head -1)
+        elif command -v netstat &> /dev/null; then
+            NEW_PID=$(netstat -tlnp 2>/dev/null | grep ":$PORT " | awk '{print $7}' | cut -d'/' -f1 | head -1)
+        elif command -v lsof &> /dev/null; then
+            NEW_PID=$(lsof -ti:$PORT 2>/dev/null)
+        fi
+        
         if [ -z "$NEW_PID" ]; then
             log_info "✓ Port $PORT libéré"
         else
@@ -94,7 +111,18 @@ kill_port 9090 "Frontend"
 log_info ""
 log_info "Vérification finale des ports..."
 echo ""
-lsof -i :80 -i :8080 -i :9090 2>/dev/null || netstat -tlnp 2>/dev/null | grep -E ":(80|8080|9090) " || ss -tlnp 2>/dev/null | grep -E ":(80|8080|9090) " || log_info "Aucun processus trouvé sur les ports 80, 8080, 9090"
+
+# Afficher les ports utilisés avec la méthode disponible
+if command -v ss &> /dev/null; then
+    ss -tlnp 2>/dev/null | grep -E ":(80|8080|9090) " || log_info "Aucun processus trouvé sur les ports 80, 8080, 9090"
+elif command -v netstat &> /dev/null; then
+    netstat -tlnp 2>/dev/null | grep -E ":(80|8080|9090) " || log_info "Aucun processus trouvé sur les ports 80, 8080, 9090"
+elif command -v lsof &> /dev/null; then
+    lsof -i :80 -i :8080 -i :9090 2>/dev/null || log_info "Aucun processus trouvé sur les ports 80, 8080, 9090"
+else
+    log_warn "Aucun outil disponible pour vérifier les ports (ss, netstat, lsof)"
+    log_info "Vous pouvez installer un outil avec: sudo apt-get install net-tools"
+fi
 
 log_info ""
 log_info "=========================================="
