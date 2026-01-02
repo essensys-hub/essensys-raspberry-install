@@ -159,6 +159,36 @@ fi
 log_info "Configuration des permissions..."
 chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
+# Mettre à jour la configuration nginx si nécessaire
+log_info "Mise à jour de la configuration nginx..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -d "$SCRIPT_DIR/nginx-config" ]; then
+    # Copier le format de log personnalisé pour les API
+    if [ -f "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" ]; then
+        cp "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" /etc/nginx/conf.d/essensys-api-log-format.conf
+        log_info "Format de log nginx mis à jour"
+    else
+        log_warn "Fichier de format de log nginx introuvable, utilisation de la configuration existante"
+    fi
+    
+    # Générer la configuration du site à partir du template
+    if [ -f "$SCRIPT_DIR/nginx-config/essensys.template" ]; then
+        sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$SCRIPT_DIR/nginx-config/essensys.template" > /etc/nginx/sites-available/essensys
+        log_info "Configuration nginx mise à jour"
+        
+        # Tester la configuration nginx
+        nginx -t
+        if [ $? -ne 0 ]; then
+            log_error "La configuration nginx est invalide"
+            exit 1
+        fi
+    else
+        log_warn "Template de configuration nginx introuvable, utilisation de la configuration existante"
+    fi
+else
+    log_warn "Répertoire nginx-config introuvable, utilisation de la configuration existante"
+fi
+
 # Redémarrer les services
 log_info "Redémarrage des services..."
 log_info "Démarrage du service essensys-backend..."

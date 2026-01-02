@@ -1,0 +1,133 @@
+server {
+    listen 80;
+    server_name _;
+    
+    root {{FRONTEND_DIR}}/dist;
+    index index.html index.htm;
+    
+    # Types MIME
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Charset
+    charset utf-8;
+    
+    # Logs généraux
+    access_log /var/log/nginx/essensys-access.log;
+    error_log /var/log/nginx/essensys-error.log warn;
+    
+    # Logs détaillés pour les API (diagnostic client legacy)
+    access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
+    error_log /var/log/nginx/essensys-api-error.log debug;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript;
+    
+    # Cache pour les assets statiques
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Servir les fichiers HTML directement
+    location ~* \.html$ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+    }
+    
+    # Proxy pour les API vers le backend
+    # CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
+    # Le client nécessite des réponses en un seul paquet TCP
+    location /api/ {
+        # Logs détaillés pour diagnostic client legacy
+        access_log /var/log/nginx/essensys-api-detailed.log essensys_api_detailed;
+        error_log /var/log/nginx/essensys-api-error.log debug;
+        
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_http_version 1.1;
+        
+        # Headers de requête
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Connection "";
+        
+        # CRITIQUE: Bufferiser la réponse complète pour single-packet TCP
+        # Le client legacy ne peut pas gérer les réponses fragmentées
+        proxy_buffering on;
+        proxy_buffer_size 4k;
+        proxy_buffers 8 4k;
+        proxy_busy_buffers_size 8k;
+        # Bufferiser toute la réponse avant d'envoyer
+        proxy_max_temp_file_size 0;
+        
+        # Désactiver gzip pour les API (évite la fragmentation)
+        gzip off;
+        
+        # Préserver les headers originaux du backend
+        # Le backend envoie déjà Content-Type avec espace avant ;charset
+        proxy_pass_header Content-Type;
+        proxy_pass_header Content-Length;
+        proxy_pass_header Connection;
+        
+        # Ne pas modifier les headers de réponse
+        proxy_hide_header X-Powered-By;
+        proxy_hide_header Server;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Logs supplémentaires pour diagnostic
+        # Capturer les erreurs de proxy
+        proxy_intercept_errors on;
+        
+        # Fermer la connexion après la réponse (compatible avec Connection: close)
+        proxy_set_header Connection "close";
+    }
+    
+    # Health check endpoint
+    location /health {
+        proxy_pass http://127.0.0.1:8080/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        access_log off;
+    }
+    
+    # Servir les fichiers statiques existants
+    location / {
+        try_files \$uri \$uri/ @fallback;
+    }
+    
+    # Fallback pour SPA - rediriger vers index.html si fichier non trouvé
+    location @fallback {
+        try_files /index.html =404;
+    }
+    
+    # Sécurité - bloquer l'accès aux fichiers cachés
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Désactiver les logs pour favicon
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+    
+    # Désactiver les logs pour robots.txt
+    location = /robots.txt {
+        log_not_found off;
+        access_log off;
+    }
+}
+
