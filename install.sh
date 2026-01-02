@@ -320,22 +320,48 @@ server {
     }
     
     # Proxy pour les API vers le backend
+    # CRITIQUE: Configuration compatible avec client legacy BP_MQX_ETH
+    # Le client nécessite des réponses en un seul paquet TCP
     location /api/ {
         proxy_pass http://127.0.0.1:8080/api/;
         proxy_http_version 1.1;
+        
+        # Headers de requête
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header Connection "";
         
+        # CRITIQUE: Bufferiser la réponse complète pour single-packet TCP
+        # Le client legacy ne peut pas gérer les réponses fragmentées
+        proxy_buffering on;
+        proxy_buffer_size 4k;
+        proxy_buffers 8 4k;
+        proxy_busy_buffers_size 8k;
+        # Bufferiser toute la réponse avant d'envoyer
+        proxy_max_temp_file_size 0;
+        
+        # Désactiver gzip pour les API (évite la fragmentation)
+        gzip off;
+        
+        # Préserver les headers originaux du backend
+        # Le backend envoie déjà Content-Type avec espace avant ;charset
+        proxy_pass_header Content-Type;
+        proxy_pass_header Content-Length;
+        proxy_pass_header Connection;
+        
+        # Ne pas modifier les headers de réponse
+        proxy_hide_header X-Powered-By;
+        proxy_hide_header Server;
+        
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
         
-        # Buffer settings
-        proxy_buffering off;
+        # Fermer la connexion après la réponse (compatible avec Connection: close)
+        proxy_set_header Connection "close";
     }
     
     # Health check endpoint
