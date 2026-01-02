@@ -299,47 +299,72 @@ EOF
 # Configurer nginx
 log_info "Configuration de nginx..."
 
-# Déterminer le répertoire du script (pour trouver nginx-config)
-# Utiliser plusieurs méthodes pour trouver le répertoire du script
+# Chercher le répertoire nginx-config dans plusieurs emplacements possibles
+NGINX_CONFIG_DIR=""
+
+# 1. Répertoire du script (si le script est dans essensys-raspberry-install)
 if [ -n "${BASH_SOURCE[0]}" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-elif [ -n "$0" ]; then
-    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-else
-    # Fallback: utiliser le répertoire courant
-    SCRIPT_DIR="$(pwd)"
-fi
-
-# Si le script est dans le répertoire courant, utiliser pwd
-if [ ! -d "$SCRIPT_DIR/nginx-config" ]; then
-    # Essayer avec le répertoire courant
-    if [ -d "$(pwd)/nginx-config" ]; then
-        SCRIPT_DIR="$(pwd)"
+    if [ -d "$SCRIPT_DIR/nginx-config" ]; then
+        NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
     fi
 fi
 
+# 2. Répertoire courant
+if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$(pwd)/nginx-config" ]; then
+    NGINX_CONFIG_DIR="$(pwd)/nginx-config"
+fi
+
+# 3. Répertoire home de l'utilisateur essensys (où les dépôts sont clonés)
+if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$HOME_DIR/essensys-raspberry-install/nginx-config" ]; then
+    NGINX_CONFIG_DIR="$HOME_DIR/essensys-raspberry-install/nginx-config"
+fi
+
+# 4. Répertoire d'installation (si nginx-config a été copié là)
+if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$INSTALL_DIR/nginx-config" ]; then
+    NGINX_CONFIG_DIR="$INSTALL_DIR/nginx-config"
+fi
+
+# 5. Chercher dans les répertoires parents
+if [ -z "$NGINX_CONFIG_DIR" ]; then
+    CURRENT_DIR="$(pwd)"
+    while [ "$CURRENT_DIR" != "/" ]; do
+        if [ -d "$CURRENT_DIR/nginx-config" ]; then
+            NGINX_CONFIG_DIR="$CURRENT_DIR/nginx-config"
+            break
+        fi
+        CURRENT_DIR="$(dirname "$CURRENT_DIR")"
+    done
+fi
+
 # Vérifier que les fichiers de configuration existent
-if [ ! -f "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" ]; then
-    log_error "Fichier de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys-api-log-format.conf"
-    log_error "Répertoire du script détecté: $SCRIPT_DIR"
-    log_error "Répertoire courant: $(pwd)"
-    log_error "Vérifiez que vous exécutez le script depuis le répertoire essensys-raspberry-install"
+if [ -z "$NGINX_CONFIG_DIR" ] || [ ! -f "$NGINX_CONFIG_DIR/essensys-api-log-format.conf" ]; then
+    log_error "Répertoire nginx-config introuvable!"
+    log_error "Recherché dans:"
+    log_error "  - Répertoire du script: $SCRIPT_DIR"
+    log_error "  - Répertoire courant: $(pwd)"
+    log_error "  - $HOME_DIR/essensys-raspberry-install/nginx-config"
+    log_error "  - $INSTALL_DIR/nginx-config"
+    log_error ""
+    log_error "Assurez-vous que le répertoire nginx-config existe à côté du script install.sh"
+    log_error "ou exécutez le script depuis le répertoire essensys-raspberry-install"
     exit 1
 fi
 
-if [ ! -f "$SCRIPT_DIR/nginx-config/essensys.template" ]; then
-    log_error "Template de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys.template"
-    log_error "Répertoire du script détecté: $SCRIPT_DIR"
+if [ ! -f "$NGINX_CONFIG_DIR/essensys.template" ]; then
+    log_error "Template de configuration nginx introuvable: $NGINX_CONFIG_DIR/essensys.template"
     exit 1
 fi
+
+log_info "Configuration nginx trouvée dans: $NGINX_CONFIG_DIR"
 
 # Copier le format de log personnalisé pour les API
 log_info "Installation du format de log nginx..."
-cp "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" /etc/nginx/conf.d/essensys-api-log-format.conf
+cp "$NGINX_CONFIG_DIR/essensys-api-log-format.conf" /etc/nginx/conf.d/essensys-api-log-format.conf
 
 # Générer la configuration du site à partir du template
 log_info "Génération de la configuration nginx..."
-sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$SCRIPT_DIR/nginx-config/essensys.template" > /etc/nginx/sites-available/essensys
+sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$NGINX_CONFIG_DIR/essensys.template" > /etc/nginx/sites-available/essensys
 
 # Activer le site nginx
 ln -sf /etc/nginx/sites-available/essensys /etc/nginx/sites-enabled/
