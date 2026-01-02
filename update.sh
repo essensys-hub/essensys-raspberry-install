@@ -51,6 +51,13 @@ if [ ! -d "$HOME_DIR/essensys-server-frontend" ]; then
     exit 1
 fi
 
+# Arrêter les services avant la mise à jour
+log_info "Arrêt des services avant mise à jour..."
+systemctl stop essensys-backend
+if [ $? -ne 0 ]; then
+    log_warn "Le service essensys-backend n'était peut-être pas démarré"
+fi
+
 # Mettre à jour le backend
 log_info "Mise à jour du backend..."
 cd "$HOME_DIR/essensys-server-backend"
@@ -60,17 +67,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copier les fichiers vers le répertoire d'installation
-log_info "Copie des fichiers backend..."
-cp -r "$HOME_DIR/essensys-server-backend"/* "$BACKEND_DIR/"
-
-# Recompiler le backend
-log_info "Recompilation du backend..."
-cd "$BACKEND_DIR"
+# Recompiler le backend dans le dépôt source (avant copie)
+log_info "Recompilation du backend dans le dépôt source..."
 export PATH=$PATH:/usr/local/go/bin
 
 # Synchroniser les dépendances
 log_info "Synchronisation des dépendances Go..."
+cd "$HOME_DIR/essensys-server-backend"
 go mod tidy
 if [ $? -ne 0 ]; then
     log_warn "go mod tidy a échoué, tentative avec go mod download..."
@@ -78,11 +81,25 @@ if [ $? -ne 0 ]; then
     go mod tidy
 fi
 
-# Compiler
+# Compiler dans le dépôt source
 log_info "Compilation du binaire..."
 go build -o server ./cmd/server
 if [ $? -ne 0 ]; then
     log_error "La compilation du backend a échoué"
+    exit 1
+fi
+
+# Copier les fichiers vers le répertoire d'installation (après arrêt du service)
+log_info "Copie des fichiers backend..."
+# Copier tout sauf le binaire server (qui sera copié séparément)
+rsync -a --exclude='server' "$HOME_DIR/essensys-server-backend/" "$BACKEND_DIR/" 2>/dev/null || \
+    find "$HOME_DIR/essensys-server-backend" -mindepth 1 -maxdepth 1 ! -name 'server' -exec cp -r {} "$BACKEND_DIR/" \;
+
+# Copier le nouveau binaire (le service est arrêté, donc pas de conflit)
+log_info "Copie du nouveau binaire server..."
+cp "$HOME_DIR/essensys-server-backend/server" "$BACKEND_DIR/server"
+if [ $? -ne 0 ]; then
+    log_error "Échec de la copie du binaire server"
     exit 1
 fi
 
@@ -125,9 +142,10 @@ chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
 # Redémarrer les services
 log_info "Redémarrage des services..."
-systemctl restart essensys-backend
+log_info "Démarrage du service essensys-backend..."
+systemctl start essensys-backend
 if [ $? -ne 0 ]; then
-    log_error "Échec du redémarrage du service essensys-backend"
+    log_error "Échec du démarrage du service essensys-backend"
     exit 1
 fi
 
