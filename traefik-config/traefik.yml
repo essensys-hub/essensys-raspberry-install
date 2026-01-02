@@ -54,11 +54,27 @@ providers:
 log:
   level: DEBUG  # DEBUG pour voir toutes les connexions et problèmes
   filePath: /var/log/traefik/traefik.log
+  # Format: common ou json (common est plus lisible pour le debug)
 
 accessLog:
   filePath: /var/log/traefik/access.log
   format: json
-  bufferingSize: 100  # Réduire le buffering pour voir les logs plus rapidement
+  bufferingSize: 1  # Buffering minimal (1 ligne) pour voir les logs en temps réel
+  # Filtrer pour voir toutes les requêtes, y compris les erreurs
+  filters:
+    statusCodes:
+      - "400-599"  # Inclure les erreurs HTTP
+  # Inclure tous les champs pour diagnostic complet
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: keep  # Garder les headers pour voir les problèmes
+      names:
+        User-Agent: keep
+        Content-Type: keep
+        Content-Length: keep
+        Connection: keep
+        Host: keep
 
 # Options globales
 global:
