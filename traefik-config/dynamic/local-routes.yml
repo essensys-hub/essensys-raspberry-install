@@ -68,11 +68,11 @@ http:
 
   services:
     # Service frontend (proxy vers nginx qui sert les fichiers statiques)
-    # Nginx écoute sur port 8081 en interne pour servir le frontend
+    # Nginx écoute sur port 9090 en interne pour servir le frontend
     frontend-service:
       loadBalancer:
         servers:
-          - url: "http://127.0.0.1:8081"
+          - url: "http://127.0.0.1:9090"
         passHostHeader: true
     
     # Service backend (proxy vers backend Go)
@@ -83,7 +83,7 @@ http:
     backend-service:
       loadBalancer:
         servers:
-          - url: "http://127.0.0.1:8080"
+          - url: "http://127.0.0.1:7070"
         passHostHeader: true
         # Désactiver la compression (le client legacy ne peut pas gérer)
         # Note: Traefik v2.x n'a pas d'option directe pour désactiver la compression

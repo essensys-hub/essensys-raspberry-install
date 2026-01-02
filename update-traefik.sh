@@ -87,12 +87,12 @@ if [ -d "$HOME_DIR/essensys-server-backend" ]; then
         # Vérifier et corriger le port dans config.yaml
         if [ -f "$BACKEND_DIR/config.yaml" ]; then
             current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
-            if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
-                sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
-                log_info "Port configuré à 8080 dans config.yaml"
+            if [ -n "$current_port" ] && [ "$current_port" != "7070" ]; then
+                sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\17070/' "$BACKEND_DIR/config.yaml"
+                log_info "Port configuré à 7070 dans config.yaml"
             elif [ -z "$current_port" ]; then
-                sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
-                log_info "Port 8080 ajouté dans config.yaml"
+                sed -i '/^server:/a\  port: 7070' "$BACKEND_DIR/config.yaml"
+                log_info "Port 7070 ajouté dans config.yaml"
             fi
         fi
         
@@ -212,11 +212,11 @@ fi
 # Redémarrer Traefik (Traefik ne supporte pas reload, il faut restart)
 log_info "Redémarrage de Traefik..."
 
-# Vérifier si le port 8080 est utilisé (conflit avec le backend)
+# Vérifier si le port 7070 est utilisé (conflit avec le backend)
 if command -v ss &> /dev/null; then
-    PORT_8080_PID=$(ss -tlnp | grep ':8080' | awk '{print $NF}' | cut -d',' -f2 | cut -d'=' -f2 | head -1)
-    if [ -n "$PORT_8080_PID" ] && [ "$PORT_8080_PID" != "$$" ]; then
-        log_warn "Le port 8080 est utilisé par le processus PID $PORT_8080_PID"
+    PORT_7070_PID=$(ss -tlnp | grep ':7070' | awk '{print $NF}' | cut -d',' -f2 | cut -d'=' -f2 | head -1)
+    if [ -n "$PORT_7070_PID" ] && [ "$PORT_7070_PID" != "$$" ]; then
+        log_warn "Le port 7070 est utilisé par le processus PID $PORT_7070_PID"
         log_info "C'est normal si c'est le backend Essensys"
     fi
 fi
@@ -247,7 +247,7 @@ if ! systemctl is-active --quiet traefik; then
     fi
     journalctl -u traefik -n 30 --no-pager || true
     log_error "Vérifiez la configuration dans /etc/traefik/traefik.yml"
-    log_error "Vérifiez aussi si le port 8080 est utilisé (conflit avec backend)"
+    log_error "Vérifiez aussi si le port 7070 est utilisé (conflit avec backend)"
     # Ne pas quitter, continuer pour voir les autres services
 fi
 

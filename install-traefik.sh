@@ -212,7 +212,7 @@ if [ -f "$BACKEND_DIR/go.mod" ]; then
         log_info "Création du fichier de configuration backend..."
         cp "$BACKEND_DIR/config.yaml.example" "$BACKEND_DIR/config.yaml" 2>/dev/null || cat > "$BACKEND_DIR/config.yaml" <<EOF
 server:
-  port: 8080
+  port: 7070
   read_timeout: 10s
   write_timeout: 10s
   idle_timeout: 60s
@@ -228,14 +228,14 @@ logging:
 EOF
     fi
     
-    # Modifier le port dans config.yaml pour utiliser 8080
+    # Modifier le port dans config.yaml pour utiliser 7070
     if [ -f "$BACKEND_DIR/config.yaml" ]; then
         current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
         if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
             sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
             log_info "Port configuré à 8080 dans config.yaml"
         elif [ -z "$current_port" ]; then
-            sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
+            sed -i '/^server:/a\  port: 7070' "$BACKEND_DIR/config.yaml"
             log_info "Port 8080 ajouté dans config.yaml"
         else
             log_info "Port déjà configuré à 8080 dans config.yaml"
@@ -465,13 +465,13 @@ ReadWritePaths=/etc/traefik /var/log/traefik /var/lib/traefik
 WantedBy=multi-user.target
 EOF
 
-# Configurer nginx pour servir le frontend sur le port 8081 (interne)
+# Configurer nginx pour servir le frontend sur le port 9090 (interne)
 log_info "Configuration de nginx pour servir le frontend en interne..."
 if [ -f "$TRAEFIK_CONFIG_DIR/nginx-frontend-internal.conf" ]; then
-    # Générer la configuration nginx pour le port 8081
+    # Générer la configuration nginx pour le port 9090
     sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$TRAEFIK_CONFIG_DIR/nginx-frontend-internal.conf" > /etc/nginx/sites-available/essensys-frontend-internal
     ln -sf /etc/nginx/sites-available/essensys-frontend-internal /etc/nginx/sites-enabled/essensys-frontend-internal
-    log_info "Configuration nginx créée pour le port 8081 (interne)"
+    log_info "Configuration nginx créée pour le port 9090 (interne)"
     
     # Tester la configuration nginx
     nginx -t
@@ -480,7 +480,7 @@ if [ -f "$TRAEFIK_CONFIG_DIR/nginx-frontend-internal.conf" ]; then
         exit 1
     fi
 else
-    log_warn "Template de configuration nginx introuvable. Nginx doit être configuré manuellement pour servir le frontend sur le port 8081"
+    log_warn "Template de configuration nginx introuvable. Nginx doit être configuré manuellement pour servir le frontend sur le port 9090"
 fi
 
 # Recharger systemd
