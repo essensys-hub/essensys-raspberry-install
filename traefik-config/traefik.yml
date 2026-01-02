@@ -8,13 +8,15 @@ api:
 
 # Métriques Prometheus
 # Les métriques sont automatiquement exposées et visibles dans le dashboard
+# IMPORTANT: Ne pas utiliser entryPoint pour éviter le conflit avec le backend sur port 8080
+# Les métriques sont accessibles via l'API interne (dashboard) et non via un entrypoint séparé
 metrics:
   prometheus:
     addEntryPointsLabels: true
     addServicesLabels: true
     addRoutersLabels: true
-    # Les métriques sont accessibles via le dashboard et l'API
-    # Pas besoin de route spécifique, intégré dans le dashboard
+    # Ne pas spécifier entryPoint pour éviter la création automatique de l'entrypoint "traefik" sur port 8080
+    # Les métriques sont intégrées dans le dashboard et l'API interne
 
 entryPoints:
   web:

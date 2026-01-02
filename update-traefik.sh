@@ -211,22 +211,43 @@ fi
 
 # Redémarrer Traefik (Traefik ne supporte pas reload, il faut restart)
 log_info "Redémarrage de Traefik..."
-# Vérifier d'abord la configuration Traefik
-if command -v traefik &> /dev/null; then
-    log_info "Vérification de la configuration Traefik..."
-    traefik version 2>&1 | head -1 || true
-    # Traefik ne peut pas valider la config sans démarrer, donc on essaie de démarrer
+
+# Vérifier si le port 8080 est utilisé (conflit avec le backend)
+if command -v ss &> /dev/null; then
+    PORT_8080_PID=$(ss -tlnp | grep ':8080' | awk '{print $NF}' | cut -d',' -f2 | cut -d'=' -f2 | head -1)
+    if [ -n "$PORT_8080_PID" ] && [ "$PORT_8080_PID" != "$$" ]; then
+        log_warn "Le port 8080 est utilisé par le processus PID $PORT_8080_PID"
+        log_info "C'est normal si c'est le backend Essensys"
+    fi
 fi
 
-systemctl restart traefik
-sleep 3  # Attendre un peu pour que Traefik démarre
+# Arrêter Traefik proprement avant de redémarrer
+log_info "Arrêt de Traefik..."
+systemctl stop traefik || true
+sleep 2  # Attendre que Traefik s'arrête complètement
+
+# Vérifier qu'aucun processus Traefik ne tourne encore
+if pgrep -f "traefik.*configfile" > /dev/null; then
+    log_warn "Des processus Traefik sont encore actifs, arrêt forcé..."
+    pkill -9 -f "traefik.*configfile" || true
+    sleep 1
+fi
+
+# Redémarrer Traefik
+log_info "Démarrage de Traefik..."
+systemctl start traefik
+sleep 5  # Attendre un peu plus pour que Traefik démarre
 
 # Vérifier si Traefik a démarré correctement
 if ! systemctl is-active --quiet traefik; then
     log_error "Échec du démarrage de Traefik"
     log_error "Vérification des logs Traefik..."
-    journalctl -u traefik -n 50 --no-pager || true
+    if [ -f "/var/log/traefik/traefik-error.log" ]; then
+        tail -30 /var/log/traefik/traefik-error.log || true
+    fi
+    journalctl -u traefik -n 30 --no-pager || true
     log_error "Vérifiez la configuration dans /etc/traefik/traefik.yml"
+    log_error "Vérifiez aussi si le port 8080 est utilisé (conflit avec backend)"
     # Ne pas quitter, continuer pour voir les autres services
 fi
 
