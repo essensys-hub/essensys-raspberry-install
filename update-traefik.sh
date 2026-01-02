@@ -239,44 +239,8 @@ else
     log_warn "⚠ Nginx: inactif (peut être normal si non utilisé)"
 fi
 
-# Commit et push automatique du dépôt essensys-raspberry-install
-log_info "Mise à jour du dépôt essensys-raspberry-install..."
-cd "$SCRIPT_DIR"
-if [ -d ".git" ]; then
-    # Vérifier s'il y a des changements
-    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-        # Vérifier si git est configuré (sinon, essayer de le configurer avec des valeurs par défaut)
-        if ! git config user.email >/dev/null 2>&1; then
-            log_warn "Git n'est pas configuré, configuration avec des valeurs par défaut..."
-            git config user.email "essensys@essensys.fr" || true
-            git config user.name "Essensys Auto Update" || true
-        fi
-        
-        log_info "Commit des changements locaux..."
-        git add -A
-        if git commit -m "Mise à jour automatique: $(date '+%Y-%m-%d %H:%M:%S')" 2>/dev/null; then
-            log_info "✓ Commit effectué avec succès"
-            
-            # Push vers le dépôt distant (seulement si un remote est configuré)
-            if git remote get-url origin >/dev/null 2>&1; then
-                log_info "Push vers le dépôt distant..."
-                if git push 2>/dev/null; then
-                    log_info "✓ Push effectué avec succès"
-                else
-                    log_warn "⚠ Échec du push (peut nécessiter une authentification)"
-                fi
-            else
-                log_info "Aucun remote configuré, pas de push"
-            fi
-        else
-            log_warn "⚠ Échec du commit (peut nécessiter une configuration git manuelle)"
-        fi
-    else
-        log_info "Aucun changement à commiter"
-    fi
-else
-    log_warn "Le répertoire n'est pas un dépôt git, pas de commit automatique"
-fi
+# Note: Pas de commit/push automatique dans le script update
+# Les modifications doivent être commitées manuellement si nécessaire
 
 log_info ""
 log_info "=========================================="
