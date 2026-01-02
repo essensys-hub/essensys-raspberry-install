@@ -168,12 +168,35 @@ sudo journalctl -u essensys-backend -f
 
 ### Nginx
 ```bash
-# Logs d'erreur
+# Logs d'erreur généraux
 sudo tail -f /var/log/nginx/essensys-error.log
 
-# Logs d'accès
+# Logs d'accès généraux
 sudo tail -f /var/log/nginx/essensys-access.log
+
+# Logs détaillés des API (diagnostic client legacy)
+sudo tail -f /var/log/nginx/essensys-api-detailed.log
+
+# Logs d'erreur détaillés des API
+sudo tail -f /var/log/nginx/essensys-api-error.log
+
+# Utiliser le script de visualisation (plus lisible)
+./view-api-logs.sh -f                    # Suivre tous les logs API en temps réel
+./view-api-logs.sh -m -n 100             # Afficher les 100 dernières requêtes mystatus
+./view-api-logs.sh -e                    # Afficher les erreurs
+./view-api-logs.sh -s -f                 # Suivre les requêtes serverinfos en temps réel
+./view-api-logs.sh -a                    # Filtrer les requêtes myactions
+./view-api-logs.sh -d                    # Filtrer les requêtes done
+./view-api-logs.sh -i                    # Filtrer les requêtes admin/inject
 ```
+
+**Note**: Les logs API détaillés incluent:
+- Adresse IP source
+- Méthode HTTP et URI complète
+- Temps de réponse (request_time, upstream_connect_time, upstream_response_time)
+- Headers HTTP (Content-Type, Content-Length, Connection)
+- Informations upstream (adresse, statut, taille de réponse)
+- Tous les détails nécessaires pour diagnostiquer les problèmes avec le client legacy qui ne respecte pas le standard HTTP
 
 ## Tests
 
