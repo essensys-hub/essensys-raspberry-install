@@ -7,18 +7,22 @@ api:
   # Le dashboard sera accessible via la route traefik.essensys.fr
 
 # Métriques Prometheus
-# Les métriques sont automatiquement exposées et visibles dans le dashboard
-# IMPORTANT: Ne pas utiliser entryPoint pour éviter le conflit avec le backend sur port 8080
-# Les métriques sont accessibles via l'API interne (dashboard) et non via un entrypoint séparé
+# Les métriques sont accessibles via l'API du dashboard (route traefik.essensys.fr)
+# L'entrypoint "traefik" est défini sur le port 8081 pour éviter le conflit avec le backend sur 8080
 metrics:
   prometheus:
     addEntryPointsLabels: true
     addServicesLabels: true
     addRoutersLabels: true
-    # Ne pas spécifier entryPoint pour éviter la création automatique de l'entrypoint "traefik" sur port 8080
     # Les métriques sont intégrées dans le dashboard et l'API interne
+    # L'entrypoint "traefik" sur port 8081 est utilisé pour l'API interne uniquement
 
 entryPoints:
+  # Entrypoint pour l'API et le dashboard Traefik (port 8081 pour éviter le conflit avec le backend sur 8080)
+  # IMPORTANT: Traefik crée automatiquement cet entrypoint, il faut le définir explicitement
+  traefik:
+    address: ":8081"
+  
   web:
     address: ":80"
     # Options pour compatibilité client legacy BP_MQX_ETH
