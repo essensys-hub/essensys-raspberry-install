@@ -16,7 +16,7 @@ INSTALL_DIR="/opt/essensys"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
 TRAEFIK_CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/traefik-config"
 TRAEFIK_VERSION="v3.0"
-ACME_EMAIL="admin@rhinosys.io"  # À modifier avec votre email
+ACME_EMAIL="admin@acme.com"  # À modifier avec votre email
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -89,7 +89,7 @@ log_info "Installation de la configuration Traefik..."
 cp "$TRAEFIK_CONFIG_DIR/traefik.yml" /etc/traefik/traefik.yml
 
 # Modifier l'email Let's Encrypt dans la configuration
-sed -i "s|admin@rhinosys.io|$ACME_EMAIL|g" /etc/traefik/traefik.yml
+sed -i "s|admin@acme.com|$ACME_EMAIL|g" /etc/traefik/traefik.yml
 
 # Générer les fichiers de configuration dynamique avec le bon chemin frontend
 log_info "Génération des fichiers de configuration dynamique..."
@@ -205,12 +205,12 @@ log_info "=========================================="
 log_info ""
 log_info "Configuration:"
 log_info "  - Local: http://mon.essensys.fr/ (port 80, sans authentification)"
-log_info "  - WAN: https://essensys.rhinosys.io/ (port 443, avec authentification)"
+log_info "  - WAN: https://essensys.acme.com/ (port 443, avec authentification)"
 log_info ""
 log_info "IMPORTANT:"
 log_info "  1. Configurez le fichier htpasswd:"
 log_info "     sudo $TRAEFIK_CONFIG_DIR/generate-htpasswd.sh"
-log_info "  2. Vérifiez que le DNS essensys.rhinosys.io pointe vers cette machine"
+log_info "  2. Vérifiez que le DNS essensys.acme.com pointe vers cette machine"
 log_info "  3. Les certificats Let's Encrypt seront générés automatiquement"
 log_info ""
 log_info "Services:"

@@ -117,18 +117,18 @@ sudo ufw status
 2. **Option 2 : DNS local** (recommandé)
    - Configurer votre routeur/DNS local pour résoudre `mon.essensys.fr` vers `192.168.1.101`
 
-### Pour l'accès WAN (essensys.rhinosys.io)
+### Pour l'accès WAN (essensys.acme.com)
 
 1. **Chez votre fournisseur DNS (OVH)** :
    - Créer un enregistrement A :
      ```
-     essensys.rhinosys.io  →  VOTRE_IP_PUBLIQUE
+     essensys.acme.com  →  VOTRE_IP_PUBLIQUE
      ```
 
 2. **Vérifier la propagation DNS** :
    ```bash
-   dig essensys.rhinosys.io
-   nslookup essensys.rhinosys.io
+   dig essensys.acme.com
+   nslookup essensys.acme.com
    ```
 
 ## Schéma de connexion
@@ -178,7 +178,7 @@ Traefik (ports 80, 443)
 
 2. **Vérifier le DNS** :
    ```bash
-   dig essensys.rhinosys.io
+   dig essensys.acme.com
    # Doit retourner votre IP publique
    ```
 

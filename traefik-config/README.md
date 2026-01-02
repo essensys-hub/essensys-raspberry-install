@@ -2,7 +2,7 @@
 
 Cette configuration permet de déployer Essensys avec Traefik comme reverse proxy, avec :
 - **Accès local** : `mon.essensys.fr` (port 80, sans authentification)
-- **Accès WAN** : `essensys.rhinosys.io` (port 443 HTTPS, avec authentification basique)
+- **Accès WAN** : `essensys.acme.com` (port 443 HTTPS, avec authentification basique)
 
 ## Architecture
 
@@ -61,7 +61,7 @@ Pour ajouter d'autres utilisateurs, exécutez à nouveau le script.
 
 Assurez-vous que :
 - `mon.essensys.fr` pointe vers l'adresse IP locale du Raspberry Pi
-- `essensys.rhinosys.io` pointe vers l'adresse IP publique du Raspberry Pi (accessible depuis Internet)
+- `essensys.acme.com` pointe vers l'adresse IP publique du Raspberry Pi (accessible depuis Internet)
 
 ### 4. Configurer le firewall
 
@@ -83,11 +83,11 @@ sudo ufw allow 443/tcp
 - **Toutes les API** : `http://mon.essensys.fr/api/*` - Sans authentification
 - **Health check** : `http://mon.essensys.fr/health` - Sans authentification
 
-### Routes WAN (essensys.rhinosys.io)
+### Routes WAN (essensys.acme.com)
 
-- **Frontend** : `https://essensys.rhinosys.io/` - **Avec authentification basique**
-- **API inject** : `https://essensys.rhinosys.io/api/inject` - **Avec authentification basique**
-- **Autres API** : `https://essensys.rhinosys.io/api/*` - **Bloquées (403 Forbidden)**
+- **Frontend** : `https://essensys.acme.com/` - **Avec authentification basique**
+- **API inject** : `https://essensys.acme.com/api/inject` - **Avec authentification basique**
+- **Autres API** : `https://essensys.acme.com/api/*` - **Bloquées (403 Forbidden)**
 
 ### Authentification
 
@@ -159,7 +159,7 @@ sudo journalctl -u traefik -f
 
 ### Certificats Let's Encrypt non générés
 
-1. Vérifier que le DNS `essensys.rhinosys.io` pointe vers l'IP publique
+1. Vérifier que le DNS `essensys.acme.com` pointe vers l'IP publique
 2. Vérifier que le port 80 est accessible depuis Internet (pour le challenge HTTP)
 3. Vérifier les logs Traefik pour les erreurs Let's Encrypt
 
@@ -183,10 +183,10 @@ C'est normal ! Seules `/api/inject` est accessible depuis le WAN (avec authentif
 Pour tester depuis le WAN :
 ```bash
 # Devrait fonctionner (avec auth)
-curl -u username:password https://essensys.rhinosys.io/api/inject
+curl -u username:password https://essensys.acme.com/api/inject
 
 # Devrait retourner 403
-curl https://essensys.rhinosys.io/api/serverinfos
+curl https://essensys.acme.com/api/serverinfos
 ```
 
 ## Mise à jour

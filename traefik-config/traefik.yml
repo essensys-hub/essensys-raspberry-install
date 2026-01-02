@@ -18,7 +18,7 @@ entryPoints:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: admin@rhinosys.io  # À modifier avec votre email
+      email: admin@acme.com  # À modifier avec votre email
       storage: /etc/traefik/acme.json
       httpChallenge:
         entryPoint: web

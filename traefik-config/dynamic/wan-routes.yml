@@ -1,4 +1,4 @@
-# Configuration des routes WAN (essensys.rhinosys.io)
+# Configuration des routes WAN (essensys.acme.com)
 # Accessible depuis Internet avec authentification basique pour / et /api/inject
 # Les autres API sont bloquées
 
@@ -22,17 +22,19 @@ http:
 
   routers:
     # Redirection HTTP vers HTTPS pour le WAN
+    # Le middleware redirect-to-https fait la redirection avant d'atteindre le service
     frontend-wan-redirect:
-      rule: "Host(`essensys.rhinosys.io`)"
+      rule: "Host(`essensys.acme.com`)"
       entryPoints:
         - web
+      service: frontend-service
       middlewares:
         - redirect-to-https
       priority: 5
     
     # Frontend WAN avec authentification (HTTPS)
     frontend-wan:
-      rule: "Host(`essensys.rhinosys.io`)"
+      rule: "Host(`essensys.acme.com`)"
       entryPoints:
         - websecure
       service: frontend-service
@@ -44,7 +46,7 @@ http:
     
     # API inject WAN avec authentification
     api-inject-wan:
-      rule: "Host(`essensys.rhinosys.io`) && PathPrefix(`/api/inject`)"
+      rule: "Host(`essensys.acme.com`) && PathPrefix(`/api/inject`)"
       entryPoints:
         - websecure
       service: backend-service
@@ -58,7 +60,7 @@ http:
     # Cette route capture toutes les autres requêtes /api/ (sauf /api/inject) et retourne 403
     # On utilise un service HTTP minimal qui retourne toujours 403
     api-block-wan:
-      rule: "Host(`essensys.rhinosys.io`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
+      rule: "Host(`essensys.acme.com`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
       entryPoints:
         - websecure
       service: block-service
