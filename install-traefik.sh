@@ -231,14 +231,14 @@ EOF
     # Modifier le port dans config.yaml pour utiliser 7070
     if [ -f "$BACKEND_DIR/config.yaml" ]; then
         current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
-        if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
-            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
-            log_info "Port configuré à 8080 dans config.yaml"
+        if [ -n "$current_port" ] && [ "$current_port" != "7070" ]; then
+            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\17070/' "$BACKEND_DIR/config.yaml"
+            log_info "Port configuré à 7070 dans config.yaml"
         elif [ -z "$current_port" ]; then
             sed -i '/^server:/a\  port: 7070' "$BACKEND_DIR/config.yaml"
-            log_info "Port 8080 ajouté dans config.yaml"
+            log_info "Port 7070 ajouté dans config.yaml"
         else
-            log_info "Port déjà configuré à 8080 dans config.yaml"
+            log_info "Port déjà configuré à 7070 dans config.yaml"
         fi
     fi
 else
