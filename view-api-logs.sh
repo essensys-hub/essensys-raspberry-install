@@ -23,6 +23,7 @@ show_help() {
     echo "  -s, --serverinfos Filtrer les requêtes /api/serverinfos"
     echo "  -d, --done         Filtrer les requêtes /api/done"
     echo "  -i, --inject       Filtrer les requêtes /api/admin/inject"
+    echo "  -t, --trace        Afficher les logs de traçage ultra-détaillés (essensys-api-trace.log)"
     echo "  -n, --lines N      Afficher les N dernières lignes (défaut: 50)"
     echo "  -h, --help         Afficher cette aide"
     echo ""
@@ -34,10 +35,11 @@ show_help() {
 }
 
 # Vérifier les permissions
-if [ ! -r "$API_DETAILED_LOG" ] && [ ! -r "$API_ERROR_LOG" ]; then
+if [ ! -r "$API_DETAILED_LOG" ] && [ ! -r "$API_TRACE_LOG" ] && [ ! -r "$API_ERROR_LOG" ]; then
     echo "Erreur: Impossible de lire les logs API"
     echo "Les fichiers doivent être accessibles:"
     echo "  - $API_DETAILED_LOG"
+    echo "  - $API_TRACE_LOG"
     echo "  - $API_ERROR_LOG"
     exit 1
 fi
@@ -45,6 +47,7 @@ fi
 # Options par défaut
 FOLLOW=false
 SHOW_ERRORS=false
+TRACE_MODE=false
 FILTER=""
 LINES=50
 
@@ -77,6 +80,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -i|--inject)
             FILTER="/api/admin/inject"
+            shift
+            ;;
+        -t|--trace)
+            TRACE_MODE=true
             shift
             ;;
         -n|--lines)
