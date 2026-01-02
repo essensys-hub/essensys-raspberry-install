@@ -213,8 +213,21 @@ EOF
     
     # Modifier le port dans config.yaml pour utiliser 8080 (nginx écoutera sur 80 et proxy vers 8080)
     # Les clients BP_MQX_ETH se connecteront au port 80, nginx les proxy vers le backend sur 8080
-    if grep -q "port: 80" "$BACKEND_DIR/config.yaml"; then
-        sed -i 's/port: 80/port: 8080/' "$BACKEND_DIR/config.yaml"
+    # Utiliser une approche plus robuste pour éviter les doublons (808080)
+    if [ -f "$BACKEND_DIR/config.yaml" ]; then
+        # Vérifier la valeur actuelle du port
+        current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
+        if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
+            # Remplacer uniquement si le port n'est pas déjà 8080
+            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
+            log_info "Port configuré à 8080 dans config.yaml"
+        elif [ -z "$current_port" ]; then
+            # Si aucun port n'est trouvé, l'ajouter
+            sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
+            log_info "Port 8080 ajouté dans config.yaml"
+        else
+            log_info "Port déjà configuré à 8080 dans config.yaml"
+        fi
     fi
 else
     log_error "Le fichier go.mod n'a pas été trouvé dans $BACKEND_DIR"

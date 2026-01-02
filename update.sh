@@ -103,6 +103,25 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Valider et corriger le port dans config.yaml si nécessaire
+if [ -f "$BACKEND_DIR/config.yaml" ]; then
+    current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/' | head -1)
+    if [ -n "$current_port" ]; then
+        # Vérifier si le port est valide (entre 1 et 65535)
+        if [ "$current_port" -lt 1 ] || [ "$current_port" -gt 65535 ]; then
+            log_warn "Port invalide détecté ($current_port), correction à 8080..."
+            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
+            log_info "Port corrigé à 8080"
+        elif [ "$current_port" != "8080" ]; then
+            log_info "Port actuel: $current_port (attendu: 8080)"
+        fi
+    else
+        # Si aucun port n'est trouvé, l'ajouter
+        log_warn "Aucun port trouvé dans config.yaml, ajout de port: 8080"
+        sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
+    fi
+fi
+
 # Mettre à jour le frontend
 log_info "Mise à jour du frontend..."
 cd "$HOME_DIR/essensys-server-frontend"
