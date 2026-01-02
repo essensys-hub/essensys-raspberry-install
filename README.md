@@ -341,7 +341,26 @@ sudo ufw allow 80/tcp
 
 ## Mise à jour
 
-### Mettre à jour le backend
+### Option 1 : Script automatique (recommandé)
+
+Un script `update.sh` est fourni pour automatiser la mise à jour complète :
+
+```bash
+cd essensys-raspberry-install
+sudo ./update.sh
+```
+
+Ce script va :
+- Mettre à jour les dépôts backend et frontend depuis GitHub
+- Recompiler le backend Go
+- Rebuild le frontend React
+- Redémarrer les services (essensys-backend et nginx)
+- Vérifier que les services sont actifs
+- Faire un commit et push automatique si des modifications sont détectées dans le dépôt essensys-raspberry-install
+
+### Option 2 : Mise à jour manuelle
+
+#### Mettre à jour le backend
 
 ```bash
 # Mettre à jour depuis GitHub
@@ -349,16 +368,16 @@ cd /home/essensys/essensys-server-backend
 sudo -u essensys git pull
 
 # Recompiler et copier
-sudo -u essensys go mod download
-sudo -u essensys go build -o server ./cmd/server
-cp server /opt/essensys/backend/
-cp config.yaml /opt/essensys/backend/ 2>/dev/null || true
+cd /opt/essensys/backend
+export PATH=$PATH:/usr/local/go/bin
+go mod tidy
+go build -o server ./cmd/server
 
 # Redémarrer le service
 sudo systemctl restart essensys-backend
 ```
 
-### Mettre à jour le frontend
+#### Mettre à jour le frontend
 
 ```bash
 # Mettre à jour depuis GitHub
@@ -366,9 +385,9 @@ cd /home/essensys/essensys-server-frontend
 sudo -u essensys git pull
 
 # Rebuild et copier
+cd /opt/essensys/frontend
 sudo -u essensys npm install
 sudo -u essensys npm run build
-cp -r dist/* /opt/essensys/frontend/dist/
 
 # Recharger nginx
 sudo systemctl reload nginx
