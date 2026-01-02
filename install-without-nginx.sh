@@ -177,10 +177,33 @@ fi
 
 # Configurer les capacités pour écouter sur le port 80 (nécessite setcap)
 log_info "Configuration des capacités pour écouter sur le port 80..."
-setcap 'cap_net_bind_service=+ep' "$BACKEND_DIR/server" 2>/dev/null || {
-    log_warn "setcap a échoué, le backend devra être exécuté en root pour écouter sur le port 80"
-    log_warn "Ou configurez un port forwarding avec iptables"
-}
+if command -v setcap &> /dev/null; then
+    if setcap 'cap_net_bind_service=+ep' "$BACKEND_DIR/server" 2>/dev/null; then
+        log_info "✓ Capacités setcap configurées avec succès"
+        # Vérifier que les capacités sont bien définies
+        if getcap "$BACKEND_DIR/server" | grep -q "cap_net_bind_service"; then
+            log_info "✓ Vérification: capacités confirmées"
+        fi
+    else
+        log_warn "setcap a échoué, le service devra être exécuté en root ou utiliser iptables"
+        log_warn "Configuration du service pour exécution en root..."
+        USE_ROOT_USER=true
+    fi
+else
+    log_warn "setcap n'est pas disponible, le service devra être exécuté en root"
+    log_warn "Installation de libcap2-bin..."
+    apt-get install -y libcap2-bin || {
+        log_warn "Impossible d'installer libcap2-bin, utilisation de root pour le service"
+        USE_ROOT_USER=true
+    }
+    if [ -z "$USE_ROOT_USER" ] && command -v setcap &> /dev/null; then
+        if setcap 'cap_net_bind_service=+ep' "$BACKEND_DIR/server" 2>/dev/null; then
+            log_info "✓ Capacités setcap configurées avec succès"
+        else
+            USE_ROOT_USER=true
+        fi
+    fi
+fi
 
 # Copier le frontend
 log_info "Copie des fichiers frontend..."
@@ -215,7 +238,39 @@ chown -R "$SERVICE_USER:$SERVICE_USER" /var/logs/Essensys
 
 # Créer le service systemd pour le backend
 log_info "Création du service systemd pour le backend..."
-cat > /etc/systemd/system/essensys-backend.service <<EOF
+
+if [ "$USE_ROOT_USER" = true ]; then
+    log_warn "Service configuré pour s'exécuter en root (nécessaire pour port 80)"
+    cat > /etc/systemd/system/essensys-backend.service <<EOF
+[Unit]
+Description=Essensys Backend Server (SANS NGINX - Port 80)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=$BACKEND_DIR
+ExecStart=$BACKEND_DIR/server
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/logs/Essensys/backend/console.out.log
+StandardError=append:/var/logs/Essensys/backend/console.out.log
+
+# Environment variables
+Environment="LOG_LEVEL=info"
+Environment="AUTH_ENABLED=false"
+
+# Security hardening (relaxé car root nécessaire pour port 80)
+PrivateTmp=true
+ReadWritePaths=$INSTALL_DIR /var/logs/Essensys
+
+[Install]
+WantedBy=multi-user.target
+EOF
+else
+    log_info "Service configuré pour s'exécuter avec l'utilisateur $SERVICE_USER (setcap activé)"
+    cat > /etc/systemd/system/essensys-backend.service <<EOF
 [Unit]
 Description=Essensys Backend Server (SANS NGINX - Port 80)
 After=network.target
@@ -236,7 +291,7 @@ Environment="LOG_LEVEL=info"
 Environment="AUTH_ENABLED=false"
 
 # Security hardening
-NoNewPrivileges=true
+# Note: NoNewPrivileges doit être désactivé pour permettre setcap
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
@@ -245,6 +300,7 @@ ReadWritePaths=$INSTALL_DIR /var/logs/Essensys
 [Install]
 WantedBy=multi-user.target
 EOF
+fi
 
 # Créer un service simple pour servir le frontend sur le port 8080
 log_info "Création du service systemd pour le frontend (port 8080)..."
