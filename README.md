@@ -18,10 +18,16 @@ L'installation configure :
 - Raspberry Pi 4 avec Raspberry Pi OS (Debian-based)
 - Accès root (sudo)
 - Connexion Internet pour télécharger les dépendances
-- **Accès SSH configuré pour GitHub** : Le script clone les dépôts depuis GitHub en utilisant SSH. Vous devez avoir :
-  - Une clé SSH configurée pour l'utilisateur qui exécute le script
-  - Les clés SSH copiées dans `/home/essensys/.ssh/` OU configurées globalement pour root
-  - Accès aux dépôts privés `essensys-hub/essensys-server-backend` et `essensys-hub/essensys-server-frontend`
+- **Git installé** : Le script installera automatiquement git s'il n'est pas déjà présent
+
+**Note** : Le script d'installation installe automatiquement toutes les dépendances nécessaires, y compris :
+- git (pour cloner les dépôts depuis GitHub via HTTPS)
+- curl, wget (pour télécharger les fichiers)
+- build-essential (pour compiler le backend Go)
+- nginx (serveur web)
+- ca-certificates (pour les connexions HTTPS sécurisées)
+
+Les dépôts sont publics et accessibles via HTTPS, aucune configuration SSH n'est nécessaire.
 
 ## Installation
 
@@ -33,53 +39,17 @@ git clone <url-du-repo-essensys-raspberry-install>
 cd essensys-raspberry-install
 ```
 
-2. **Configurer l'accès SSH à GitHub** (important) :
-   
-   Le script clone automatiquement les dépôts depuis GitHub dans `/home/essensys`. Le script essaiera automatiquement de copier les clés SSH de root vers l'utilisateur essensys si elles existent.
-   
-   **Option A : Le script copie automatiquement les clés de root (recommandé)**
-   
-   Si vous avez déjà des clés SSH configurées pour root, le script les copiera automatiquement :
-   ```bash
-   # Vérifier que vous avez des clés SSH pour root
-   sudo ls -la /root/.ssh/
-   
-   # Si vous n'en avez pas, générer une clé SSH
-   sudo ssh-keygen -t ed25519 -C "essensys@raspberrypi"
-   
-   # Afficher la clé publique et l'ajouter dans GitHub
-   sudo cat /root/.ssh/id_ed25519.pub
-   # Copiez cette clé dans GitHub : Settings > SSH and GPG keys > New SSH key
-   ```
-   
-   **Option B : Configurer manuellement les clés pour l'utilisateur essensys**
-   
-   Si vous préférez configurer les clés après la création de l'utilisateur :
-   ```bash
-   # Générer une clé SSH pour l'utilisateur essensys
-   sudo -u essensys ssh-keygen -t ed25519 -C "essensys@raspberrypi"
-   
-   # Afficher la clé publique
-   sudo -u essensys cat /home/essensys/.ssh/id_ed25519.pub
-   # Copiez cette clé dans GitHub : Settings > SSH and GPG keys > New SSH key
-   ```
-   
-   **Tester la connexion SSH :**
-   ```bash
-   sudo -u essensys ssh -T git@github.com
-   # Vous devriez voir : "Hi username! You've successfully authenticated..."
-   ```
-
-3. Exécuter le script d'installation :
+2. Exécuter le script d'installation :
 ```bash
 sudo ./install.sh
 ```
 
 Le script va :
 - Mettre à jour le système
-- Créer l'utilisateur `essensys` avec home directory `/home/essensys`
-- Cloner les dépôts backend et frontend depuis GitHub dans `/home/essensys`
+- Installer les dépendances système (git, curl, wget, build-essential, nginx, etc.)
 - Installer Go, Node.js, npm et nginx
+- Créer l'utilisateur `essensys` avec home directory `/home/essensys`
+- Cloner les dépôts backend et frontend depuis GitHub (HTTPS) dans `/home/essensys`
 - Compiler le backend Go
 - Builder le frontend React
 - Configurer nginx comme reverse proxy
@@ -93,8 +63,8 @@ Si vous préférez cloner manuellement les dépôts :
 1. Créer l'utilisateur et cloner les projets :
 ```bash
 sudo useradd -m -s /bin/bash essensys
-sudo -u essensys bash -c "cd /home/essensys && git clone git@github.com:essensys-hub/essensys-server-backend.git"
-sudo -u essensys bash -c "cd /home/essensys && git clone git@github.com:essensys-hub/essensys-server-frontend.git"
+sudo -u essensys bash -c "cd /home/essensys && git clone https://github.com/essensys-hub/essensys-server-backend.git"
+sudo -u essensys bash -c "cd /home/essensys && git clone https://github.com/essensys-hub/essensys-server-frontend.git"
 ```
 
 2. Exécuter le script d'installation (il détectera les dépôts existants et les mettra à jour).

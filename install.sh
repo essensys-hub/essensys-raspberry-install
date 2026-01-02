@@ -18,8 +18,8 @@ FRONTEND_DIR="$INSTALL_DIR/frontend"
 BACKEND_USER="essensys"
 SERVICE_USER="essensys"
 HOME_DIR="/home/essensys"
-BACKEND_REPO="git@github.com:essensys-hub/essensys-server-backend.git"
-FRONTEND_REPO="git@github.com:essensys-hub/essensys-server-frontend.git"
+BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
+FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
 
 # Fonction pour afficher les messages
 log_info() {
@@ -121,69 +121,25 @@ mkdir -p "$FRONTEND_DIR"
 mkdir -p "$INSTALL_DIR/logs"
 
 # Cloner les dépôts dans le home directory de l'utilisateur essensys
-log_info "Clonage des dépôts depuis GitHub..."
+log_info "Clonage des dépôts depuis GitHub (HTTPS)..."
 log_info "Backend: $BACKEND_REPO"
 log_info "Frontend: $FRONTEND_REPO"
-
-# Configurer les clés SSH pour l'utilisateur essensys
-log_info "Configuration des clés SSH..."
-mkdir -p "$HOME_DIR/.ssh"
-chmod 700 "$HOME_DIR/.ssh"
-
-# Essayer de copier les clés SSH de root si elles existent
-if [ -f "/root/.ssh/id_rsa" ] || [ -f "/root/.ssh/id_ed25519" ]; then
-    log_info "Copie des clés SSH de root vers l'utilisateur $SERVICE_USER..."
-    if [ -f "/root/.ssh/id_rsa" ]; then
-        cp /root/.ssh/id_rsa* "$HOME_DIR/.ssh/" 2>/dev/null || true
-    fi
-    if [ -f "/root/.ssh/id_ed25519" ]; then
-        cp /root/.ssh/id_ed25519* "$HOME_DIR/.ssh/" 2>/dev/null || true
-    fi
-    if [ -f "/root/.ssh/known_hosts" ]; then
-        cp /root/.ssh/known_hosts "$HOME_DIR/.ssh/" 2>/dev/null || true
-    fi
-    chmod 600 "$HOME_DIR/.ssh/id_*" 2>/dev/null || true
-    chmod 644 "$HOME_DIR/.ssh/known_hosts" 2>/dev/null || true
-    chown -R "$SERVICE_USER:$SERVICE_USER" "$HOME_DIR/.ssh"
-    log_info "Clés SSH copiées"
-elif [ ! -f "$HOME_DIR/.ssh/id_rsa" ] && [ ! -f "$HOME_DIR/.ssh/id_ed25519" ]; then
-    log_warn "Aucune clé SSH trouvée"
-    log_info "Le script va essayer de cloner quand même..."
-    log_info "Si cela échoue, configurez les clés SSH manuellement :"
-    log_info "  sudo -u $SERVICE_USER ssh-keygen -t ed25519 -C 'essensys@raspberrypi'"
-    log_info "  sudo -u $SERVICE_USER cat $HOME_DIR/.ssh/id_ed25519.pub"
-    log_info "  (Copiez cette clé dans GitHub Settings > SSH Keys)"
-fi
-
-# Tester la connexion SSH à GitHub
-log_info "Test de la connexion SSH à GitHub..."
-if sudo -u "$SERVICE_USER" bash -c "ssh -T git@github.com 2>&1 | grep -q 'successfully authenticated' || ssh -T git@github.com 2>&1 | grep -q 'You've successfully authenticated'"; then
-    log_info "Connexion SSH à GitHub réussie"
-elif sudo -u "$SERVICE_USER" bash -c "ssh -o StrictHostKeyChecking=no -T git@github.com 2>&1" > /dev/null 2>&1; then
-    log_info "Connexion SSH à GitHub semble fonctionner"
-else
-    log_warn "Impossible de tester la connexion SSH, continuation quand même..."
-fi
 
 # Cloner le backend
 log_info "Clonage du backend..."
 if [ -d "$HOME_DIR/essensys-server-backend" ]; then
     log_info "Le dépôt backend existe déjà, mise à jour..."
     if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR/essensys-server-backend && git pull"; then
-        log_error "Échec de la mise à jour du backend. Vérifiez les clés SSH ou les permissions."
+        log_error "Échec de la mise à jour du backend. Vérifiez la connexion Internet et les permissions."
         exit 1
     fi
 else
     if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $BACKEND_REPO"; then
         log_error "Échec du clonage du backend."
         log_error "Vérifiez que :"
-        log_error "  1. Les clés SSH sont configurées pour l'utilisateur $SERVICE_USER"
-        log_error "  2. La clé publique est ajoutée dans GitHub"
-        log_error "  3. Vous avez accès aux dépôts privés essensys-hub"
-        log_error ""
-        log_error "Pour configurer les clés SSH :"
-        log_error "  sudo -u $SERVICE_USER ssh-keygen -t ed25519 -C 'essensys@raspberrypi'"
-        log_error "  sudo -u $SERVICE_USER cat $HOME_DIR/.ssh/id_ed25519.pub"
+        log_error "  1. La connexion Internet fonctionne"
+        log_error "  2. Le dépôt est accessible publiquement"
+        log_error "  3. Git est correctement installé"
         exit 1
     fi
 fi
@@ -193,16 +149,16 @@ log_info "Clonage du frontend..."
 if [ -d "$HOME_DIR/essensys-server-frontend" ]; then
     log_info "Le dépôt frontend existe déjà, mise à jour..."
     if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR/essensys-server-frontend && git pull"; then
-        log_error "Échec de la mise à jour du frontend. Vérifiez les clés SSH ou les permissions."
+        log_error "Échec de la mise à jour du frontend. Vérifiez la connexion Internet et les permissions."
         exit 1
     fi
 else
     if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $FRONTEND_REPO"; then
         log_error "Échec du clonage du frontend."
         log_error "Vérifiez que :"
-        log_error "  1. Les clés SSH sont configurées pour l'utilisateur $SERVICE_USER"
-        log_error "  2. La clé publique est ajoutée dans GitHub"
-        log_error "  3. Vous avez accès aux dépôts privés essensys-hub"
+        log_error "  1. La connexion Internet fonctionne"
+        log_error "  2. Le dépôt est accessible publiquement"
+        log_error "  3. Git est correctement installé"
         exit 1
     fi
 fi
