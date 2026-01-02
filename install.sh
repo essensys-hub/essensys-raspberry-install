@@ -245,6 +245,11 @@ fi
 log_info "Configuration des permissions..."
 chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
+# Créer le répertoire de logs
+log_info "Création du répertoire de logs..."
+mkdir -p /var/logs/Essensys/backend
+chown -R "$SERVICE_USER:$SERVICE_USER" /var/logs/Essensys
+
 # Créer le service systemd pour le backend
 log_info "Création du service systemd pour le backend..."
 cat > /etc/systemd/system/essensys-backend.service <<EOF
@@ -260,8 +265,8 @@ WorkingDirectory=$BACKEND_DIR
 ExecStart=$BACKEND_DIR/server
 Restart=always
 RestartSec=5
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/logs/Essensys/backend/console.out.log
+StandardError=append:/var/logs/Essensys/backend/console.out.log
 
 # Environment variables
 Environment="LOG_LEVEL=info"
@@ -272,7 +277,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=$INSTALL_DIR
+ReadWritePaths=$INSTALL_DIR /var/logs/Essensys
 
 [Install]
 WantedBy=multi-user.target
@@ -446,7 +451,7 @@ log_info "  - Backend: systemctl status essensys-backend"
 log_info "  - Nginx: systemctl status nginx"
 log_info ""
 log_info "Logs:"
-log_info "  - Backend: journalctl -u essensys-backend -f"
+log_info "  - Backend: tail -f /var/logs/Essensys/backend/console.out.log"
 log_info "  - Nginx: tail -f /var/log/nginx/essensys-error.log"
 log_info ""
 log_info "Pour tester:"

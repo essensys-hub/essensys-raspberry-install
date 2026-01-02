@@ -145,15 +145,25 @@ sudo systemctl enable nginx
 ## Logs
 
 ### Backend
+Les logs du backend sont écrits dans `/var/logs/Essensys/backend/console.out.log` :
+
 ```bash
 # Voir les logs en temps réel
-sudo journalctl -u essensys-backend -f
+sudo tail -f /var/logs/Essensys/backend/console.out.log
 
 # Voir les dernières lignes
-sudo journalctl -u essensys-backend -n 50
+sudo tail -n 50 /var/logs/Essensys/backend/console.out.log
 
-# Voir les logs depuis le démarrage
-sudo journalctl -u essensys-backend -b
+# Voir tout le fichier de log
+sudo cat /var/logs/Essensys/backend/console.out.log
+
+# Vider les logs (si nécessaire)
+sudo truncate -s 0 /var/logs/Essensys/backend/console.out.log
+```
+
+**Note** : Les logs sont également disponibles via journalctl (pour compatibilité) :
+```bash
+sudo journalctl -u essensys-backend -f
 ```
 
 ### Nginx
