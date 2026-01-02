@@ -35,12 +35,13 @@ providers:
 
 # Logs
 log:
-  level: INFO
+  level: DEBUG  # DEBUG pour voir toutes les connexions et problèmes
   filePath: /var/log/traefik/traefik.log
 
 accessLog:
   filePath: /var/log/traefik/access.log
   format: json
+  bufferingSize: 100  # Réduire le buffering pour voir les logs plus rapidement
 
 # Options globales
 global:
