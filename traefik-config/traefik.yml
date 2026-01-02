@@ -7,20 +7,14 @@ api:
   # Le dashboard sera accessible via la route traefik.essensys.fr
 
 # Métriques Prometheus
+# Les métriques sont automatiquement exposées et visibles dans le dashboard
 metrics:
   prometheus:
     addEntryPointsLabels: true
     addServicesLabels: true
     addRoutersLabels: true
-    entryPoint: web
-    # Expose les métriques sur /metrics (accessible via le dashboard)
-
-# Traces (OpenTelemetry)
-tracing:
-  # Configuration basique pour les traces
-  # Les traces sont automatiquement collectées et visibles dans le dashboard
-  serviceName: traefik
-  sampleRate: 1.0  # 100% des requêtes sont tracées
+    # Les métriques sont accessibles via le dashboard et l'API
+    # Pas besoin de route spécifique, intégré dans le dashboard
 
 entryPoints:
   web:

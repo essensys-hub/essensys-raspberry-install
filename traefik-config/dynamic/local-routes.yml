@@ -20,20 +20,13 @@ http:
 
   routers:
     # Dashboard Traefik (console admin)
+    # Le dashboard inclut automatiquement les métriques et les logs d'accès
     traefik-dashboard:
       rule: "Host(`traefik.essensys.fr`)"
       entryPoints:
         - web
       service: api@internal
       priority: 100
-    
-    # Métriques Prometheus
-    traefik-metrics:
-      rule: "Host(`traefik.essensys.fr`) && Path(`/metrics`)"
-      entryPoints:
-        - web
-      service: prometheus@internal
-      priority: 95
     
     # Frontend local
     frontend-local:
