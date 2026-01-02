@@ -7,16 +7,32 @@ http:
   middlewares:
     # Middleware pour préserver les headers originaux et désactiver la compression
     # CRITIQUE: Compatible client legacy BP_MQX_ETH
+    # Le client nécessite:
+    # - Réponses en un seul paquet TCP (pas de fragmentation)
+    # - Headers préservés (Content-Type avec espace avant ;charset)
+    # - Pas de compression (évite la fragmentation)
     preserve-headers:
       headers:
         customRequestHeaders:
           Connection: ""
         customResponseHeaders:
           Connection: "close"
+        # Préserver les headers originaux du backend
+        # Le backend envoie déjà Content-Type avec espace avant ;charset=UTF-8
+        # Ne pas modifier les headers de réponse
         # Désactiver la compression pour éviter la fragmentation
         # Le client legacy nécessite des réponses en un seul paquet TCP
         # Note: Dans Traefik v2.x, on ne peut pas désactiver la compression directement
         # mais on peut éviter de l'activer en ne l'utilisant pas
+    
+    # Middleware pour bufferiser les réponses (single-packet TCP)
+    # CRITIQUE: Le client legacy ne peut pas gérer les réponses fragmentées
+    buffer-response:
+      buffering:
+        maxRequestBodyBytes: 65536      # 64k max body (comme Nginx)
+        maxResponseBodyBytes: 1048576   # 1MB max response (bufferiser complètement)
+        memRequestBodyBytes: 65536      # Bufferiser en mémoire
+        retryExpression: "IsNetworkError() && Attempts() < 2"
 
   routers:
     # Dashboard Traefik (console admin)
@@ -45,10 +61,13 @@ http:
       service: backend-service
       middlewares:
         - preserve-headers
+        - buffer-response
       priority: 20
     
     # Toutes les autres API locales (accessibles sans auth)
     # CRITIQUE: Compatible client legacy BP_MQX_ETH
+    # IMPORTANT: Cette route doit capturer TOUTES les requêtes /api/, même malformées
+    # Traefik doit être permissif pour accepter les requêtes HTTP non-standard
     api-all-local:
       rule: "Host(`mon.essensys.fr`) && PathPrefix(`/api/`)"
       entryPoints:
@@ -56,6 +75,7 @@ http:
       service: backend-service
       middlewares:
         - preserve-headers
+        - buffer-response
       priority: 15
     
     # Health check local
@@ -77,24 +97,25 @@ http:
     
     # Service backend (proxy vers backend Go)
     # CRITIQUE: Configuration compatible client legacy BP_MQX_ETH
-    # - Désactivation de la compression pour éviter la fragmentation
-    # - Timeouts augmentés pour client non-standard
-    # - Préservation des headers originaux
+    # Le client legacy a des contraintes strictes:
+    # 1. Réponses en un seul paquet TCP (pas de fragmentation)
+    # 2. JSON malformé accepté (clés non-quotées)
+    # 3. Headers HTTP non-standard (Content-Type avec espace avant ;)
+    # 4. Requêtes HTTP potentiellement malformées
     backend-service:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:7070"
         passHostHeader: true
-        # Désactiver la compression (le client legacy ne peut pas gérer)
-        # Note: Traefik v2.x n'a pas d'option directe pour désactiver la compression
-        # On utilise un middleware pour cela
-        # Timeouts augmentés pour client non-standard
+        # Timeouts augmentés pour client non-standard (comme Nginx: 60s)
+        # Le client peut être lent à envoyer/recevoir
+        # Note: Les timeouts de transport sont configurés dans l'entrypoint
         healthCheck:
           interval: "10s"
           timeout: "5s"
           path: "/health"
           scheme: "http"
       # Options de réponse pour single-packet TCP
-      # Traefik bufferise automatiquement les réponses, mais on peut forcer
-      # en utilisant un middleware de buffering si nécessaire
+      # Le middleware buffer-response force la bufferisation complète
+      # Traefik attendra la réponse complète du backend avant d'envoyer au client
 

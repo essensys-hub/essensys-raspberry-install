@@ -26,8 +26,21 @@ entryPoints:
   web:
     address: ":80"
     # Options pour compatibilité client legacy BP_MQX_ETH
-    # Le client ne respecte pas complètement le protocole HTTP standard
-    # Traefik est généralement plus permissif que nginx, mais on configure explicitement
+    # CRITIQUE: Le client ne respecte pas complètement le protocole HTTP standard
+    # - JSON malformé (clés non-quotées)
+    # - Headers HTTP non-standard (Content-Type avec espace avant ;)
+    # - Requêtes HTTP potentiellement malformées
+    # Traefik doit être permissif pour accepter ces requêtes
+    transport:
+      respondingTimeouts:
+        readTimeout: "60s"      # Timeout de lecture augmenté pour client non-standard
+        writeTimeout: "60s"     # Timeout d'écriture augmenté
+        idleTimeout: "180s"     # Timeout d'inactivité augmenté
+      forwardingTimeouts:
+        dialTimeout: "60s"       # Timeout de connexion au backend
+        responseHeaderTimeout: "60s"  # Timeout pour les headers de réponse
+    # Désactiver la validation stricte HTTP pour accepter les requêtes non-standard
+    # Note: Traefik v2.x est généralement permissif, mais on configure explicitement
   websecure:
     address: ":443"
     http:
@@ -60,21 +73,22 @@ accessLog:
   filePath: /var/log/traefik/access.log
   format: json
   bufferingSize: 1  # Buffering minimal (1 ligne) pour voir les logs en temps réel
-  # Filtrer pour voir toutes les requêtes, y compris les erreurs
-  filters:
-    statusCodes:
-      - "400-599"  # Inclure les erreurs HTTP
+  # IMPORTANT: Ne PAS filtrer - voir TOUTES les requêtes, même rejetées
+  # Les requêtes rejetées par Traefik (avant routing) peuvent ne pas avoir de status code
   # Inclure tous les champs pour diagnostic complet
   fields:
     defaultMode: keep
     headers:
-      defaultMode: keep  # Garder les headers pour voir les problèmes
+      defaultMode: keep  # Garder TOUS les headers pour voir les problèmes
       names:
         User-Agent: keep
         Content-Type: keep
         Content-Length: keep
         Connection: keep
         Host: keep
+        # Headers supplémentaires pour diagnostic client legacy
+        Accept: keep
+        Accept-Encoding: keep
 
 # Options globales
 global:
