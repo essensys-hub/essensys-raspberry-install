@@ -13,10 +13,16 @@ NC='\033[0m'
 
 # Variables
 INSTALL_DIR="/opt/essensys"
+BACKEND_DIR="$INSTALL_DIR/backend"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
 TRAEFIK_CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/traefik-config"
 TRAEFIK_VERSION="v2.11"
 ACME_EMAIL="admin@acme.com"  # À modifier avec votre email
+BACKEND_USER="essensys"
+SERVICE_USER="essensys"
+HOME_DIR="/home/essensys"
+BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
+FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -44,10 +50,209 @@ if [ ! -d "$TRAEFIK_CONFIG_DIR" ]; then
     exit 1
 fi
 
-# Installer les dépendances
-log_info "Installation des dépendances..."
+# Installer les dépendances système
+log_info "Installation des dépendances système..."
 apt-get update
-apt-get install -y curl wget apache2-utils python3
+apt-get install -y \
+    curl \
+    wget \
+    git \
+    build-essential \
+    nginx \
+    apache2-utils \
+    python3 \
+    libcap2-bin \
+    ca-certificates
+
+# Installer Go
+log_info "Installation de Go..."
+if ! command -v go &> /dev/null; then
+    GO_VERSION="1.21.5"
+    GO_ARCH="armv6l"
+    if [ "$(uname -m)" = "aarch64" ]; then
+        GO_ARCH="arm64"
+    fi
+    
+    GO_TAR="go${GO_VERSION}.linux-${GO_ARCH}.tar.gz"
+    cd /tmp
+    wget "https://go.dev/dl/${GO_TAR}"
+    tar -C /usr/local -xzf "${GO_TAR}"
+    rm "${GO_TAR}"
+    
+    # Ajouter Go au PATH
+    if ! grep -q "/usr/local/go/bin" /etc/profile; then
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+    fi
+    export PATH=$PATH:/usr/local/go/bin
+else
+    log_info "Go est déjà installé"
+    export PATH=$PATH:/usr/local/go/bin
+fi
+
+# Installer Node.js (via NodeSource)
+log_info "Installation de Node.js..."
+if ! command -v node &> /dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+else
+    log_info "Node.js est déjà installé"
+fi
+
+# Vérifier les versions installées
+log_info "Vérification des versions installées..."
+go version
+node --version
+npm --version
+
+# Créer l'utilisateur de service avec home directory
+log_info "Création de l'utilisateur de service..."
+if ! id "$SERVICE_USER" &>/dev/null; then
+    useradd -m -s /bin/bash -d "$HOME_DIR" "$SERVICE_USER"
+    log_info "Utilisateur $SERVICE_USER créé avec home directory $HOME_DIR"
+else
+    log_info "L'utilisateur $SERVICE_USER existe déjà"
+    # S'assurer que le home directory existe
+    if [ ! -d "$HOME_DIR" ]; then
+        mkdir -p "$HOME_DIR"
+        chown "$SERVICE_USER:$SERVICE_USER" "$HOME_DIR"
+    fi
+fi
+
+# Créer les répertoires
+log_info "Création des répertoires d'installation..."
+mkdir -p "$INSTALL_DIR"
+mkdir -p "$BACKEND_DIR"
+mkdir -p "$FRONTEND_DIR"
+mkdir -p "$INSTALL_DIR/logs"
+
+# Cloner les dépôts dans le home directory de l'utilisateur essensys
+log_info "Clonage des dépôts depuis GitHub (HTTPS)..."
+log_info "Backend: $BACKEND_REPO"
+log_info "Frontend: $FRONTEND_REPO"
+
+# Cloner le backend
+log_info "Clonage du backend..."
+if [ -d "$HOME_DIR/essensys-server-backend" ]; then
+    log_info "Le dépôt backend existe déjà, mise à jour..."
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR/essensys-server-backend && git pull"; then
+        log_error "Échec de la mise à jour du backend. Vérifiez la connexion Internet et les permissions."
+        exit 1
+    fi
+else
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $BACKEND_REPO"; then
+        log_error "Échec du clonage du backend."
+        log_error "Vérifiez que :"
+        log_error "  1. La connexion Internet fonctionne"
+        log_error "  2. Le dépôt est accessible publiquement"
+        log_error "  3. Git est correctement installé"
+        exit 1
+    fi
+fi
+
+# Cloner le frontend
+log_info "Clonage du frontend..."
+if [ -d "$HOME_DIR/essensys-server-frontend" ]; then
+    log_info "Le dépôt frontend existe déjà, mise à jour..."
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR/essensys-server-frontend && git pull"; then
+        log_error "Échec de la mise à jour du frontend. Vérifiez la connexion Internet et les permissions."
+        exit 1
+    fi
+else
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $FRONTEND_REPO"; then
+        log_error "Échec du clonage du frontend."
+        log_error "Vérifiez que :"
+        log_error "  1. La connexion Internet fonctionne"
+        log_error "  2. Le dépôt est accessible publiquement"
+        log_error "  3. Git est correctement installé"
+        exit 1
+    fi
+fi
+
+# Copier les fichiers depuis le home directory vers les répertoires d'installation
+log_info "Copie des fichiers vers les répertoires d'installation..."
+cp -r "$HOME_DIR/essensys-server-backend"/* "$BACKEND_DIR/"
+cp -r "$HOME_DIR/essensys-server-frontend"/* "$FRONTEND_DIR/"
+
+# Compiler le backend
+if [ -f "$BACKEND_DIR/go.mod" ]; then
+    log_info "Compilation du backend..."
+    cd "$BACKEND_DIR"
+    log_info "Synchronisation et téléchargement des dépendances Go..."
+    go mod tidy
+    if [ $? -ne 0 ]; then
+        log_warn "go mod tidy a échoué, tentative avec go mod download..."
+        go mod download
+        go mod tidy
+    fi
+    log_info "Compilation du binaire..."
+    go build -o server ./cmd/server
+    if [ $? -ne 0 ]; then
+        log_error "La compilation du backend a échoué"
+        log_error "Vérifiez que toutes les dépendances sont disponibles"
+        exit 1
+    fi
+    
+    # Créer le fichier de configuration si nécessaire
+    if [ ! -f "$BACKEND_DIR/config.yaml" ]; then
+        log_info "Création du fichier de configuration backend..."
+        cp "$BACKEND_DIR/config.yaml.example" "$BACKEND_DIR/config.yaml" 2>/dev/null || cat > "$BACKEND_DIR/config.yaml" <<EOF
+server:
+  port: 8080
+  read_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 60s
+
+auth:
+  enabled: false
+  clients:
+    testclient: testpass
+
+logging:
+  level: info
+  format: text
+EOF
+    fi
+    
+    # Modifier le port dans config.yaml pour utiliser 8080
+    if [ -f "$BACKEND_DIR/config.yaml" ]; then
+        current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
+        if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
+            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
+            log_info "Port configuré à 8080 dans config.yaml"
+        elif [ -z "$current_port" ]; then
+            sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
+            log_info "Port 8080 ajouté dans config.yaml"
+        else
+            log_info "Port déjà configuré à 8080 dans config.yaml"
+        fi
+    fi
+else
+    log_error "Le fichier go.mod n'a pas été trouvé dans $BACKEND_DIR"
+    exit 1
+fi
+
+# Installer les dépendances et builder le frontend
+if [ -f "$FRONTEND_DIR/package.json" ]; then
+    log_info "Installation des dépendances frontend..."
+    cd "$FRONTEND_DIR"
+    npm install
+    
+    log_info "Build du frontend pour la production..."
+    npm run build
+    
+    if [ ! -d "$FRONTEND_DIR/dist" ]; then
+        log_error "Le build du frontend a échoué"
+        exit 1
+    fi
+    log_info "Build du frontend terminé avec succès"
+else
+    log_error "Le fichier package.json n'a pas été trouvé dans $FRONTEND_DIR"
+    exit 1
+fi
+
+# Configurer les permissions
+log_info "Configuration des permissions..."
+chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
 # Télécharger et installer Traefik
 log_info "Téléchargement de Traefik..."
@@ -230,8 +435,10 @@ systemctl daemon-reload
 
 # Démarrer les services
 log_info "Démarrage des services..."
+systemctl enable essensys-backend
 systemctl enable traefik-block-service
 systemctl enable traefik
+systemctl start essensys-backend
 systemctl start traefik-block-service
 systemctl start traefik
 
@@ -244,6 +451,7 @@ fi
 # Vérifier le statut
 log_info "Vérification du statut des services..."
 sleep 2
+systemctl status essensys-backend --no-pager -l || true
 systemctl status traefik --no-pager -l || true
 systemctl status traefik-block-service --no-pager -l || true
 
@@ -263,10 +471,13 @@ log_info "  2. Vérifiez que le DNS essensys.acme.com pointe vers cette machine"
 log_info "  3. Les certificats Let's Encrypt seront générés automatiquement"
 log_info ""
 log_info "Services:"
+log_info "  - Backend: systemctl status essensys-backend"
 log_info "  - Traefik: systemctl status traefik"
 log_info "  - Block Service: systemctl status traefik-block-service"
+log_info "  - Nginx (frontend interne): systemctl status nginx"
 log_info ""
 log_info "Logs:"
+log_info "  - Backend: tail -f /var/logs/Essensys/backend/console.out.log"
 log_info "  - Traefik: tail -f /var/log/traefik/traefik.log"
 log_info "  - Traefik errors: tail -f /var/log/traefik/traefik-error.log"
 log_info ""
