@@ -15,7 +15,7 @@ NC='\033[0m'
 INSTALL_DIR="/opt/essensys"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
 TRAEFIK_CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/traefik-config"
-TRAEFIK_VERSION="v3.0"
+TRAEFIK_VERSION="v2.11"
 ACME_EMAIL="admin@acme.com"  # À modifier avec votre email
 
 log_info() {
@@ -58,21 +58,70 @@ if [ ! -f "$TRAEFIK_BINARY" ]; then
         ARCH="armv7"
     fi
     
-    TRAEFIK_URL="https://github.com/traefik/traefik/releases/download/${TRAEFIK_VERSION}/traefik_${TRAEFIK_VERSION}_linux_${ARCH}.tar.gz"
-    log_info "Téléchargement depuis: $TRAEFIK_URL"
+    log_info "Architecture détectée: $ARCH"
+    
+    # Essayer plusieurs formats d'URL possibles
+    # Format 1: traefik_v2.11.0_linux_arm64.tar.gz (v2.x)
+    # Format 2: traefik_v3.0_linux_arm64.tar.gz (v3.x si disponible)
+    # Format 3: traefik_linux_arm64.tar.gz (format alternatif)
+    
+    TRAEFIK_URLS=(
+        "https://github.com/traefik/traefik/releases/download/v2.11.3/traefik_v2.11.3_linux_${ARCH}.tar.gz"
+        "https://github.com/traefik/traefik/releases/download/v2.11.0/traefik_v2.11.0_linux_${ARCH}.tar.gz"
+        "https://github.com/traefik/traefik/releases/download/v2.10.7/traefik_v2.10.7_linux_${ARCH}.tar.gz"
+    )
     
     cd /tmp
-    wget -q "$TRAEFIK_URL" -O traefik.tar.gz || {
-        log_error "Échec du téléchargement de Traefik"
-        exit 1
-    }
+    DOWNLOADED=0
     
+    for TRAEFIK_URL in "${TRAEFIK_URLS[@]}"; do
+        log_info "Essai de téléchargement depuis: $TRAEFIK_URL"
+        if wget -q --timeout=10 "$TRAEFIK_URL" -O traefik.tar.gz 2>/dev/null; then
+            # Vérifier que le fichier téléchargé n'est pas vide et est valide
+            if [ -s traefik.tar.gz ] && tar -tzf traefik.tar.gz >/dev/null 2>&1; then
+                DOWNLOADED=1
+                log_info "Téléchargement réussi!"
+                break
+            else
+                log_warn "Fichier invalide, essai suivant..."
+                rm -f traefik.tar.gz
+            fi
+        else
+            log_warn "Échec du téléchargement, essai suivant..."
+        fi
+    done
+    
+    if [ "$DOWNLOADED" -eq 0 ]; then
+        log_error "Échec du téléchargement de Traefik après plusieurs tentatives"
+        log_error ""
+        log_error "Options:"
+        log_error "1. Vérifiez votre connexion Internet"
+        log_error "2. Téléchargez manuellement depuis: https://github.com/traefik/traefik/releases"
+        log_error "3. Placez le binaire dans: $TRAEFIK_BINARY"
+        log_error "4. Rendez-le exécutable: chmod +x $TRAEFIK_BINARY"
+        exit 1
+    fi
+    
+    # Extraire le binaire
+    log_info "Extraction du binaire Traefik..."
     tar -xzf traefik.tar.gz
+    if [ ! -f traefik ]; then
+        log_error "Le binaire traefik n'a pas été trouvé dans l'archive"
+        rm -f traefik.tar.gz
+        exit 1
+    fi
+    
     mv traefik "$TRAEFIK_BINARY"
     chmod +x "$TRAEFIK_BINARY"
     rm -f traefik.tar.gz
     
-    log_info "Traefik installé avec succès"
+    # Vérifier la version installée
+    if "$TRAEFIK_BINARY" version >/dev/null 2>&1; then
+        VERSION=$("$TRAEFIK_BINARY" version | head -1)
+        log_info "Traefik installé avec succès: $VERSION"
+    else
+        log_info "Traefik installé avec succès"
+    fi
 else
     log_info "Traefik est déjà installé"
 fi
