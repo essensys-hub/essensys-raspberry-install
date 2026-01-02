@@ -1,0 +1,46 @@
+# Configuration principale Traefik
+# Entrypoints et configuration globale
+
+api:
+  dashboard: true
+  insecure: false  # Dashboard accessible uniquement via routes sécurisées
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+
+# Configuration Let's Encrypt pour HTTPS
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@rhinosys.io  # À modifier avec votre email
+      storage: /etc/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# Providers de configuration (fichiers statiques)
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+    filename: ""
+
+# Logs
+log:
+  level: INFO
+  filePath: /var/log/traefik/traefik.log
+
+accessLog:
+  filePath: /var/log/traefik/access.log
+  format: json
+
+# Options globales
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+

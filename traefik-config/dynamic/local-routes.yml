@@ -1,0 +1,53 @@
+# Configuration des routes LOCALES (mon.essensys.fr)
+# Accessible sans authentification depuis le réseau local
+
+http:
+  routers:
+    # Frontend local
+    frontend-local:
+      rule: "Host(`mon.essensys.fr`)"
+      entryPoints:
+        - web
+      service: frontend-service
+      priority: 10
+    
+    # API inject local (accessible sans auth)
+    api-inject-local:
+      rule: "Host(`mon.essensys.fr`) && PathPrefix(`/api/inject`)"
+      entryPoints:
+        - web
+      service: backend-service
+      priority: 20
+    
+    # Toutes les autres API locales (accessibles sans auth)
+    api-all-local:
+      rule: "Host(`mon.essensys.fr`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - web
+      service: backend-service
+      priority: 15
+    
+    # Health check local
+    health-local:
+      rule: "Host(`mon.essensys.fr`) && Path(`/health`)"
+      entryPoints:
+        - web
+      service: backend-service
+      priority: 25
+
+  services:
+    # Service frontend (proxy vers nginx qui sert les fichiers statiques)
+    # Nginx écoute sur port 8081 en interne pour servir le frontend
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8081"
+        passHostHeader: true
+    
+    # Service backend (proxy vers backend Go)
+    backend-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8080"
+        passHostHeader: true
+

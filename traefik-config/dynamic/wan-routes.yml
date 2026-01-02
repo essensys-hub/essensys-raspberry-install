@@ -1,0 +1,92 @@
+# Configuration des routes WAN (essensys.rhinosys.io)
+# Accessible depuis Internet avec authentification basique pour / et /api/inject
+# Les autres API sont bloquées
+
+http:
+  middlewares:
+    # Middleware de redirection HTTP vers HTTPS
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+    
+    # Middleware d'authentification basique pour le frontend WAN
+    auth-frontend-wan:
+      basicAuth:
+        usersFile: /etc/traefik/users.htpasswd
+    
+    # Middleware d'authentification basique pour /api/inject WAN
+    auth-api-inject-wan:
+      basicAuth:
+        usersFile: /etc/traefik/users.htpasswd
+
+  routers:
+    # Redirection HTTP vers HTTPS pour le WAN
+    frontend-wan-redirect:
+      rule: "Host(`essensys.rhinosys.io`)"
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      priority: 5
+    
+    # Frontend WAN avec authentification (HTTPS)
+    frontend-wan:
+      rule: "Host(`essensys.rhinosys.io`)"
+      entryPoints:
+        - websecure
+      service: frontend-service
+      middlewares:
+        - auth-frontend-wan
+      tls:
+        certResolver: letsencrypt
+      priority: 10
+    
+    # API inject WAN avec authentification
+    api-inject-wan:
+      rule: "Host(`essensys.rhinosys.io`) && PathPrefix(`/api/inject`)"
+      entryPoints:
+        - websecure
+      service: backend-service
+      middlewares:
+        - auth-api-inject-wan
+      tls:
+        certResolver: letsencrypt
+      priority: 20
+    
+    # Blocage de toutes les autres API depuis le WAN
+    # Cette route capture toutes les autres requêtes /api/ (sauf /api/inject) et retourne 403
+    # On utilise un service HTTP minimal qui retourne toujours 403
+    api-block-wan:
+      rule: "Host(`essensys.rhinosys.io`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
+      entryPoints:
+        - websecure
+      service: block-service
+      tls:
+        certResolver: letsencrypt
+      priority: 15
+
+  services:
+    # Service frontend (proxy vers nginx qui sert les fichiers statiques)
+    # Nginx écoute sur port 8081 en interne pour servir le frontend
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8081"
+        passHostHeader: true
+    
+    # Service backend (proxy vers backend Go)
+    backend-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8080"
+        passHostHeader: true
+    
+    # Service de blocage (retourne 403 Forbidden)
+    # Ce service utilise un serveur HTTP minimal sur port 8082 qui retourne toujours 403
+    block-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8082"
+        passHostHeader: true
+
