@@ -300,16 +300,36 @@ EOF
 log_info "Configuration de nginx..."
 
 # Déterminer le répertoire du script (pour trouver nginx-config)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Utiliser plusieurs méthodes pour trouver le répertoire du script
+if [ -n "${BASH_SOURCE[0]}" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [ -n "$0" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+else
+    # Fallback: utiliser le répertoire courant
+    SCRIPT_DIR="$(pwd)"
+fi
+
+# Si le script est dans le répertoire courant, utiliser pwd
+if [ ! -d "$SCRIPT_DIR/nginx-config" ]; then
+    # Essayer avec le répertoire courant
+    if [ -d "$(pwd)/nginx-config" ]; then
+        SCRIPT_DIR="$(pwd)"
+    fi
+fi
 
 # Vérifier que les fichiers de configuration existent
 if [ ! -f "$SCRIPT_DIR/nginx-config/essensys-api-log-format.conf" ]; then
     log_error "Fichier de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys-api-log-format.conf"
+    log_error "Répertoire du script détecté: $SCRIPT_DIR"
+    log_error "Répertoire courant: $(pwd)"
+    log_error "Vérifiez que vous exécutez le script depuis le répertoire essensys-raspberry-install"
     exit 1
 fi
 
 if [ ! -f "$SCRIPT_DIR/nginx-config/essensys.template" ]; then
     log_error "Template de configuration nginx introuvable: $SCRIPT_DIR/nginx-config/essensys.template"
+    log_error "Répertoire du script détecté: $SCRIPT_DIR"
     exit 1
 fi
 
