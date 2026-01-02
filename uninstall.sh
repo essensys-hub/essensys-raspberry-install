@@ -78,20 +78,47 @@ fi
 
 # Supprimer la configuration nginx
 log_info "Suppression de la configuration nginx..."
+NGINX_CONFIG_REMOVED=false
+
 if [ -f "/etc/nginx/sites-available/essensys" ]; then
     rm -f /etc/nginx/sites-available/essensys
     log_info "✓ Configuration nginx supprimée"
+    NGINX_CONFIG_REMOVED=true
 fi
 
 if [ -L "/etc/nginx/sites-enabled/essensys" ]; then
     rm -f /etc/nginx/sites-enabled/essensys
     log_info "✓ Lien symbolique nginx supprimé"
+    NGINX_CONFIG_REMOVED=true
 fi
 
-# Recharger nginx
-if systemctl is-active --quiet nginx 2>/dev/null; then
-    log_info "Rechargement de nginx..."
-    systemctl reload nginx
+# Supprimer aussi le format de log personnalisé
+if [ -f "/etc/nginx/conf.d/essensys-api-log-format.conf" ]; then
+    rm -f /etc/nginx/conf.d/essensys-api-log-format.conf
+    log_info "✓ Format de log nginx supprimé"
+    NGINX_CONFIG_REMOVED=true
+fi
+
+# Recharger nginx seulement si la configuration a été modifiée et si nginx est actif
+if [ "$NGINX_CONFIG_REMOVED" = true ] && systemctl is-active --quiet nginx 2>/dev/null; then
+    log_info "Test de la configuration nginx..."
+    if nginx -t 2>/dev/null; then
+        log_info "Rechargement de nginx..."
+        systemctl reload nginx
+        if [ $? -ne 0 ]; then
+            log_warn "Échec du rechargement de nginx (peut être normal si aucun site n'est configuré)"
+        fi
+    else
+        log_warn "La configuration nginx est invalide (peut être normal après suppression)"
+        # Essayer de redémarrer nginx si possible, sinon l'arrêter
+        if [ -f "/etc/nginx/sites-enabled/default" ] || [ "$(ls -A /etc/nginx/sites-enabled/ 2>/dev/null)" ]; then
+            log_info "Tentative de redémarrage de nginx..."
+            systemctl restart nginx 2>/dev/null || log_warn "Impossible de redémarrer nginx"
+        else
+            log_info "Aucun site nginx configuré, arrêt de nginx..."
+            systemctl stop nginx 2>/dev/null || log_warn "Impossible d'arrêter nginx"
+        fi
+    fi
 fi
 
 # Supprimer les fichiers d'installation
