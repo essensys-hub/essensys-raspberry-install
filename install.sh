@@ -172,8 +172,20 @@ cp -r "$HOME_DIR/essensys-server-frontend"/* "$FRONTEND_DIR/"
 if [ -f "$BACKEND_DIR/go.mod" ]; then
     log_info "Compilation du backend..."
     cd "$BACKEND_DIR"
-    go mod download
+    log_info "Synchronisation et téléchargement des dépendances Go..."
+    go mod tidy
+    if [ $? -ne 0 ]; then
+        log_warn "go mod tidy a échoué, tentative avec go mod download..."
+        go mod download
+        go mod tidy
+    fi
+    log_info "Compilation du binaire..."
     go build -o server ./cmd/server
+    if [ $? -ne 0 ]; then
+        log_error "La compilation du backend a échoué"
+        log_error "Vérifiez que toutes les dépendances sont disponibles"
+        exit 1
+    fi
     
     # Configurer les capacités pour écouter sur le port 8080 (non-privilégié, pas besoin de setcap)
     # Le backend écoutera sur 8080, nginx sur 80 proxy vers 8080
