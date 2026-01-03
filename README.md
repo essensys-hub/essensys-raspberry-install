@@ -141,7 +141,7 @@ Les dépôts sont publics et accessibles via HTTPS, aucune configuration SSH n'e
 
 ## Installation
 
-### Option 1 : Installation automatique (recommandée)
+### Installation automatique (recommandée)
 
 1. Cloner ce dépôt :
 ```bash
@@ -149,24 +149,33 @@ git clone <url-du-repo-essensys-raspberry-install>
 cd essensys-raspberry-install
 ```
 
-2. Exécuter le script d'installation :
+2. (Optionnel) Créer le fichier `domain.txt` pour le domaine WAN :
+```bash
+echo "essensys.acme.com" > /home/essensys/domain.txt
+```
+Si ce fichier n'existe pas, le domaine par défaut `essensys.acme.com` sera utilisé.
+
+3. Exécuter le script d'installation :
 ```bash
 sudo ./install.sh
 ```
 
-Le script va :
-- Mettre à jour le système
-- Installer les dépendances système (git, curl, wget, build-essential, nginx, etc.)
-- Installer Go, Node.js, npm et nginx
-- Créer l'utilisateur `essensys` avec home directory `/home/essensys`
-- Cloner les dépôts backend et frontend depuis GitHub (HTTPS) dans `/home/essensys`
-- Compiler le backend Go
-- Builder le frontend React
-- Configurer nginx comme reverse proxy
-- Créer les services systemd
-- Démarrer les services
+Le script `install.sh` installe **tout** :
+- Mise à jour du système
+- Installation des dépendances système (git, curl, wget, build-essential, nginx, apache2-utils, python3, etc.)
+- Installation de Go, Node.js, npm
+- Installation de Nginx
+- Installation de Traefik
+- Création de l'utilisateur `essensys` avec home directory `/home/essensys`
+- Clonage des dépôts backend et frontend depuis GitHub (HTTPS) dans `/home/essensys`
+- Compilation du backend Go (port 7070)
+- Build du frontend React
+- Configuration de Nginx (port 80 pour API locales, port 9090 pour frontend interne)
+- Configuration de Traefik (port 80 pour frontend local, port 443 pour frontend WAN)
+- Création de tous les services systemd (backend, nginx, traefik, traefik-block-service)
+- Démarrage de tous les services
 
-### Option 2 : Installation manuelle
+### Installation manuelle
 
 Si vous préférez cloner manuellement les dépôts :
 
@@ -540,11 +549,9 @@ sudo ufw allow 80/tcp
 
 ## Mise à jour
 
-### Option 1 : Script automatique (recommandé)
+### Script automatique (recommandé)
 
-#### Mode Standard (Nginx uniquement)
-
-Un script `update.sh` est fourni pour automatiser la mise à jour complète :
+Un script `update.sh` unifié est fourni pour automatiser la mise à jour complète :
 
 ```bash
 cd essensys-raspberry-install
@@ -555,27 +562,12 @@ Ce script va :
 - Mettre à jour les dépôts backend et frontend depuis GitHub
 - Recompiler le backend Go
 - Rebuild le frontend React
-- Redémarrer les services (essensys-backend et nginx)
-- Vérifier que les services sont actifs
-
-#### Mode Traefik
-
-Un script `update-traefik.sh` est fourni pour la mise à jour avec Traefik :
-
-```bash
-cd essensys-raspberry-install
-sudo ./update-traefik.sh
-```
-
-Ce script va :
-- Mettre à jour les dépôts backend et frontend depuis GitHub
-- Recompiler le backend Go
-- Rebuild le frontend React
+- Mettre à jour la configuration Nginx
 - Mettre à jour la configuration Traefik (lit `/home/essensys/domain.txt` pour le domaine WAN)
-- Redémarrer les services (essensys-backend, nginx, traefik)
-- Vérifier que les services sont actifs
+- Redémarrer tous les services (essensys-backend, nginx, traefik, traefik-block-service)
+- Vérifier que tous les services sont actifs
 
-### Option 2 : Mise à jour manuelle
+### Mise à jour manuelle
 
 #### Mettre à jour le backend
 
@@ -612,9 +604,9 @@ sudo systemctl reload nginx
 
 ## Désinstallation
 
-### Option 1 : Script automatique (recommandé)
+### Script automatique (recommandé)
 
-Un script `uninstall.sh` est fourni pour automatiser la désinstallation complète :
+Un script `uninstall.sh` unifié est fourni pour automatiser la désinstallation complète :
 
 ```bash
 cd essensys-raspberry-install
@@ -623,14 +615,16 @@ sudo ./uninstall.sh
 
 Le script va :
 - Demander confirmation avant de supprimer
-- Arrêter et désactiver les services
-- Supprimer les fichiers de service systemd
-- Supprimer la configuration nginx
+- Arrêter et désactiver tous les services (essensys-backend, traefik, traefik-block-service, nginx)
+- Supprimer tous les fichiers de service systemd
+- Supprimer la configuration Nginx (essensys, essensys-frontend-internal)
+- Supprimer la configuration Traefik (`/etc/traefik`)
+- Supprimer les binaires (traefik, traefik-block-service.py)
 - Supprimer les fichiers d'installation dans `/opt/essensys`
-- Supprimer les logs dans `/var/logs/Essensys`
+- Supprimer tous les logs (`/var/logs/Essensys`, `/var/log/traefik`, logs nginx)
 - Optionnellement supprimer l'utilisateur et les dépôts
 
-### Option 2 : Désinstallation manuelle
+### Désinstallation manuelle
 
 Si vous préférez désinstaller manuellement :
 
@@ -687,16 +681,11 @@ sudo apt update && sudo apt upgrade -y
 
 5. **Utiliser HTTPS** en production (nécessite un certificat SSL)
 
-## Installation avec Traefik (mode avancé)
+**Note** : Le script `install.sh` installe automatiquement Nginx ET Traefik. L'architecture est configurée comme suit :
+- **Nginx** : Gère les API locales (port 80) pour le client Essensys legacy
+- **Traefik** : Gère le frontend local (port 80) et WAN (port 443 avec HTTPS et authentification)
 
-Pour une installation avec Traefik (accès WAN avec HTTPS et authentification) :
-
-```bash
-cd essensys-raspberry-install
-sudo ./install-traefik.sh
-```
-
-**Prérequis** :
+**Prérequis pour l'accès WAN** :
 1. Créer le fichier `/home/essensys/domain.txt` avec votre domaine WAN :
    ```bash
    echo "essensys.acme.com" > /home/essensys/domain.txt

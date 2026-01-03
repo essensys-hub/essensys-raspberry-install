@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script d'installation Essensys pour Raspberry Pi 4
-# Ce script installe et configure le backend et le frontend Essensys
+# Ce script installe et configure Nginx, Traefik, Backend et Frontend
 
 set -e  # Arrêter en cas d'erreur
 
@@ -20,6 +20,12 @@ SERVICE_USER="essensys"
 HOME_DIR="/home/essensys"
 BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
 FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
+DOMAIN_FILE="$HOME_DIR/domain.txt"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TRAEFIK_CONFIG_DIR="$SCRIPT_DIR/traefik-config"
+NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
+ACME_EMAIL="admin@acme.com"  # À modifier avec votre email
+TRAEFIK_VERSION="v2.11"
 
 # Fonction pour afficher les messages
 log_info() {
@@ -41,6 +47,21 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 log_info "Démarrage de l'installation Essensys pour Raspberry Pi 4"
+log_info "Installation complète: Nginx + Traefik + Backend + Frontend"
+
+# Lire le domaine WAN depuis le fichier domain.txt
+WAN_DOMAIN="essensys.acme.com"  # Valeur par défaut
+if [ -f "$DOMAIN_FILE" ]; then
+    WAN_DOMAIN=$(cat "$DOMAIN_FILE" | tr -d '\n\r ' | head -1)
+    if [ -z "$WAN_DOMAIN" ]; then
+        log_warn "Le fichier $DOMAIN_FILE est vide, utilisation du domaine par défaut: $WAN_DOMAIN"
+    else
+        log_info "Domaine WAN lu depuis $DOMAIN_FILE: $WAN_DOMAIN"
+    fi
+else
+    log_warn "Le fichier $DOMAIN_FILE n'existe pas, utilisation du domaine par défaut: $WAN_DOMAIN"
+    log_warn "Créez le fichier avec: echo 'essensys.acme.com' > $DOMAIN_FILE"
+fi
 
 # Mettre à jour le système
 log_info "Mise à jour du système..."
@@ -55,6 +76,8 @@ apt-get install -y \
     git \
     build-essential \
     nginx \
+    apache2-utils \
+    python3 \
     libcap2-bin \
     ca-certificates \
     openssh-client
@@ -187,15 +210,12 @@ if [ -f "$BACKEND_DIR/go.mod" ]; then
         exit 1
     fi
     
-    # Configurer les capacités pour écouter sur le port 8080 (non-privilégié, pas besoin de setcap)
-    # Le backend écoutera sur 8080, nginx sur 80 proxy vers 8080
-    
     # Créer le fichier de configuration si nécessaire
     if [ ! -f "$BACKEND_DIR/config.yaml" ]; then
         log_info "Création du fichier de configuration backend..."
         cp "$BACKEND_DIR/config.yaml.example" "$BACKEND_DIR/config.yaml" 2>/dev/null || cat > "$BACKEND_DIR/config.yaml" <<EOF
 server:
-  port: 8080
+  port: 7070
   read_timeout: 10s
   write_timeout: 10s
   idle_timeout: 60s
@@ -211,30 +231,23 @@ logging:
 EOF
     fi
     
-    # Modifier le port dans config.yaml pour utiliser 8080 (nginx écoutera sur 80 et proxy vers 8080)
-    # Les clients BP_MQX_ETH se connecteront au port 80, nginx les proxy vers le backend sur 8080
-    # Utiliser une approche plus robuste pour éviter les doublons (808080)
+    # Modifier le port dans config.yaml pour utiliser 7070
     if [ -f "$BACKEND_DIR/config.yaml" ]; then
-        # Vérifier la valeur actuelle du port
         current_port=$(grep -E "^[[:space:]]*port:[[:space:]]*[0-9]+" "$BACKEND_DIR/config.yaml" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/')
-        if [ -n "$current_port" ] && [ "$current_port" != "8080" ]; then
-            # Remplacer uniquement si le port n'est pas déjà 8080
-            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\18080/' "$BACKEND_DIR/config.yaml"
-            log_info "Port configuré à 8080 dans config.yaml"
+        if [ -n "$current_port" ] && [ "$current_port" != "7070" ]; then
+            sed -i 's/^\([[:space:]]*port:[[:space:]]*\)[0-9]*/\17070/' "$BACKEND_DIR/config.yaml"
+            log_info "Port configuré à 7070 dans config.yaml"
         elif [ -z "$current_port" ]; then
-            # Si aucun port n'est trouvé, l'ajouter
-            sed -i '/^server:/a\  port: 8080' "$BACKEND_DIR/config.yaml"
-            log_info "Port 8080 ajouté dans config.yaml"
+            sed -i '/^server:/a\  port: 7070' "$BACKEND_DIR/config.yaml"
+            log_info "Port 7070 ajouté dans config.yaml"
         else
-            log_info "Port déjà configuré à 8080 dans config.yaml"
+            log_info "Port déjà configuré à 7070 dans config.yaml"
         fi
     fi
 else
     log_error "Le fichier go.mod n'a pas été trouvé dans $BACKEND_DIR"
     exit 1
 fi
-
-# Le frontend a déjà été copié plus haut
 
 # Installer les dépendances et builder le frontend
 if [ -f "$FRONTEND_DIR/package.json" ]; then
@@ -249,6 +262,7 @@ if [ -f "$FRONTEND_DIR/package.json" ]; then
         log_error "Le build du frontend a échoué"
         exit 1
     fi
+    log_info "Build du frontend terminé avec succès"
 else
     log_error "Le fichier package.json n'a pas été trouvé dans $FRONTEND_DIR"
     exit 1
@@ -296,58 +310,12 @@ ReadWritePaths=$INSTALL_DIR /var/logs/Essensys
 WantedBy=multi-user.target
 EOF
 
-# Configurer nginx
-log_info "Configuration de nginx..."
+# Configurer Nginx
+log_info "Configuration de Nginx..."
 
-# Chercher le répertoire nginx-config dans plusieurs emplacements possibles
-NGINX_CONFIG_DIR=""
-
-# 1. Répertoire du script (si le script est dans essensys-raspberry-install)
-if [ -n "${BASH_SOURCE[0]}" ]; then
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -d "$SCRIPT_DIR/nginx-config" ]; then
-        NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
-    fi
-fi
-
-# 2. Répertoire courant
-if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$(pwd)/nginx-config" ]; then
-    NGINX_CONFIG_DIR="$(pwd)/nginx-config"
-fi
-
-# 3. Répertoire home de l'utilisateur essensys (où les dépôts sont clonés)
-if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$HOME_DIR/essensys-raspberry-install/nginx-config" ]; then
-    NGINX_CONFIG_DIR="$HOME_DIR/essensys-raspberry-install/nginx-config"
-fi
-
-# 4. Répertoire d'installation (si nginx-config a été copié là)
-if [ -z "$NGINX_CONFIG_DIR" ] && [ -d "$INSTALL_DIR/nginx-config" ]; then
-    NGINX_CONFIG_DIR="$INSTALL_DIR/nginx-config"
-fi
-
-# 5. Chercher dans les répertoires parents
-if [ -z "$NGINX_CONFIG_DIR" ]; then
-    CURRENT_DIR="$(pwd)"
-    while [ "$CURRENT_DIR" != "/" ]; do
-        if [ -d "$CURRENT_DIR/nginx-config" ]; then
-            NGINX_CONFIG_DIR="$CURRENT_DIR/nginx-config"
-            break
-        fi
-        CURRENT_DIR="$(dirname "$CURRENT_DIR")"
-    done
-fi
-
-# Vérifier que les fichiers de configuration existent
-if [ -z "$NGINX_CONFIG_DIR" ] || [ ! -f "$NGINX_CONFIG_DIR/essensys-api-log-format.conf" ]; then
-    log_error "Répertoire nginx-config introuvable!"
-    log_error "Recherché dans:"
-    log_error "  - Répertoire du script: $SCRIPT_DIR"
-    log_error "  - Répertoire courant: $(pwd)"
-    log_error "  - $HOME_DIR/essensys-raspberry-install/nginx-config"
-    log_error "  - $INSTALL_DIR/nginx-config"
-    log_error ""
-    log_error "Assurez-vous que le répertoire nginx-config existe à côté du script install.sh"
-    log_error "ou exécutez le script depuis le répertoire essensys-raspberry-install"
+# Vérifier que le répertoire nginx-config existe
+if [ ! -d "$NGINX_CONFIG_DIR" ] || [ ! -f "$NGINX_CONFIG_DIR/essensys-api-log-format.conf" ]; then
+    log_error "Répertoire nginx-config introuvable: $NGINX_CONFIG_DIR"
     exit 1
 fi
 
@@ -377,52 +345,226 @@ touch /var/log/nginx/essensys-api-trace.log
 touch /var/log/nginx/essensys-api-error.log
 chown -R www-data:www-data /var/log/nginx/essensys-*.log 2>/dev/null || chown -R nginx:nginx /var/log/nginx/essensys-*.log 2>/dev/null || true
 
+# Configurer Nginx pour servir le frontend sur le port 9090 (interne pour Traefik)
+log_info "Configuration de Nginx pour le frontend interne (port 9090)..."
+if [ -f "$TRAEFIK_CONFIG_DIR/nginx-frontend-internal.conf" ]; then
+    sed "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" "$TRAEFIK_CONFIG_DIR/nginx-frontend-internal.conf" > /etc/nginx/sites-available/essensys-frontend-internal
+    ln -sf /etc/nginx/sites-available/essensys-frontend-internal /etc/nginx/sites-enabled/essensys-frontend-internal
+    log_info "Configuration nginx créée pour le port 9090 (interne)"
+fi
+
 # Tester la configuration nginx
 log_info "Vérification de la configuration nginx..."
 nginx -t
+
+# Télécharger et installer Traefik
+log_info "Téléchargement de Traefik..."
+TRAEFIK_BINARY="/usr/local/bin/traefik"
+if [ ! -f "$TRAEFIK_BINARY" ]; then
+    ARCH="arm64"  # Pour Raspberry Pi 4
+    if [ "$(uname -m)" = "armv7l" ]; then
+        ARCH="armv7"
+    fi
+    
+    log_info "Architecture détectée: $ARCH"
+    
+    TRAEFIK_URLS=(
+        "https://github.com/traefik/traefik/releases/download/v2.11.3/traefik_v2.11.3_linux_${ARCH}.tar.gz"
+        "https://github.com/traefik/traefik/releases/download/v2.11.0/traefik_v2.11.0_linux_${ARCH}.tar.gz"
+        "https://github.com/traefik/traefik/releases/download/v2.10.7/traefik_v2.10.7_linux_${ARCH}.tar.gz"
+    )
+    
+    cd /tmp
+    DOWNLOADED=0
+    
+    for TRAEFIK_URL in "${TRAEFIK_URLS[@]}"; do
+        log_info "Essai de téléchargement depuis: $TRAEFIK_URL"
+        if wget -q --timeout=10 "$TRAEFIK_URL" -O traefik.tar.gz 2>/dev/null; then
+            if [ -s traefik.tar.gz ] && tar -tzf traefik.tar.gz >/dev/null 2>&1; then
+                DOWNLOADED=1
+                log_info "Téléchargement réussi!"
+                break
+            else
+                log_warn "Fichier invalide, essai suivant..."
+                rm -f traefik.tar.gz
+            fi
+        else
+            log_warn "Échec du téléchargement, essai suivant..."
+        fi
+    done
+    
+    if [ "$DOWNLOADED" -eq 0 ]; then
+        log_error "Échec du téléchargement de Traefik après plusieurs tentatives"
+        exit 1
+    fi
+    
+    # Extraire le binaire
+    log_info "Extraction du binaire Traefik..."
+    tar -xzf traefik.tar.gz
+    if [ ! -f traefik ]; then
+        log_error "Le binaire traefik n'a pas été trouvé dans l'archive"
+        rm -f traefik.tar.gz
+        exit 1
+    fi
+    
+    mv traefik "$TRAEFIK_BINARY"
+    chmod +x "$TRAEFIK_BINARY"
+    rm -f traefik.tar.gz
+    
+    if "$TRAEFIK_BINARY" version >/dev/null 2>&1; then
+        VERSION=$("$TRAEFIK_BINARY" version | head -1)
+        log_info "Traefik installé avec succès: $VERSION"
+    else
+        log_info "Traefik installé avec succès"
+    fi
+else
+    log_info "Traefik est déjà installé"
+fi
+
+# Créer les répertoires nécessaires pour Traefik
+log_info "Création des répertoires Traefik..."
+mkdir -p /etc/traefik/dynamic
+mkdir -p /etc/traefik
+mkdir -p /var/log/traefik
+mkdir -p /var/lib/traefik
+
+# Copier la configuration principale Traefik
+log_info "Installation de la configuration Traefik..."
+if [ ! -d "$TRAEFIK_CONFIG_DIR" ]; then
+    log_error "Répertoire de configuration Traefik introuvable: $TRAEFIK_CONFIG_DIR"
+    exit 1
+fi
+
+cp "$TRAEFIK_CONFIG_DIR/traefik.yml" /etc/traefik/traefik.yml
+
+# Modifier l'email Let's Encrypt dans la configuration
+sed -i "s|admin@acme.com|$ACME_EMAIL|g" /etc/traefik/traefik.yml
+
+# Générer les fichiers de configuration dynamique avec le bon chemin frontend et domaine WAN
+log_info "Génération des fichiers de configuration dynamique Traefik..."
+sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$TRAEFIK_CONFIG_DIR/dynamic/local-routes.yml" > /etc/traefik/dynamic/local-routes.yml
+sed -e "s|{{FRONTEND_DIR}}|$FRONTEND_DIR|g" -e "s|{{WAN_DOMAIN}}|$WAN_DOMAIN|g" "$TRAEFIK_CONFIG_DIR/dynamic/wan-routes.yml" > /etc/traefik/dynamic/wan-routes.yml
+log_info "Domaine WAN configuré: $WAN_DOMAIN"
+
+# Créer le fichier acme.json pour Let's Encrypt
+log_info "Création du fichier acme.json..."
+touch /etc/traefik/acme.json
+chmod 600 /etc/traefik/acme.json
+
+# Créer le fichier htpasswd (vide pour l'instant, à remplir avec generate-htpasswd.sh)
+log_info "Création du fichier htpasswd..."
+touch /etc/traefik/users.htpasswd
+chmod 600 /etc/traefik/users.htpasswd
+log_warn "Le fichier htpasswd est vide. Exécutez generate-htpasswd.sh pour ajouter des utilisateurs"
+
+# Installer le service de blocage (Python)
+log_info "Installation du service de blocage..."
+cp "$TRAEFIK_CONFIG_DIR/block-service.py" /usr/local/bin/traefik-block-service.py
+chmod +x /usr/local/bin/traefik-block-service.py
+
+# Créer le service systemd pour le service de blocage
+log_info "Création du service systemd pour le service de blocage..."
+cat > /etc/systemd/system/traefik-block-service.service <<EOF
+[Unit]
+Description=Traefik Block Service (403 Forbidden)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/traefik-block-service.py 8082
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Créer le service systemd pour Traefik
+log_info "Création du service systemd pour Traefik..."
+cat > /etc/systemd/system/traefik.service <<EOF
+[Unit]
+Description=Traefik Reverse Proxy
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=$TRAEFIK_BINARY --configfile=/etc/traefik/traefik.yml
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/traefik/traefik.log
+StandardError=append:/var/log/traefik/traefik-error.log
+
+# Sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/traefik /var/log/traefik /var/lib/traefik
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 # Recharger systemd et démarrer les services
 log_info "Configuration des services systemd..."
 systemctl daemon-reload
 systemctl enable essensys-backend
 systemctl enable nginx
+systemctl enable traefik-block-service
+systemctl enable traefik
 
 # Démarrer les services
 log_info "Démarrage des services..."
 systemctl restart essensys-backend
+systemctl restart traefik-block-service
+systemctl restart traefik
 systemctl restart nginx
 
 # Vérifier le statut des services
 log_info "Vérification du statut des services..."
-sleep 2
-systemctl status essensys-backend --no-pager -l
-systemctl status nginx --no-pager -l
+sleep 3
+systemctl status essensys-backend --no-pager -l || true
+systemctl status traefik --no-pager -l || true
+systemctl status nginx --no-pager -l || true
 
 log_info ""
 log_info "=========================================="
 log_info "Installation terminée avec succès!"
 log_info "=========================================="
 log_info ""
-log_info "Configuration:"
-log_info "  - Frontend: http://localhost/ (port 80)"
-log_info "  - Backend API: http://localhost/api/* (proxifié par nginx sur port 80)"
-log_info "  - Backend direct: http://localhost:8080 (pour les tests)"
+log_info "Architecture installée:"
+log_info "  - Backend Go: port 7070 (géré par Nginx pour API locales)"
+log_info "  - Frontend React: servi par Nginx port 9090 (interne)"
+log_info "  - Nginx: port 80 pour API locales (client Essensys legacy)"
+log_info "  - Traefik: port 80 pour frontend local, port 443 pour frontend WAN"
 log_info ""
-log_info "Les clients BP_MQX_ETH doivent se connecter au port 80"
-log_info "Nginx proxy automatiquement les requêtes /api/* vers le backend sur 8080"
+log_info "Configuration:"
+log_info "  - Local API: http://mon.essensys.fr/api/* (Nginx port 80)"
+log_info "  - Local Frontend: http://mon.essensys.fr/ (Traefik port 80 -> Nginx 9090)"
+log_info "  - WAN Frontend: https://$WAN_DOMAIN/ (Traefik port 443 -> Nginx 9090, avec auth)"
+log_info ""
+log_info "IMPORTANT:"
+log_info "  1. Configurez le fichier htpasswd:"
+log_info "     sudo $TRAEFIK_CONFIG_DIR/generate-htpasswd.sh username"
+log_info "  2. Vérifiez que le DNS $WAN_DOMAIN pointe vers cette machine"
+log_info "  3. Les certificats Let's Encrypt seront générés automatiquement"
+log_info "  4. Domaine WAN lu depuis: $DOMAIN_FILE"
 log_info ""
 log_info "Services:"
 log_info "  - Backend: systemctl status essensys-backend"
+log_info "  - Traefik: systemctl status traefik"
 log_info "  - Nginx: systemctl status nginx"
+log_info "  - Block Service: systemctl status traefik-block-service"
 log_info ""
 log_info "Logs:"
 log_info "  - Backend: tail -f /var/logs/Essensys/backend/console.out.log"
+log_info "  - Traefik: tail -f /var/log/traefik/traefik.log"
 log_info "  - Nginx: tail -f /var/log/nginx/essensys-error.log"
 log_info ""
 log_info "Pour tester:"
 log_info "  curl http://localhost/health"
 log_info "  curl http://localhost/api/serverinfos"
-log_info "  curl http://localhost:8080/health"
-log_info "  curl http://localhost/"
+log_info "  curl http://localhost:7070/health"
 log_info ""
-
