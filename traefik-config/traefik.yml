@@ -3,8 +3,8 @@
 
 api:
   dashboard: true
-  insecure: true  # Dashboard accessible directement via l'entrypoint traefik (port 8081)
-  # Le dashboard est accessible via http://localhost:8081/dashboard/
+  insecure: false  # Dashboard accessible via route sécurisée (subnet local uniquement)
+  # Le dashboard sera accessible via http://traefik.essensys.fr/dashboard/ depuis le subnet local
   debug: true  # Activer le mode debug de l'API pour voir toutes les traces
 
 # Métriques Prometheus
@@ -19,15 +19,19 @@ metrics:
     # L'entrypoint "traefik" sur port 8081 est utilisé pour l'API interne uniquement
 
 entryPoints:
-  # Entrypoint pour l'API et le dashboard Traefik (port 8081 pour éviter le conflit avec le backend sur 8080)
+  # Entrypoint pour l'API et le dashboard Traefik (port 8081 pour éviter le conflit avec le backend sur 7070)
   # IMPORTANT: Traefik crée automatiquement cet entrypoint, il faut le définir explicitement
   traefik:
     address: ":8081"
   
+  # Entrypoint pour le dashboard accessible depuis le subnet local (port 8080)
+  # Nginx proxy les requêtes traefik.essensys.fr vers ce port
+  # OU accès direct via http://<ip-raspberry>:8080/dashboard/
+  dashboard:
+    address: ":8080"
+  
   # NOTE: Le port 80 est géré par Nginx pour les API locales et le frontend local
   # Traefik ne gère que le port 443 pour le frontend WAN
-  # web:
-  #   address: ":80"  # Désactivé - Nginx gère le port 80
   websecure:
     address: ":443"
     http:
