@@ -1,24 +1,47 @@
 # Configuration des routes WAN ({{WAN_DOMAIN}})
 # Règles de sécurité WAN:
-# - Frontend-service: BLOQUÉ en WAN (ni HTTP ni HTTPS)
-# - /api/admin/inject: UNIQUEMENT en HTTPS avec authentification
+# - Frontend-service: Accessible en HTTPS avec authentification basique
+# - /api/admin/inject: UNIQUEMENT en HTTPS avec authentification basique (même auth que frontend)
 # - Autres API (/api/serverinfos, /api/mystatus, /api/myactions, /api/done): BLOQUÉES (ni HTTP ni HTTPS)
+# - Backend (autres endpoints): BLOQUÉ en WAN
 # Le domaine est remplacé par install.sh depuis /home/essensys/domain.txt
 
 http:
   middlewares:
-    # Middleware de redirection HTTP vers HTTPS pour /api/admin/inject
-    redirect-api-inject-to-https:
+    # Middleware de redirection HTTP vers HTTPS
+    redirect-to-https:
       redirectScheme:
         scheme: https
         permanent: true
     
-    # Middleware d'authentification basique pour /api/admin/inject
-    auth-api-inject-wan:
+    # Middleware d'authentification basique (utilisé pour frontend ET /api/admin/inject)
+    auth-wan:
       basicAuth:
         usersFile: /etc/traefik/users.htpasswd
 
   routers:
+    # Redirection HTTP vers HTTPS pour le frontend WAN
+    frontend-wan-redirect:
+      rule: "Host(`{{WAN_DOMAIN}}`) && !PathPrefix(`/api/`)"
+      entryPoints:
+        - web
+      service: frontend-service
+      middlewares:
+        - redirect-to-https
+      priority: 5
+    
+    # Frontend WAN avec authentification (HTTPS)
+    frontend-wan:
+      rule: "Host(`{{WAN_DOMAIN}}`) && !PathPrefix(`/api/`)"
+      entryPoints:
+        - websecure
+      service: frontend-service
+      middlewares:
+        - auth-wan
+      tls:
+        certResolver: letsencrypt
+      priority: 10
+    
     # Redirection HTTP vers HTTPS pour /api/admin/inject
     api-inject-wan-redirect:
       rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/admin/inject`)"
@@ -26,34 +49,42 @@ http:
         - web
       service: backend-service
       middlewares:
-        - redirect-api-inject-to-https
+        - redirect-to-https
       priority: 20
     
-    # /api/admin/inject UNIQUEMENT en HTTPS avec authentification
+    # /api/admin/inject UNIQUEMENT en HTTPS avec authentification (même auth que frontend)
     api-inject-wan:
       rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/admin/inject`)"
       entryPoints:
         - websecure
       service: backend-service
       middlewares:
-        - auth-api-inject-wan
+        - auth-wan
       tls:
         certResolver: letsencrypt
       priority: 25
     
-    # Blocage de toutes les autres routes WAN (frontend et autres API)
+    # Blocage de toutes les autres routes WAN (autres API)
     # Ces routes retournent 403 Forbidden
-    block-all-wan:
-      rule: "Host(`{{WAN_DOMAIN}}`)"
+    block-api-wan:
+      rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/`) && !PathPrefix(`/api/admin/inject`)"
       entryPoints:
         - web
         - websecure
       service: block-service
       tls:
         certResolver: letsencrypt
-      priority: 5
+      priority: 15
 
   services:
+    # Service frontend (proxy vers nginx qui sert les fichiers statiques)
+    # Nginx écoute sur port 9090 en interne pour servir le frontend
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:9090"
+        passHostHeader: true
+    
     # Service backend (proxy vers backend Go sur port 7070)
     backend-service:
       loadBalancer:
