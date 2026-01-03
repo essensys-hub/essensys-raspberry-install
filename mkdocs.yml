@@ -1,0 +1,109 @@
+site_name: Essensys Raspberry Pi Installation
+site_description: Documentation complète pour l'installation et la configuration d'Essensys sur Raspberry Pi 4
+site_author: Essensys Team
+site_url: https://essensys-hub.github.io/essensys-raspberry-install
+
+repo_name: essensys-hub/essensys-raspberry-install
+repo_url: https://github.com/essensys-hub/essensys-raspberry-install
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Basculer vers le mode sombre
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Basculer vers le mode clair
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - minify:
+      minify_html: true
+
+nav:
+  - Accueil: index.md
+  - Installation:
+    - installation/index.md
+    - installation/preparation.md
+    - installation/os-installation.md
+    - installation/essensys-installation.md
+  - Connexion:
+    - connexion/index.md
+    - connexion/ssh.md
+    - connexion/configuration-reseau.md
+  - Logs:
+    - logs/index.md
+    - logs/backend.md
+    - logs/nginx.md
+    - logs/traefik.md
+  - Accès:
+    - acces/index.md
+    - acces/local.md
+    - acces/wan.md
+  - Configuration Routeur:
+    - router/index.md
+    - router/ubiquiti-udm-pro.md
+    - router/freebox.md
+    - router/sfr.md
+    - router/orange-livebox.md
+  - Architecture:
+    - architecture/index.md
+    - architecture/backend.md
+    - architecture/frontend.md
+    - architecture/nginx.md
+    - architecture/traefik.md
+    - architecture/ports.md
+  - Maintenance:
+    - maintenance/update.md
+    - maintenance/uninstall.md
+    - maintenance/troubleshooting.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/essensys-hub
+  version:
+    provider: mike
+
