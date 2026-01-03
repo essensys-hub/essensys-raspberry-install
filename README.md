@@ -4,14 +4,124 @@ Ce projet contient les scripts d'installation pour déployer le backend et le fr
 
 ## Architecture
 
-L'installation configure :
+L'installation configure une architecture simplifiée avec deux modes de déploiement :
 
-- **Backend Go** : Écoute sur le port 8080, gère les API et la communication avec les clients BP_MQX_ETH
-- **Frontend React** : Application web compilée et servie par nginx
+### Mode Standard (Nginx uniquement)
+
+- **Backend Go** : Écoute sur le port 7070, gère les API et la communication avec les clients BP_MQX_ETH
+- **Frontend React** : Application web compilée et servie par Nginx
 - **Nginx** : Reverse proxy sur le port 80 qui :
-  - Sert le frontend React
-  - Proxy les requêtes `/api/*` vers le backend sur le port 8080
-  - Permet aux clients BP_MQX_ETH de se connecter au port 80 (compatible avec le firmware)
+  - Sert le frontend React sur `/`
+  - Proxy les requêtes `/api/*` vers le backend sur le port 7070
+  - Compatible avec le client Essensys legacy (BP_MQX_ETH) qui nécessite des réponses en un seul paquet TCP
+
+### Mode Traefik (Nginx + Traefik)
+
+- **Backend Go** : Port 7070 (géré par Nginx pour les API locales)
+- **Frontend React** : Servi par Nginx sur port 9090 (interne)
+- **Nginx** : Port 80 pour les API locales (client Essensys legacy)
+- **Traefik** : Reverse proxy avancé qui :
+  - Gère le frontend local (`mon.essensys.fr`) → Nginx port 9090
+  - Gère le frontend WAN (`essensys.acme.com`) → Nginx port 9090 avec authentification HTTPS
+  - Gère les certificats Let's Encrypt automatiquement
+
+### Diagrammes d'architecture
+
+#### Architecture simplifiée (mode standard)
+
+```mermaid
+graph TB
+    Client[Client Essensys<br/>192.168.1.151]
+    Browser[Navigateur Web<br/>Local]
+    Nginx[Nginx<br/>Port 80]
+    Backend[Backend Go<br/>Port 7070]
+    Frontend[Frontend React<br/>Fichiers statiques]
+    
+    Client -->|mon.essensys.fr/api/*| Nginx
+    Browser -->|mon.essensys.fr/| Nginx
+    Nginx -->|/api/*| Backend
+    Nginx -->|/| Frontend
+    
+    style Client fill:#e1f5ff
+    style Browser fill:#fff4e1
+    style Nginx fill:#e8f5e9
+    style Backend fill:#f3e5f5
+    style Frontend fill:#fff4e1
+```
+
+#### Architecture avec Traefik (mode avancé)
+
+```mermaid
+graph TB
+    Client[Client Essensys<br/>192.168.1.151]
+    BrowserLocal[Navigateur Local<br/>mon.essensys.fr]
+    BrowserWAN[Navigateur WAN<br/>essensys.acme.com]
+    
+    Nginx[Nginx<br/>Port 80: API locales<br/>Port 9090: Frontend interne]
+    Traefik[Traefik<br/>Port 80: Frontend local<br/>Port 443: Frontend WAN HTTPS]
+    Backend[Backend Go<br/>Port 7070]
+    Frontend[Frontend React<br/>Fichiers statiques]
+    
+    Client -->|mon.essensys.fr/api/*| Nginx
+    BrowserLocal -->|mon.essensys.fr/| Traefik
+    BrowserWAN -->|essensys.acme.com/| Traefik
+    
+    Nginx -->|/api/*| Backend
+    Traefik -->|Frontend| Nginx
+    Nginx -->|Frontend| Frontend
+    
+    style Client fill:#e1f5ff
+    style BrowserLocal fill:#fff4e1
+    style BrowserWAN fill:#fff4e1
+    style Nginx fill:#e8f5e9
+    style Traefik fill:#e3f2fd
+    style Backend fill:#f3e5f5
+    style Frontend fill:#fff4e1
+```
+
+#### Flux de communication détaillé
+
+```mermaid
+sequenceDiagram
+    participant C as Client Essensys<br/>192.168.1.151
+    participant N as Nginx<br/>Port 80
+    participant B as Backend Go<br/>Port 7070
+    
+    C->>N: GET /api/serverinfos<br/>(HTTP non-standard)
+    N->>N: Parse requête<br/>(permissif)
+    N->>B: Proxy vers backend<br/>(port 7070)
+    B->>B: Traitement requête
+    B->>N: Réponse HTTP<br/>(single-packet TCP)
+    N->>N: Bufferisation complète<br/>(évite fragmentation)
+    N->>C: Réponse complète<br/>(un seul paquet TCP)
+```
+
+#### Flux frontend avec Traefik
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant T as Traefik<br/>Port 80/443
+    participant N as Nginx<br/>Port 9090
+    participant F as Frontend<br/>Fichiers statiques
+    
+    Note over U,F: Accès local
+    U->>T: http://mon.essensys.fr/
+    T->>N: Proxy vers Nginx<br/>(port 9090)
+    N->>F: Servir fichiers statiques
+    F->>N: index.html + assets
+    N->>T: Réponse
+    T->>U: Frontend React
+    
+    Note over U,F: Accès WAN
+    U->>T: https://essensys.acme.com/
+    T->>T: Authentification Basic Auth
+    T->>N: Proxy vers Nginx<br/>(port 9090)
+    N->>F: Servir fichiers statiques
+    F->>N: index.html + assets
+    N->>T: Réponse
+    T->>U: Frontend React (HTTPS)
+```
 
 ## Prérequis
 
@@ -99,6 +209,8 @@ sudo nano /opt/essensys/backend/config.yaml
 sudo systemctl restart essensys-backend
 ```
 
+**Note** : Le backend écoute sur le port **7070** (et non 8080) pour éviter les conflits avec Traefik.
+
 ### Nginx
 
 La configuration nginx se trouve dans `/etc/nginx/sites-available/essensys`.
@@ -108,6 +220,54 @@ Pour modifier la configuration :
 sudo nano /etc/nginx/sites-available/essensys
 sudo nginx -t  # Vérifier la configuration
 sudo systemctl reload nginx
+```
+
+**Configuration API** : Nginx proxy les requêtes `/api/*` vers le backend sur le port **7070** avec une configuration spéciale pour le client Essensys legacy (single-packet TCP, headers non-standard).
+
+### Traefik (mode avancé)
+
+#### Fichier `domain.txt` - Configuration du domaine WAN
+
+Le fichier `/home/essensys/domain.txt` contient le domaine WAN utilisé par Traefik pour l'accès HTTPS depuis Internet.
+
+**Création du fichier** :
+```bash
+# Créer le fichier avec votre domaine WAN
+echo "essensys.acme.com" > /home/essensys/domain.txt
+
+# Vérifier le contenu
+cat /home/essensys/domain.txt
+```
+
+**Format** :
+- Une seule ligne contenant le nom de domaine complet (sans `http://` ou `https://`)
+- Exemple : `essensys.acme.com`
+- Le domaine doit pointer vers l'IP publique de votre routeur (NAT/port forwarding configuré)
+
+**Utilisation** :
+- Le script `install-traefik.sh` lit ce fichier pour configurer les routes WAN
+- Le script `update-traefik.sh` lit ce fichier lors des mises à jour
+- Si le fichier n'existe pas, le domaine par défaut `essensys.acme.com` est utilisé
+
+**Configuration Traefik** :
+```bash
+# Configuration principale
+sudo nano /etc/traefik/traefik.yml
+
+# Routes locales
+sudo nano /etc/traefik/dynamic/local-routes.yml
+
+# Routes WAN
+sudo nano /etc/traefik/dynamic/wan-routes.yml
+
+# Vérifier la configuration
+sudo systemctl restart traefik
+```
+
+**Authentification WAN** :
+```bash
+# Générer le fichier htpasswd pour l'authentification
+sudo /home/essensys/essensys-raspberry-install/traefik-config/generate-htpasswd.sh username
 ```
 
 ## Gestion des services
@@ -202,8 +362,8 @@ sudo tail -f /var/log/nginx/essensys-api-error.log
 
 ### Vérifier que le backend fonctionne
 ```bash
-# Health check direct
-curl http://localhost:8080/health
+# Health check direct (port 7070)
+curl http://localhost:7070/health
 
 # Health check via nginx
 curl http://localhost/health
@@ -221,10 +381,16 @@ http://<ip-du-raspberry-pi>
 ### Vérifier les ports
 ```bash
 # Vérifier que nginx écoute sur le port 80
-sudo netstat -tlnp | grep :80
+sudo ss -tlnp | grep :80
 
-# Vérifier que le backend écoute sur le port 8080
-sudo netstat -tlnp | grep :8080
+# Vérifier que le backend écoute sur le port 7070
+sudo ss -tlnp | grep :7070
+
+# Vérifier que Nginx écoute sur le port 9090 (frontend interne pour Traefik)
+sudo ss -tlnp | grep :9090
+
+# Vérifier que Traefik écoute sur les ports 80 et 443 (si installé)
+sudo ss -tlnp | grep -E ':(80|443)'
 ```
 
 ## Configuration réseau
@@ -358,7 +524,7 @@ sudo netstat -tlnp | grep :80
 
 2. Vérifier que le backend fonctionne :
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:7070/health
 ```
 
 3. Vérifier que nginx proxy correctement :
@@ -376,6 +542,8 @@ sudo ufw allow 80/tcp
 
 ### Option 1 : Script automatique (recommandé)
 
+#### Mode Standard (Nginx uniquement)
+
 Un script `update.sh` est fourni pour automatiser la mise à jour complète :
 
 ```bash
@@ -389,7 +557,23 @@ Ce script va :
 - Rebuild le frontend React
 - Redémarrer les services (essensys-backend et nginx)
 - Vérifier que les services sont actifs
-- Faire un commit et push automatique si des modifications sont détectées dans le dépôt essensys-raspberry-install
+
+#### Mode Traefik
+
+Un script `update-traefik.sh` est fourni pour la mise à jour avec Traefik :
+
+```bash
+cd essensys-raspberry-install
+sudo ./update-traefik.sh
+```
+
+Ce script va :
+- Mettre à jour les dépôts backend et frontend depuis GitHub
+- Recompiler le backend Go
+- Rebuild le frontend React
+- Mettre à jour la configuration Traefik (lit `/home/essensys/domain.txt` pour le domaine WAN)
+- Redémarrer les services (essensys-backend, nginx, traefik)
+- Vérifier que les services sont actifs
 
 ### Option 2 : Mise à jour manuelle
 
@@ -503,11 +687,43 @@ sudo apt update && sudo apt upgrade -y
 
 5. **Utiliser HTTPS** en production (nécessite un certificat SSL)
 
+## Installation avec Traefik (mode avancé)
+
+Pour une installation avec Traefik (accès WAN avec HTTPS et authentification) :
+
+```bash
+cd essensys-raspberry-install
+sudo ./install-traefik.sh
+```
+
+**Prérequis** :
+1. Créer le fichier `/home/essensys/domain.txt` avec votre domaine WAN :
+   ```bash
+   echo "essensys.acme.com" > /home/essensys/domain.txt
+   ```
+2. Configurer le NAT/port forwarding sur votre routeur (ports 80 et 443 vers l'IP du Raspberry Pi)
+3. Configurer le DNS pour pointer votre domaine WAN vers votre IP publique
+
+**Voir la documentation complète** : `traefik-config/README.md`
+
+## Ports utilisés
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Nginx | 80 | Frontend local + API locales (client Essensys) |
+| Nginx | 9090 | Frontend interne (utilisé par Traefik) |
+| Backend Go | 7070 | API backend (proxied par Nginx) |
+| Traefik | 80 | Frontend local (proxy vers Nginx 9090) |
+| Traefik | 443 | Frontend WAN HTTPS (proxy vers Nginx 9090) |
+| Traefik | 8081 | API interne Traefik (dashboard) |
+
 ## Support
 
 Pour toute question ou problème, consultez :
 - La documentation du backend : `essensys-server-backend/README.md`
 - La documentation du frontend : `essensys-server-frontend/README.md`
+- La documentation Traefik : `traefik-config/README.md`
+- La documentation client legacy : `client-essensys-legacy/README.md`
 
 ## Licence
 
