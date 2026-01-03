@@ -5,6 +5,7 @@ api:
   dashboard: true
   insecure: false  # Dashboard accessible uniquement via routes sécurisées
   # Le dashboard sera accessible via la route traefik.essensys.fr
+  debug: true  # Activer le mode debug de l'API pour voir toutes les traces
 
 # Métriques Prometheus
 # Les métriques sont accessibles via l'API du dashboard (route traefik.essensys.fr)
@@ -64,10 +65,12 @@ providers:
     filename: ""
 
 # Logs
+# CRITIQUE: Mode TRACE pour voir TOUTES les traces, même les connexions rejetées
+# TRACE est le niveau le plus détaillé disponible dans Traefik v2
 log:
-  level: DEBUG  # DEBUG pour voir toutes les connexions et problèmes
+  level: TRACE  # TRACE pour voir toutes les connexions, même rejetées avant routing
   filePath: /var/log/traefik/traefik.log
-  # Format: common ou json (common est plus lisible pour le debug)
+  format: common  # Format common plus lisible pour le debug (json aussi disponible)
 
 accessLog:
   filePath: /var/log/traefik/access.log
