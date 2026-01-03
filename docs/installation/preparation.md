@@ -5,6 +5,9 @@
 ### Composants requis
 
 1. **Raspberry Pi 4** (4 Go minimum recommandé)
+   
+   ![Raspberry Pi 4](../img/raspberry_pi_4.jpg)
+   
    - [Acheter sur Amazon](https://www.amazon.fr/Raspberry-Pi-4595-modèles-Go/dp/B09TTNF8BT)
    - Modèle 4 Go ou 8 Go recommandé
 
@@ -13,6 +16,9 @@
    - Un SSD améliore considérablement les performances par rapport à une carte SD
 
 3. **Adaptateur USB vers SATA**
+   
+   ![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
+   
    - [Adaptateur USB 3.0 vers SATA](https://www.amazon.fr/dp/B07F7WDZGT)
    - Nécessaire pour connecter le SSD au Raspberry Pi
 
@@ -30,8 +36,13 @@
 
 ### Étape 1 : Brancher le SSD à l'adaptateur USB
 
+![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
+
 1. Connecter le SSD SATA à l'adaptateur USB-SATA
+   - Le connecteur SATA de l'adaptateur se connecte directement sur le SSD
+   - Assurez-vous que la connexion est bien enfoncée
 2. Brancher l'adaptateur à votre ordinateur via USB
+   - Utilisez un port USB 3.0 (bleu) si disponible pour de meilleures performances
 
 ### Étape 2 : Vérifier la détection
 

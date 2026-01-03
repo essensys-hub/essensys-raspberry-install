@@ -75,10 +75,19 @@ Une fois l'écriture terminée :
 
 ### Étape 1 : Brancher le matériel
 
+![Raspberry Pi 4](../img/raspberry_pi_4.jpg)
+
 1. Connecter le **SSD au Raspberry Pi** via l'adaptateur USB-SATA
-   - Utiliser un port USB 3.0 (bleu) si disponible
+   - Utiliser un port USB 3.0 (bleu) si disponible pour de meilleures performances
+   - Le port USB 3.0 se trouve sur le côté droit du Raspberry Pi 4
+   
+   ![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
+   
 2. Connecter le **câble Ethernet** au Raspberry Pi
+   - Le port Ethernet se trouve en haut à droite du Raspberry Pi
 3. Connecter l'**alimentation** au Raspberry Pi
+   - Utiliser le port USB-C (port d'alimentation) sur le côté gauche
+   - Utiliser une alimentation officielle Raspberry Pi 4 (5V, 3A minimum)
 
 ### Étape 2 : Premier démarrage
 
