@@ -6,6 +6,8 @@ http:
   routers:
     # Dashboard Traefik (console admin)
     # Le dashboard inclut automatiquement les métriques et les logs d'accès
+    # Accessible à http://traefik.essensys.fr/dashboard/ ou http://traefik.essensys.fr/api/
+    # Le service api@internal gère automatiquement les chemins /dashboard/ et /api/
     traefik-dashboard:
       rule: "Host(`traefik.essensys.fr`)"
       entryPoints:
