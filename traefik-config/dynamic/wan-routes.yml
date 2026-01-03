@@ -1,6 +1,6 @@
 # Configuration des routes WAN ({{WAN_DOMAIN}})
-# Accessible depuis Internet avec authentification basique pour / et /api/inject
-# Les autres API sont bloquées
+# Traefik gère uniquement le frontend WAN avec authentification
+# Les API sont gérées par Nginx directement (port 80) pour compatibilité client legacy
 # Le domaine est remplacé par install-traefik.sh depuis /home/essensys/domain.txt
 
 http:
@@ -13,11 +13,6 @@ http:
     
     # Middleware d'authentification basique pour le frontend WAN
     auth-frontend-wan:
-      basicAuth:
-        usersFile: /etc/traefik/users.htpasswd
-    
-    # Middleware d'authentification basique pour /api/inject WAN
-    auth-api-inject-wan:
       basicAuth:
         usersFile: /etc/traefik/users.htpasswd
 
@@ -44,30 +39,6 @@ http:
       tls:
         certResolver: letsencrypt
       priority: 10
-    
-    # API inject WAN avec authentification
-    api-inject-wan:
-      rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/inject`)"
-      entryPoints:
-        - websecure
-      service: backend-service
-      middlewares:
-        - auth-api-inject-wan
-      tls:
-        certResolver: letsencrypt
-      priority: 20
-    
-    # Blocage de toutes les autres API depuis le WAN
-    # Cette route capture toutes les autres requêtes /api/ (sauf /api/inject) et retourne 403
-    # On utilise un service HTTP minimal qui retourne toujours 403
-    api-block-wan:
-      rule: "Host(`{{WAN_DOMAIN}}`) && PathPrefix(`/api/`) && !PathPrefix(`/api/inject`)"
-      entryPoints:
-        - websecure
-      service: block-service
-      tls:
-        certResolver: letsencrypt
-      priority: 15
 
   services:
     # Service frontend (proxy vers nginx qui sert les fichiers statiques)
@@ -76,20 +47,5 @@ http:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:9090"
-        passHostHeader: true
-    
-    # Service backend (proxy vers backend Go)
-    backend-service:
-      loadBalancer:
-        servers:
-          - url: "http://127.0.0.1:7070"
-        passHostHeader: true
-    
-    # Service de blocage (retourne 403 Forbidden)
-    # Ce service utilise un serveur HTTP minimal sur port 8082 qui retourne toujours 403
-    block-service:
-      loadBalancer:
-        servers:
-          - url: "http://127.0.0.1:8082"
         passHostHeader: true
 

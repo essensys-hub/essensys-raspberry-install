@@ -59,7 +59,7 @@ server {
         client_body_buffer_size 64k;
         client_max_body_size 64k;
         
-        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_pass http://127.0.0.1:7070/api/;
         proxy_http_version 1.1;
         
         # Headers de requête
@@ -106,7 +106,7 @@ server {
     
     # Health check endpoint
     location /health {
-        proxy_pass http://127.0.0.1:8080/health;
+        proxy_pass http://127.0.0.1:7070/health;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         access_log off;
