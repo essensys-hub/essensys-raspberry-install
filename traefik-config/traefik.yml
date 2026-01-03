@@ -37,11 +37,8 @@ entryPoints:
         readTimeout: "60s"      # Timeout de lecture augmenté pour client non-standard
         writeTimeout: "60s"     # Timeout d'écriture augmenté
         idleTimeout: "180s"     # Timeout d'inactivité augmenté
-      forwardingTimeouts:
-        dialTimeout: "60s"       # Timeout de connexion au backend
-        responseHeaderTimeout: "60s"  # Timeout pour les headers de réponse
-    # Désactiver la validation stricte HTTP pour accepter les requêtes non-standard
-    # Note: Traefik v2.x est généralement permissif, mais on configure explicitement
+    # Note: forwardingTimeouts n'existe pas dans Traefik v2.11
+    # Les timeouts de forwarding sont gérés au niveau des services/middlewares
   websecure:
     address: ":443"
     http:
