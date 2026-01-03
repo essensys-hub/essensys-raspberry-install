@@ -39,17 +39,20 @@ entryPoints:
         certResolver: letsencrypt
 
 # Configuration Let's Encrypt pour HTTPS
-# NOTE: Le challenge HTTP doit passer par Nginx (port 80) qui proxy vers Traefik
-# Pour l'instant, Let's Encrypt utilise le challenge HTTP via Nginx
+# NOTE: Le challenge HTTP Let's Encrypt nécessite le port 80
+# Comme Nginx gère le port 80, le challenge sera géré par Nginx
+# Nginx doit être configuré pour proxy .well-known/acme-challenge vers Traefik
+# OU utiliser le challenge TLS-ALPN sur le port 443
 certificatesResolvers:
   letsencrypt:
     acme:
       email: admin@acme.com  # À modifier avec votre email
       storage: /etc/traefik/acme.json
-      httpChallenge:
-        # Le challenge HTTP sera géré par Nginx qui proxy vers Traefik
-        # Nginx écoute sur le port 80 et peut gérer le challenge .well-known/acme-challenge
-        entryPoint: websecure  # Utiliser websecure pour le challenge TLS
+      # Utiliser TLS-ALPN challenge sur port 443 (pas besoin de port 80)
+      tlsChallenge: {}
+      # Alternative: httpChallenge nécessite port 80, mais Nginx le gère
+      # httpChallenge:
+      #   entryPoint: web  # Nécessiterait que Traefik écoute sur port 80
 
 # Providers de configuration (fichiers statiques)
 providers:
