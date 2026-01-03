@@ -3,8 +3,8 @@
 
 api:
   dashboard: true
-  insecure: false  # Dashboard accessible uniquement via routes sécurisées
-  # Le dashboard sera accessible via la route traefik.essensys.fr
+  insecure: true  # Dashboard accessible directement via l'entrypoint traefik (port 8081)
+  # Le dashboard est accessible via http://localhost:8081/dashboard/
   debug: true  # Activer le mode debug de l'API pour voir toutes les traces
 
 # Métriques Prometheus
@@ -24,21 +24,10 @@ entryPoints:
   traefik:
     address: ":8081"
   
-  web:
-    address: ":80"
-    # Options pour compatibilité client legacy BP_MQX_ETH
-    # CRITIQUE: Le client ne respecte pas complètement le protocole HTTP standard
-    # - JSON malformé (clés non-quotées)
-    # - Headers HTTP non-standard (Content-Type avec espace avant ;)
-    # - Requêtes HTTP potentiellement malformées
-    # Traefik doit être permissif pour accepter ces requêtes
-    transport:
-      respondingTimeouts:
-        readTimeout: "60s"      # Timeout de lecture augmenté pour client non-standard
-        writeTimeout: "60s"     # Timeout d'écriture augmenté
-        idleTimeout: "180s"     # Timeout d'inactivité augmenté
-    # Note: forwardingTimeouts n'existe pas dans Traefik v2.11
-    # Les timeouts de forwarding sont gérés au niveau des services/middlewares
+  # NOTE: Le port 80 est géré par Nginx pour les API locales et le frontend local
+  # Traefik ne gère que le port 443 pour le frontend WAN
+  # web:
+  #   address: ":80"  # Désactivé - Nginx gère le port 80
   websecure:
     address: ":443"
     http:

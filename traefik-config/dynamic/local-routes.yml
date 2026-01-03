@@ -1,27 +1,19 @@
-# Configuration des routes LOCALES (mon.essensys.fr)
-# Traefik gère uniquement le frontend local
-# Les API sont gérées par Nginx directement (port 80) pour compatibilité client legacy
+# Configuration des routes LOCALES
+# NOTE: Les routes locales sont gérées par Nginx directement (port 80)
+# Traefik ne gère que le frontend WAN (port 443)
+# Cette configuration est vide car Nginx gère tout en local
 
 http:
   routers:
-    # Dashboard Traefik (console admin)
-    # Le dashboard inclut automatiquement les métriques et les logs d'accès
-    # Accessible à http://traefik.essensys.fr/dashboard/ ou http://traefik.essensys.fr/api/
-    # Le service api@internal gère automatiquement les chemins /dashboard/ et /api/
-    traefik-dashboard:
-      rule: "Host(`traefik.essensys.fr`)"
-      entryPoints:
-        - web
-      service: api@internal
-      priority: 100
-    
-    # Frontend local (proxy vers Nginx qui sert le frontend sur port 9090)
-    frontend-local:
-      rule: "Host(`mon.essensys.fr`)"
-      entryPoints:
-        - web
-      service: frontend-service
-      priority: 10
+    # Dashboard Traefik (console admin) - accessible via l'entrypoint traefik (port 8081)
+    # Le dashboard est accessible directement via http://localhost:8081/dashboard/
+    # Pas besoin de route car l'entrypoint traefik est configuré dans traefik.yml
+    # traefik-dashboard:
+    #   rule: "Host(`traefik.essensys.fr`)"
+    #   entryPoints:
+    #     - traefik
+    #   service: api@internal
+    #   priority: 100
 
   services:
     # Service frontend (proxy vers nginx qui sert les fichiers statiques)
