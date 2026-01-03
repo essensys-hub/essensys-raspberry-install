@@ -32,13 +32,10 @@ entryPoints:
   dashboard:
     address: ":8080"
   
-  # Entrypoint web (port 80) pour le frontend local
-  # Nginx gère aussi le port 80 pour les API locales (client Essensys legacy)
-  # Traefik et Nginx peuvent coexister sur le port 80 grâce au server_name
-  # Traefik gère mon.essensys.fr (frontend local)
-  # Nginx gère _ (default_server) pour les API locales
-  web:
-    address: ":80"
+  # NOTE: Le port 80 est géré par Nginx pour le frontend local ET les API locales
+  # Traefik ne gère que le port 443 pour le frontend WAN
+  # web:
+  #   address: ":80"  # Désactivé - Nginx gère le port 80
   
   websecure:
     address: ":443"

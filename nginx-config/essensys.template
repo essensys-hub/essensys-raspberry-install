@@ -1,8 +1,8 @@
-# Configuration principale: API sur /api/ (port 80)
-# IMPORTANT: Le frontend local est géré par Traefik (mon.essensys.fr)
-# Nginx gère uniquement les API locales pour compatibilité client legacy
+# Configuration principale: Frontend sur / et API sur /api/ (port 80)
+# IMPORTANT: Nginx gère le frontend local ET les API locales
+# Traefik gère uniquement le frontend WAN (port 443)
 server {
-    listen 80;
+    listen 80 default_server;
     server_name _;
     
     # Désactiver toute redirection automatique
