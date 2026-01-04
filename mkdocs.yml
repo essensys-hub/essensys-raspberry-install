@@ -64,6 +64,8 @@ plugins:
 
 nav:
   - Accueil: index.md
+  - Client iOS: client-ios.md
+
   - Installation:
     - installation/index.md
     - installation/preparation.md
@@ -106,4 +108,5 @@ extra:
       link: https://github.com/essensys-hub
   version:
     provider: mike
+
 
