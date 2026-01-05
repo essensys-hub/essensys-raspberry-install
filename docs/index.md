@@ -57,10 +57,15 @@ graph TB
     BrowserLocal[Navigateur Local<br/>mon.essensys.fr]
     BrowserWAN[Navigateur WAN<br/>essensys.acme.com]
     
+    AdGuard[AdGuard Home<br/>Port 53: DNS]
     Nginx[Nginx<br/>Port 80: API locales<br/>Port 9090: Frontend interne]
     Traefik[Traefik<br/>Port 443: Frontend WAN HTTPS]
     Backend[Backend Go<br/>Port 7070]
     Frontend[Frontend React<br/>Fichiers statiques]
+    
+    Client -->|DNS| AdGuard
+    BrowserLocal -->|DNS| AdGuard
+    AdGuard -->|mon.essensys.fr = 192.168.x.x| Client
     
     Client -->|mon.essensys.fr/api/*| Nginx
     BrowserLocal -->|mon.essensys.fr/| Nginx
@@ -70,6 +75,7 @@ graph TB
     Nginx -->|/| Frontend
     Traefik -->|Frontend| Nginx
     
+    style AdGuard fill:#dcedc8
     style Client fill:#e1f5ff
     style BrowserLocal fill:#fff4e1
     style BrowserWAN fill:#fff4e1
@@ -85,6 +91,7 @@ graph TB
 - **Frontend React** : Interface web moderne
 - **Nginx** : Reverse proxy pour les API locales et le frontend local
 - **Traefik** : Reverse proxy avancé pour l'accès WAN avec HTTPS et authentification
+- **AdGuard Home** : Serveur DNS local et bloqueur de publicités
 
 ## 🔒 Sécurité
 
