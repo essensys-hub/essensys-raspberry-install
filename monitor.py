@@ -118,6 +118,44 @@ class SystemMonitor:
         t = threading.Thread(target=_restart)
         t.start()
 
+    def get_disk_usage(self, path):
+        try:
+            st = os.statvfs(path)
+            total = st.f_blocks * st.f_frsize
+            used = (st.f_blocks - st.f_bfree) * st.f_frsize
+            return used, total, (used/total)*100
+        except:
+            return 0, 0, 0
+
+    def get_dir_size(self, path):
+        try:
+            # Using du -sb for bytes (recursive)
+            # busybox du might not support -b, using -s with block size 1k?
+            # Standard linux du supports -b or -k. Let's try -sk (kb) for compatibility
+            cmd = ['du', '-sk', path]
+            output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode().split()[0]
+            return int(output) * 1024 # Convert KB to bytes
+        except:
+            return 0
+
+    def reboot_system(self):
+        def _reboot():
+            time.sleep(1) # Visual feedback delay
+            subprocess.call(["sudo", "reboot"])
+        
+        t = threading.Thread(target=_reboot)
+        t.start()
+        return "Rebooting system..."
+
+    def prompt_login(self, stdscr):
+        # We want to exit monitor and execute login
+        # This will replace the current process
+        self.running = False
+        stdscr.clear()
+        stdscr.refresh()
+        curses.endwin()
+        os.execl("/bin/login", "login")
+
     def _tail_log(self):
         if not os.path.exists(LOG_FILE):
              with self.log_lock:
@@ -131,6 +169,12 @@ class SystemMonitor:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
             
             while self.running:
+                # Non-blocking read needed or select? 
+                # Actually readline is blocking. We can use select to timeout.
+                # But since this is a thread, blocking is fine as long as we can kill it?
+                # subprocess doesn't die easily.
+                # Let's just use it. When self.running becomes False, we might be stuck in readline.
+                # That's acceptable for a simple script, main thread will exit.
                 line = process.stdout.readline()
                 if not line:
                     break
@@ -143,6 +187,15 @@ class SystemMonitor:
     def stop(self):
         self.running = False
 
+
+def format_bytes(size):
+    power = 2**10
+    n = 0
+    power_labels = {0 : '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    while size > power:
+        size /= power
+        n += 1
+    return f"{size:.1f}{power_labels.get(n, '')}B"
 
 def draw_centered(stdscr, y, text, attr=0):
     h, w = stdscr.getmaxyx()
@@ -192,9 +245,16 @@ def main(stdscr):
             mem_pct, mem_used, mem_total = monitor.get_mem_usage()
             clients = monitor.get_client_count()
             
-            stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)} MB) | CLIENTS: {clients}"
+            # Disk Usage
+            root_used, root_total, root_pct = monitor.get_disk_usage('/')
+            logs_size = monitor.get_dir_size('/var/logs') if os.path.exists('/var/logs') else monitor.get_dir_size('/var/log')
+            
+            stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)}MB) | CLIENTS: {clients}"
+            stats_str2 = f"DISK /: {root_pct:.1f}% ({format_bytes(root_used)}/{format_bytes(root_total)}) | /var/logs: {format_bytes(logs_size)}"
+            
             draw_centered(stdscr, 2, stats_str)
-            stdscr.hline(3, 0, curses.ACS_HLINE, w)
+            draw_centered(stdscr, 3, stats_str2)
+            stdscr.hline(4, 0, curses.ACS_HLINE, w)
 
             # --- Services ---
             # Calculate layout
@@ -208,24 +268,24 @@ def main(stdscr):
                 bx = i * col_width
                 # content
                 try:
-                    stdscr.addstr(4, bx + 2, f"{service['name']}", curses.A_BOLD)
-                    stdscr.addstr(5, bx + 2, f"Status: {status_txt}", color)
-                    stdscr.addstr(6, bx + 2, f"Restart: Press '{service['key']}'")
+                    stdscr.addstr(5, bx + 2, f"{service['name']}", curses.A_BOLD)
+                    stdscr.addstr(6, bx + 2, f"Status: {status_txt}", color)
+                    stdscr.addstr(7, bx + 2, f"Restart: '{service['key']}'")
                 except:
                     pass
 
-            stdscr.hline(7, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(7, 2, " LOGS (tail -f) ", curses.color_pair(3))
+            stdscr.hline(8, 0, curses.ACS_HLINE, w)
+            stdscr.addstr(8, 2, " LOGS (tail -f) ", curses.color_pair(3))
 
             # --- Logs ---
-            log_h = h - 9
+            log_h = h - 10
             if log_h > 0:
                 with monitor.log_lock:
                     logs = list(monitor.log_buffer)[-log_h:]
                 
                 for i, line in enumerate(logs):
                     try:
-                        stdscr.addstr(8 + i, 1, line[:w-2])
+                        stdscr.addstr(9 + i, 1, line[:w-2])
                     except:
                         pass
             
@@ -233,12 +293,20 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                stdscr.addstr(h-1, 0, "Press 'q' to quit | Commands: 'b' Backend, 'f' Frontend, 't' Traefik", curses.color_pair(3))
+                cmds = "'q': Quit | 'l': Login | 'r': Reboot | 'b/f/t': Restart Services"
+                stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
             key = stdscr.getch()
             if key == ord('q'):
                 break
+            elif key == ord('l'):
+                monitor.prompt_login(stdscr)
+                # If prompt_login returns (it shouldn't if exec works), break
+                break
+            elif key == ord('r'):
+                last_restart_msg = monitor.reboot_system()
+                last_restart_time = time.time()
             elif key == ord('b'):
                 monitor.restart_service("essensys-backend")
                 last_restart_msg = "Restarting Backend..."

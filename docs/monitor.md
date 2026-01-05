@@ -16,6 +16,7 @@ Cette interface permet de :
 *   **Monitoring système** :
     *   Utilisation CPU
     *   Utilisation Mémoire
+    *   **Utilisation Disque** : Espace disque `/` et taille de `/var/logs`
     *   Nombre de clients connectés (sur les ports 80, 443, 7070)
 *   **Logs en temps réel** : Affichage des logs du backend (`/var/logs/Essensys/backend/console.out.log`) via `tail -f`.
 
@@ -37,7 +38,9 @@ sudo ./setup_monitor.sh
 | **B** | Redémarrer le service **Backend** |
 | **F** | Redémarrer le service **Frontend** (Nginx) |
 | **T** | Redémarrer le service **Traefik** |
-| **Q** | Quitter le moniteur (retour au shell) |
+| **R** | **Reboot** (Redémarrer le Raspberry Pi) |
+| **L** | **Login** (Quitter et se connecter au shell) |
+| **Q** | Quitter le moniteur |
 
 ## Dépannage
 
