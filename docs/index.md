@@ -10,7 +10,7 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 ### 2.1 Pré-requis système & Clonage
 Ouvrez un terminal sur votre Raspberry Pi et lancez cette commande pour installer Git et télécharger les sources :
 ```bash
-curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/main/requirements.sh | sudo bash
+sudo curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/main/requirements.sh | sudo bash
 ```
 
 ### 2.2 Choix du Domaine WAN
