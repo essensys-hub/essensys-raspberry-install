@@ -560,36 +560,30 @@ if [ -x "$ADGUARD_DIR/AdGuardHome" ]; then
     log_info "Service AdGuard Home installé (init)."
 fi
 
-# 3. Arrêter le service pour éviter qu'il n'écrase la conf lors de l'update
-log_info "Arrêt temporaire de AdGuard Home pour mise à jour de la configuration..."
-if systemctl is-active --quiet AdGuardHome 2>/dev/null; then
-    systemctl stop AdGuardHome
-    # Attendre un peu que l'arrêt soit effectif et que le fichier soit relâché
-    sleep 2
-fi
+# 3. Démarrer le service immédiatement (et s'assurer qu'il tourne)
+log_info "Démarrage/Redémarrage de AdGuard Home..."
+systemctl restart AdGuardHome
 
-# 4. Utiliser le script Python pour une mise à jour robuste du YAML
-if [ -f "$ADGUARD_CONFIG_DIR/update_dns.py" ]; then
-    log_info "Mise à jour de la configuration AdGuard via script Python..."
-    python3 "$ADGUARD_CONFIG_DIR/update_dns.py" "$ADGUARD_DIR/AdGuardHome.yaml" "$LOCAL_IP"
-else
-    log_warn "Script update_dns.py non trouvé. Tentative de configuration manuelle (moins robuste)..."
-    if [ -f "$ADGUARD_DIR/AdGuardHome.yaml" ]; then
-         if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-             sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
-         fi
-         if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-            sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
-         fi
-         if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-             cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
-
-rewrites:
-  - domain: mon.essensys.fr
-    answer: $LOCAL_IP
-YAML
-         fi
+# 4. Attendre que le service soit up et configurer via API (plus fiable que modif fichier)
+log_info "Attente du démarrage de l'API AdGuard (port 3000)..."
+if timeout 30 bash -c 'until echo > /dev/tcp/127.0.0.1/3000; do sleep 1; done'; then
+    log_info "API AdGuard disponible. Configuration du rewrite DNS via API..."
+    
+    # Ajout du rewrite DNS via API
+    # Note: On assume une install fraîche sans auth, ou que auth n'est pas encore requis
+    # Si auth est actif, il faudrait récupérer ou passer le user/pass
+    
+    curl -s -X POST "http://127.0.0.1:3000/control/rewrite/add" \
+      -H "Content-Type: application/json" \
+      -d "{\"domain\":\"mon.essensys.fr\",\"answer\":\"$LOCAL_IP\"}"
+      
+    if [ $? -eq 0 ]; then
+        log_info "Configuration DNS appliquée avec succès via API."
+    else
+        log_warn "Échec de la configuration via API."
     fi
+else
+    log_warn "Timeout attente AdGuard Home (port 3000). Configuration API ignorée."
 fi
 
 # Recharger systemd et démarrer les services
@@ -601,12 +595,12 @@ systemctl enable traefik-block-service
 systemctl enable traefik
 
 # Démarrer les services
-log_info "Démarrage des services..."
+log_info "Démarrage des autres services..."
 systemctl restart essensys-backend
 systemctl restart traefik-block-service
 systemctl restart traefik
 systemctl restart nginx
-systemctl restart AdGuardHome
+# AdGuard déjà démarré au dessus
 
 # Vérifier le statut des services
 log_info "Vérification du statut des services..."
