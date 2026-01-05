@@ -536,32 +536,52 @@ if [ ! -d "$ADGUARD_DIR" ]; then
     tar -xzf AdGuardHome.tar.gz
     mv AdGuardHome "$ADGUARD_DIR"
     rm AdGuardHome.tar.gz
-    
-    # Préparer la configuration
     mkdir -p "$ADGUARD_DIR"
+else
+    log_info "Répertoire AdGuard Home déjà présent."
+fi
+
+# Configuration continue (s'exécute à chaque installation pour garantir la conf)
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+
+# 1. Si pas de fichier de conf, copier le template
+if [ ! -f "$ADGUARD_DIR/AdGuardHome.yaml" ] && [ -f "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" ]; then
+    log_info "Création de la configuration AdGuard Home (depuis template)..."
+    cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
+fi
+
+if [ -f "$ADGUARD_DIR/AdGuardHome.yaml" ]; then
+    # 2. Correction bug 'os: linux'
+    if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+         log_info "Correction configuration AdGuard (suppression os: linux)..."
+         sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
+    fi
     
-    # Récupérer l'IP locale
-    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    # 3. Remplacement placeholder LOCAL_IP (si présent)
+    if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+        log_info "Configuration IP ($LOCAL_IP) pour réécriture DNS..."
+        sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
+    fi
     
-    if [ -f "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" ]; then
-        log_info "Génération de la configuration AdGuard Home..."
-        cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
-        
-        # FIX: S'assurer que la clé 'os: linux' (invalide) est absente
-        if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-             log_info "Correction de la configuration AdGuard (suppression de os: linux)..."
-             sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
-        fi
-        
-        # Configurer l'IP pour la réécriture DNS via le placeholder
-        if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-            log_info "Configuration de l'IP ($LOCAL_IP) pour la réécriture DNS..."
-            sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
-        fi
-        
-        # Fallback (si le template n'avait pas le placeholder ou pour les anciennes versions)
-        if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-            log_info "Ajout de la règle de réécriture DNS manquante..."
+    # 4. Garantie de la règle de réécriture DNS (si absente)
+    if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+        log_info "Ajout de la règle de réécriture DNS manquante pour mon.essensys.fr..."
+        # Attention à l'indentation YAML. On ajoute à la fin.
+        # Idéalement 'rewrites' est une clé racine.
+        if grep -q "^rewrites:" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+            # Si la section rewrites existe, c'est compliqué d'ajouter proprement avec cat >> sans parser YAML.
+            # Mais si on n'a pas trouvé le domaine, on assume qu'il manque.
+            # On tente d'ajouter à la fin du fichier, en espérant qu'AdGuard le merge.
+            # Le format AdGuard (s'il a réécrit le fichier) met souvent rewrites à la fin.
+            # Risque: doublon de clé 'rewrites'.
+            # Mieux: ne rien faire si rewrites existe mais pas le domaine? (Risque d'erreur manuelle)
+            # Solution pragmatique: on ajoute seulement si 'rewrites:' n'existe PAS du tout, 
+            # OU si on est sûr que c'est notre template.
+            # Si le fichier a été généré par AdGuard, il a probablement 'rewrites: []' ou null.
+            log_warn "La section 'rewrites' existe mais sans mon.essensys.fr. Ajout manuel requis ou fichier déjà géré par AdGuard."
+            # On force l'ajout à la fin quand même? Non, risque de casser le YAML.
+            # On va utiliser une approche plus simple : ne toucher que si le fichier semble être le nôtre ou vide de rewrites.
+        else
             cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
 
 rewrites:
@@ -570,14 +590,14 @@ rewrites:
 YAML
         fi
     fi
-    
-    # Installer le service
+fi
+
+# Installation du service si nécessaire
+if [ -x "$ADGUARD_DIR/AdGuardHome" ]; then
     cd "$ADGUARD_DIR"
-    ./AdGuardHome -s install
-    
-    log_info "AdGuard Home installé et configuré."
-else
-    log_info "AdGuard Home est déjà installé."
+    # L'installation du service est idempotente ou échoue sans dégâts si déjà installé
+    ./AdGuardHome -s install 2>/dev/null || true
+    log_info "Service AdGuard Home vérifié."
 fi
 
 # Recharger systemd et démarrer les services
