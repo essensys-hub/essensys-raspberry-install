@@ -547,6 +547,12 @@ if [ ! -d "$ADGUARD_DIR" ]; then
         log_info "Génération de la configuration AdGuard Home..."
         cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
         
+        # FIX: S'assurer que la clé 'os: linux' (invalide) est absente
+        if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+             log_info "Correction de la configuration AdGuard (suppression de os: linux)..."
+             sed -i '/^os: linux/d' "$ADGUARD_DIR/AdGuardHome.yaml"
+        fi
+        
         # Ajouter la règle de réécriture pour mon.essensys.fr
         # On utilise une astuce avec sed pour insérer la règle dans filtering
         # Ou plus simple: on ajoute le bloc rewrite à la fin du fichier si le template n'est pas complet
