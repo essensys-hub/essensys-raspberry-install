@@ -13,7 +13,8 @@ LOG_FILE = "/var/logs/Essensys/backend/console.out.log"
 SERVICES = [
     {"name": "Backend", "service": "essensys-backend", "key": "b"},
     {"name": "Frontend", "service": "nginx", "key": "f"},
-    {"name": "Traefik", "service": "traefik", "key": "t"}
+    {"name": "Traefik", "service": "traefik", "key": "t"},
+    {"name": "AdGuard", "service": "AdGuardHome", "key": "a"}
 ]
 REFRESH_RATE = 1.0  # seconds
 
@@ -317,7 +318,7 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "'q': Quit | 'c': Config | 'l': Login | 'r': Reboot"
+                cmds = "'q': Quit | 'a': AdGuard | 'c': Config | 'l': Login | 'r': Reboot"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
@@ -344,6 +345,10 @@ def main(stdscr):
             elif key == ord('t'):
                 monitor.restart_service("traefik")
                 last_restart_msg = "Restarting Traefik..."
+                last_restart_time = time.time()
+            elif key == ord('a'):
+                monitor.restart_service("AdGuardHome")
+                last_restart_msg = "Restarting AdGuard..."
                 last_restart_time = time.time()
 
             stdscr.refresh()

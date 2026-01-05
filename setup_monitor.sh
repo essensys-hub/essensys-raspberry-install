@@ -47,6 +47,7 @@ echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/python3 $MONITOR_SCRIPT" > "$SU
 echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart essensys-backend" >> "$SUDOERS_FILE"
 echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx" >> "$SUDOERS_FILE"
 echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart traefik" >> "$SUDOERS_FILE"
+echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart AdGuardHome" >> "$SUDOERS_FILE"
 echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/raspi-config" >> "$SUDOERS_FILE"
 echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/reboot" >> "$SUDOERS_FILE"
 chmod 440 "$SUDOERS_FILE"

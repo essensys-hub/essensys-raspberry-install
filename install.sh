@@ -507,6 +507,69 @@ ReadWritePaths=/etc/traefik /var/log/traefik /var/lib/traefik
 WantedBy=multi-user.target
 EOF
 
+# Installer AdGuard Home
+log_info "Installation de AdGuard Home..."
+ADGUARD_DIR="/opt/AdGuardHome"
+ADGUARD_CONFIG_DIR="$SCRIPT_DIR/adguard-config"
+
+# Désactiver le stub listener de systemd-resolved sur le port 53
+if grep -q "#DNSStubListener=yes" /etc/systemd/resolved.conf || ! grep -q "DNSStubListener=no" /etc/systemd/resolved.conf; then
+    log_info "Désactivation du DNSStubListener (port 53) pour systemd-resolved..."
+    sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+    sed -i 's/DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+    systemctl restart systemd-resolved
+fi
+
+# Créer le lien symbolique pour resolv.conf si nécessaire
+if [ -L /etc/resolv.conf ]; then
+     ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+fi
+
+if [ ! -d "$ADGUARD_DIR" ]; then
+    cd /tmp
+    log_info "Téléchargement de AdGuard Home..."
+    wget -q https://static.adguard.com/adguardhome/release/AdGuardHome_linux_arm64.tar.gz -O AdGuardHome.tar.gz
+    tar -xzf AdGuardHome.tar.gz
+    mv AdGuardHome "$ADGUARD_DIR"
+    rm AdGuardHome.tar.gz
+    
+    # Préparer la configuration
+    mkdir -p "$ADGUARD_DIR"
+    
+    # Récupérer l'IP locale
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    
+    if [ -f "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" ]; then
+        log_info "Génération de la configuration AdGuard Home..."
+        cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
+        
+        # Ajouter la règle de réécriture pour mon.essensys.fr
+        # On utilise une astuce avec sed pour insérer la règle dans filtering
+        # Ou plus simple: on ajoute le bloc rewrite à la fin du fichier si le template n'est pas complet
+        # Mais le template a été créé complet via task planning. On va utiliser yq ou sed si besoin.
+        # Le template a 'user_rules: []'.
+        # On va append directement si c'est plus simple ou modifier le template.
+        
+        # Ajoutons le rewrite à la fin du fichier YAML s'il n'existe pas
+        if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+            cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
+
+rewrites:
+  - domain: mon.essensys.fr
+    answer: $LOCAL_IP
+YAML
+        fi
+    fi
+    
+    # Installer le service
+    cd "$ADGUARD_DIR"
+    ./AdGuardHome -s install
+    
+    log_info "AdGuard Home installé et configuré."
+else
+    log_info "AdGuard Home est déjà installé."
+fi
+
 # Recharger systemd et démarrer les services
 log_info "Configuration des services systemd..."
 systemctl daemon-reload

@@ -98,6 +98,7 @@ nav:
     - architecture/frontend.md
     - architecture/nginx.md
     - architecture/traefik.md
+    - architecture/adguard.md
     - architecture/ports.md
   - Maintenance:
     - maintenance/update.md

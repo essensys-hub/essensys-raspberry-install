@@ -12,6 +12,7 @@ Cette interface permet de :
     *   **Backend** (`essensys-backend`)
     *   **Frontend** (`nginx` - port interne 9090)
     *   **Traefik** (`traefik` - port 80/443)
+    *   **AdGuard** (`AdGuardHome` - DNS port 53, UI port 3000)
 *   **Contrôler les services** : Redémarrage facile des services via des raccourcis clavier.
 *   **Monitoring système** :
     *   Utilisation CPU
@@ -38,6 +39,7 @@ sudo ./setup_monitor.sh
 | **B** | Redémarrer le service **Backend** |
 | **F** | Redémarrer le service **Frontend** (Nginx) |
 | **T** | Redémarrer le service **Traefik** |
+| **A** | Redémarrer le service **AdGuard Home** |
 | **R** | **Reboot** (Redémarrer le Raspberry Pi) |
 | **C** | **Config** (Lancer `raspi-config`) |
 | **L** | **Login** (Quitter et se connecter au shell) |
