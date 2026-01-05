@@ -28,6 +28,11 @@ class SystemMonitor:
         self.log_thread = threading.Thread(target=self._tail_log, daemon=True)
         self.log_thread.start()
 
+        # Cache for disk stats
+        self.last_disk_check = 0
+        self.cached_disk_usage = (0, 0, 0)
+        self.cached_logs_size = 0
+
     def _read_cpu_stats(self):
         try:
             with open('/proc/stat', 'r') as f:
@@ -118,7 +123,14 @@ class SystemMonitor:
         t = threading.Thread(target=_restart)
         t.start()
 
-    def get_disk_usage(self, path):
+    def update_disk_stats(self):
+        # Update every 120 seconds
+        if time.time() - self.last_disk_check > 120:
+            self.cached_disk_usage = self._get_disk_usage('/')
+            self.cached_logs_size = self._get_dir_size('/var/logs') if os.path.exists('/var/logs') else self._get_dir_size('/var/log')
+            self.last_disk_check = time.time()
+
+    def _get_disk_usage(self, path):
         try:
             st = os.statvfs(path)
             total = st.f_blocks * st.f_frsize
@@ -127,7 +139,7 @@ class SystemMonitor:
         except:
             return 0, 0, 0
 
-    def get_dir_size(self, path):
+    def _get_dir_size(self, path):
         try:
             # Using du -sb for bytes (recursive)
             # busybox du might not support -b, using -s with block size 1k?
@@ -155,6 +167,17 @@ class SystemMonitor:
         stdscr.refresh()
         curses.endwin()
         os.execl("/bin/login", "login")
+
+    def open_raspi_config(self, stdscr):
+        curses.def_prog_mode() # Save curses state
+        curses.endwin()        # Restore terminal
+        try:
+            subprocess.call(["sudo", "raspi-config"])
+        except Exception as e:
+            print(f"Error launching raspi-config: {e}")
+            time.sleep(2)
+        curses.reset_prog_mode() # Restore curses state
+        stdscr.refresh()
 
     def _tail_log(self):
         if not os.path.exists(LOG_FILE):
@@ -245,9 +268,10 @@ def main(stdscr):
             mem_pct, mem_used, mem_total = monitor.get_mem_usage()
             clients = monitor.get_client_count()
             
-            # Disk Usage
-            root_used, root_total, root_pct = monitor.get_disk_usage('/')
-            logs_size = monitor.get_dir_size('/var/logs') if os.path.exists('/var/logs') else monitor.get_dir_size('/var/log')
+            # Disk Usage (Cached)
+            monitor.update_disk_stats()
+            root_used, root_total, root_pct = monitor.cached_disk_usage
+            logs_size = monitor.cached_logs_size
             
             stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)}MB) | CLIENTS: {clients}"
             stats_str2 = f"DISK /: {root_pct:.1f}% ({format_bytes(root_used)}/{format_bytes(root_total)}) | /var/logs: {format_bytes(logs_size)}"
@@ -293,13 +317,15 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "'q': Quit | 'l': Login | 'r': Reboot | 'b/f/t': Restart Services"
+                cmds = "'q': Quit | 'c': Config | 'l': Login | 'r': Reboot"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
             key = stdscr.getch()
             if key == ord('q'):
                 break
+            elif key == ord('c'):
+                monitor.open_raspi_config(stdscr)
             elif key == ord('l'):
                 monitor.prompt_login(stdscr)
                 # If prompt_login returns (it shouldn't if exec works), break

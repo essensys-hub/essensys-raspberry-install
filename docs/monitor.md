@@ -39,6 +39,7 @@ sudo ./setup_monitor.sh
 | **F** | Redémarrer le service **Frontend** (Nginx) |
 | **T** | Redémarrer le service **Traefik** |
 | **R** | **Reboot** (Redémarrer le Raspberry Pi) |
+| **C** | **Config** (Lancer `raspi-config`) |
 | **L** | **Login** (Quitter et se connecter au shell) |
 | **Q** | Quitter le moniteur |
 
