@@ -553,15 +553,15 @@ if [ ! -d "$ADGUARD_DIR" ]; then
              sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
         fi
         
-        # Ajouter la règle de réécriture pour mon.essensys.fr
-        # On utilise une astuce avec sed pour insérer la règle dans filtering
-        # Ou plus simple: on ajoute le bloc rewrite à la fin du fichier si le template n'est pas complet
-        # Mais le template a été créé complet via task planning. On va utiliser yq ou sed si besoin.
-        # Le template a 'user_rules: []'.
-        # On va append directement si c'est plus simple ou modifier le template.
+        # Configurer l'IP pour la réécriture DNS via le placeholder
+        if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+            log_info "Configuration de l'IP ($LOCAL_IP) pour la réécriture DNS..."
+            sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
+        fi
         
-        # Ajoutons le rewrite à la fin du fichier YAML s'il n'existe pas
+        # Fallback (si le template n'avait pas le placeholder ou pour les anciennes versions)
         if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+            log_info "Ajout de la règle de réécriture DNS manquante..."
             cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
 
 rewrites:

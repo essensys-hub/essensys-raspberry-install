@@ -132,3 +132,6 @@ log_compress: false
 log_localtime: false
 verbose: false
 schema_version: 20
+rewrites:
+  - domain: mon.essensys.fr
+    answer: LOCAL_IP_PLACEHOLDER
