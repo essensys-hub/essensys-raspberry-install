@@ -49,6 +49,15 @@ fi
 log_info "Démarrage de l'installation Essensys pour Raspberry Pi 4"
 log_info "Installation complète: Nginx + Traefik + Backend + Frontend"
 
+# Vérifier les arguments pour le mode Staging
+USE_STAGING=false
+for arg in "$@"; do
+    if [ "$arg" == "--staging" ]; then
+        USE_STAGING=true
+        log_warn "MODE STAGING ACTIVÉ: Les certificats Let's Encrypt seront non-sécurisés (test seulement)"
+    fi
+done
+
 # Lire le domaine WAN depuis le fichier domain.txt
 WAN_DOMAIN="essensys.acme.com"  # Valeur par défaut
 if [ -f "$DOMAIN_FILE" ]; then
@@ -440,6 +449,13 @@ cp "$TRAEFIK_CONFIG_DIR/traefik.yml" /etc/traefik/traefik.yml
 
 # Modifier l'email Let's Encrypt dans la configuration
 sed -i "s|admin@acme.com|$ACME_EMAIL|g" /etc/traefik/traefik.yml
+
+# Activer le mode Staging si demandé
+if [ "$USE_STAGING" = true ]; then
+    log_info "Activation du serveur Let's Encrypt Staging..."
+    # Décommenter la ligne caServer
+    sed -i 's|# caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"|caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"|' /etc/traefik/traefik.yml
+fi
 
 # Générer les fichiers de configuration dynamique avec le bon chemin frontend et domaine WAN
 log_info "Génération des fichiers de configuration dynamique Traefik..."

@@ -134,12 +134,11 @@ Traefik va automatiquement régénérer le fichier et demander un nouveau certif
 #### Erreur 429 (Rate Limit)
 Si vous voyez `acme: error: 429 :: POST ... :: too many certificates`, vous avez demandé trop de certificats récemment.
 **Solution** :
-1. Attendre (le log indique `retry after ...`).
-2. OU utiliser le serveur de *Staging* pour tester :
-   - Éditer `/etc/traefik/traefik.yml`.
-   - Ajouter `caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"` dans la section `certificatesResolvers.letsencrypt.acme`.
-   - Redémarrer Traefik.
-   - *Note : Le certificat sera "Non sécurisé" mais cela validera la config.*
+1. Relancer l'installation avec l'option Staging (pour valider la config sans utiliser le quota PROD) :
+   ```bash
+   sudo ./install.sh --staging
+   ```
+2. *Note : Le certificat sera "Non sécurisé" mais cela validera la config.*
 
 ### Impossible de se connecter
 

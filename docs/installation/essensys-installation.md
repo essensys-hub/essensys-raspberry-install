@@ -25,6 +25,11 @@ chmod +x install.sh
 sudo ./install.sh
 ```
 
+> **Note (Erreur 429)** : Si vous rencontrez une erreur "Rate Limited" avec Let's Encrypt lors de l'installation, vous pouvez utiliser le mode staging (test) :
+> ```bash
+> sudo ./install.sh --staging
+> ```
+
 Le script va :
 
 1. **Mettre à jour le système** (`apt update && apt upgrade`)
