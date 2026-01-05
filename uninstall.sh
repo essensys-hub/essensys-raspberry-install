@@ -41,7 +41,7 @@ log_info "========================================="
 # Demander confirmation
 log_warn "ATTENTION: Cette opération va supprimer complètement l'installation Essensys"
 log_warn "Les données suivantes seront supprimées:"
-log_warn "  - Services systemd (essensys-backend, traefik, traefik-block-service)"
+log_warn "  - Services systemd (essensys-backend, traefik, traefik-block-service, AdGuardHome)"
 log_warn "  - Configuration nginx (essensys, essensys-frontend-internal)"
 log_warn "  - Configuration Traefik (/etc/traefik)"
 log_warn "  - Fichiers d'installation dans $INSTALL_DIR (backend, frontend)"
@@ -88,6 +88,31 @@ fi
 if systemctl is-enabled --quiet traefik-block-service 2>/dev/null; then
     log_info "Désactivation du service traefik-block-service..."
     systemctl disable traefik-block-service
+fi
+
+# Service AdGuard Home
+log_info "Désinstallation de AdGuard Home..."
+if [ -x "/opt/AdGuardHome/AdGuardHome" ]; then
+    # Tenter d'utiliser la commande de désinstallation intégrée
+    cd /opt/AdGuardHome || true
+    if ./AdGuardHome -s uninstall 2>/dev/null; then
+        log_info "Service AdGuardHome désinstallé via son binaire"
+    else
+        # Fallback manuel si la désinstallation échoue/bloque
+        systemctl stop AdGuardHome 2>/dev/null || true
+        systemctl disable AdGuardHome 2>/dev/null || true
+        rm -f /etc/systemd/system/AdGuardHome.service
+        systemctl daemon-reload
+        log_info "Service AdGuardHome arrêté et supprimé manuellement"
+    fi
+else
+    # Si binaire absent mais service présent
+    if systemctl is-active --quiet AdGuardHome 2>/dev/null; then
+         systemctl stop AdGuardHome
+         systemctl disable AdGuardHome
+         rm -f /etc/systemd/system/AdGuardHome.service
+         systemctl daemon-reload
+    fi
 fi
 
 # Supprimer les fichiers de service systemd
@@ -201,6 +226,15 @@ if [ -d "/etc/traefik" ]; then
     log_info "✓ Configuration Traefik supprimée (/etc/traefik)"
 else
     log_info "Le répertoire /etc/traefik n'existe pas"
+fi
+
+# Supprimer AdGuard Home
+log_info "Suppression des fichiers AdGuard Home..."
+if [ -d "/opt/AdGuardHome" ]; then
+    rm -rf /opt/AdGuardHome
+    log_info "✓ Répertoire /opt/AdGuardHome supprimé"
+else
+    log_info "Le répertoire /opt/AdGuardHome n'existe pas"
 fi
 
 # Supprimer le binaire Traefik
