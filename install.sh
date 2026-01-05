@@ -78,6 +78,7 @@ apt-get install -y \
     nginx \
     apache2-utils \
     python3 \
+    python3-yaml \
     libcap2-bin \
     ca-certificates \
     openssh-client
@@ -541,7 +542,7 @@ else
     log_info "Répertoire AdGuard Home déjà présent."
 fi
 
-# Configuration continue (s'exécute à chaque installation pour garantir la conf)
+# Configuration continue
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 
 # 1. Si pas de fichier de conf, copier le template
@@ -550,45 +551,34 @@ if [ ! -f "$ADGUARD_DIR/AdGuardHome.yaml" ] && [ -f "$ADGUARD_CONFIG_DIR/AdGuard
     cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
 fi
 
-if [ -f "$ADGUARD_DIR/AdGuardHome.yaml" ]; then
-    # 2. Correction bug 'os: linux'
-    if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-         log_info "Correction configuration AdGuard (suppression os: linux)..."
-         sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
-    fi
-    
-    # 3. Remplacement placeholder LOCAL_IP (si présent)
-    if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-        log_info "Configuration IP ($LOCAL_IP) pour réécriture DNS..."
-        sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
-    fi
-    
-    # 4. Garantie de la règle de réécriture DNS (si absente)
-    if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-        log_info "Ajout de la règle de réécriture DNS manquante pour mon.essensys.fr..."
-        # Attention à l'indentation YAML. On ajoute à la fin.
-        # Idéalement 'rewrites' est une clé racine.
-        if grep -q "^rewrites:" "$ADGUARD_DIR/AdGuardHome.yaml"; then
-            # Si la section rewrites existe, c'est compliqué d'ajouter proprement avec cat >> sans parser YAML.
-            # Mais si on n'a pas trouvé le domaine, on assume qu'il manque.
-            # On tente d'ajouter à la fin du fichier, en espérant qu'AdGuard le merge.
-            # Le format AdGuard (s'il a réécrit le fichier) met souvent rewrites à la fin.
-            # Risque: doublon de clé 'rewrites'.
-            # Mieux: ne rien faire si rewrites existe mais pas le domaine? (Risque d'erreur manuelle)
-            # Solution pragmatique: on ajoute seulement si 'rewrites:' n'existe PAS du tout, 
-            # OU si on est sûr que c'est notre template.
-            # Si le fichier a été généré par AdGuard, il a probablement 'rewrites: []' ou null.
-            log_warn "La section 'rewrites' existe mais sans mon.essensys.fr. Ajout manuel requis ou fichier déjà géré par AdGuard."
-            # On force l'ajout à la fin quand même? Non, risque de casser le YAML.
-            # On va utiliser une approche plus simple : ne toucher que si le fichier semble être le nôtre ou vide de rewrites.
-        else
-            cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
+# 2. Arrêter le service pour éviter qu'il n'écrase la conf
+if systemctl is-active --quiet AdGuardHome 2>/dev/null; then
+    log_info "Arrêt temporaire de AdGuard Home pour mise à jour de la configuration..."
+    systemctl stop AdGuardHome
+fi
+
+# 3. Utiliser le script Python pour une mise à jour robuste du YAML
+if [ -f "$ADGUARD_CONFIG_DIR/update_dns.py" ]; then
+    log_info "Mise à jour de la configuration AdGuard via script Python..."
+    python3 "$ADGUARD_CONFIG_DIR/update_dns.py" "$ADGUARD_DIR/AdGuardHome.yaml" "$LOCAL_IP"
+else
+    log_warn "Script update_dns.py non trouvé. Tentative de configuration manuelle (moins robuste)..."
+    # Fallback shell si python script absent (mais on vient de l'installer)
+    if [ -f "$ADGUARD_DIR/AdGuardHome.yaml" ]; then
+         if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+             sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
+         fi
+         if grep -q "LOCAL_IP_PLACEHOLDER" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+            sed -i "s/LOCAL_IP_PLACEHOLDER/$LOCAL_IP/g" "$ADGUARD_DIR/AdGuardHome.yaml"
+         fi
+         if ! grep -q "domain: mon.essensys.fr" "$ADGUARD_DIR/AdGuardHome.yaml"; then
+             cat >> "$ADGUARD_DIR/AdGuardHome.yaml" <<YAML
 
 rewrites:
   - domain: mon.essensys.fr
     answer: $LOCAL_IP
 YAML
-        fi
+         fi
     fi
 fi
 
