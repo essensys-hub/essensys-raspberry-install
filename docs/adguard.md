@@ -15,9 +15,15 @@ Cela permet aux appareils du réseau local d'accéder aux services Essensys via 
 
 ## Utilisation
 
-Pour utiliser ce serveur DNS sur vos appareils (ou votre routeur) :
-1.  Configurez le DNS de votre appareil/routeur pour utiliser l'IP du Raspberry Pi.
+Pour utiliser ce serveur DNS sur vos appareils (ou votre routeur) afin que `mon.essensys.fr` soit résolu pour tout le monde :
+1.  Configurez le DHCP de votre routeur pour distribuer l'IP du Raspberry Pi (`192.168.1.101`) comme serveur DNS primaire.
 2.  L'accès à `mon.essensys.fr` résoudra directement sur le Pi.
+
+**Guides de configuration par routeur :**
+*   [Ubiquiti UDM Pro](router/ubiquiti-udm-pro.md#configuration-dns-local-avec-adguard-home)
+*   [Freebox](router/freebox.md#via-linterface-freebox-dhcp)
+*   [SFR Box](router/sfr.md#via-linterface-sfr-dhcp)
+*   [Orange Livebox](router/orange-livebox.md#via-linterface-livebox)
 
 ## Monitoring
 

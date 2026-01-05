@@ -76,68 +76,18 @@ ssh root@<ip-udm-pro>
 vi /mnt/data/udapi-config/port-forwarding.json
 ```
 
-## Configuration DNS local
+## Configuration DNS local (avec AdGuard Home)
+
+Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau, il est recommandé de configurer le Raspberry Pi comme serveur DNS principal du réseau.
 
 ### Via l'interface Unifi
 
-1. Aller dans **Settings** → **Networks** → **LAN**
-2. Cliquer sur **DHCP** → **DNS**
-3. Ajouter une entrée DNS :
-   - **Hostname** : `mon.essensys.fr`
-   - **IP** : `192.168.1.101`
+1.  Aller dans **Settings** → **Networks** → **LAN**
+2.  Cliquer sur **DHCP** → **DNS Stats** (ou **DHCP Service Management**)
+3.  Définir **DNS Server 1** sur l'IP du Raspberry Pi : `192.168.1.101`
+4.  Définir **DNS Server 2** sur un DNS public (ex: 9.9.9.9) en secours (optionnel, mais attention : si le Pi est éteint, seul le secours fonctionnera et `mon.essensys.fr` ne sera plus résolu).
 
-### Via SSH (persistant)
-
-Se connecter en SSH au UDM Pro :
-
-```bash
-ssh root@<ip-udm-pro>
-```
-
-Créer/modifier le fichier de configuration DNS :
-
-```bash
-vi /mnt/data/udapi-config/dnsmasq.conf
-```
-
-Ajouter :
-```
-host-record=mon.essensys.fr,192.168.1.101
-host-record=traefik.essensys.fr,192.168.1.101
-```
-
-Redémarrer dnsmasq :
-
-```bash
-/etc/init.d/dnsmasq restart
-```
-
-### Configuration persistante via config.gateway.json
-
-Pour une configuration persistante qui survit aux mises à jour :
-
-1. Se connecter en SSH au UDM Pro
-2. Créer/modifier `/mnt/data/udapi-config/config.gateway.json` :
-
-```json
-{
-  "service": {
-    "dns": {
-      "forwarding": {
-        "options": [
-          "host-record=mon.essensys.fr,192.168.1.101",
-          "host-record=traefik.essensys.fr,192.168.1.101"
-        ]
-      }
-    }
-  }
-}
-```
-
-3. Appliquer la configuration :
-```bash
-/usr/bin/udapi-config-apply
-```
+*Alternative* : Si vous ne souhaitez pas changer le DNS de tout le réseau, vous pouvez ajouter manuellement l'enregistrement DNS comme décrit ci-dessous, mais l'utilisation d'AdGuard est recommandée pour le blocage de publicités.
 
 ## Vérification
 

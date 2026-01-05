@@ -63,7 +63,17 @@ graph TB
 
 ## Configuration DNS local
 
-Configurer le DNS local via l'interface du routeur ou utiliser `/etc/hosts` sur les machines clientes.
+### Via l'interface SFR (DHCP)
+
+Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau :
+
+1.  Se connecter à l'interface de la Box SFR.
+2.  Aller dans **Réseau** → **DHCP**.
+3.  Repérer la section **Serveurs DNS**.
+4.  Décocher "Automatique" si nécessaire.
+5.  Dans **DNS Primaire**, entrer l'IP du Raspberry Pi : `192.168.1.101`.
+6.  Valider.
+7.  Redémarrer les appareils clients.
 
 ## Vérification
 

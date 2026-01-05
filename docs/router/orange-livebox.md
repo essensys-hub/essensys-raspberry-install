@@ -63,7 +63,19 @@ graph TB
 
 ## Configuration DNS local
 
-Configurer le DNS local via l'interface Livebox ou utiliser `/etc/hosts` sur les machines clientes.
+### Via l'interface Livebox
+
+**Note importante** : La plupart des Livebox ne permettent **PAS** de modifier les serveurs DNS distribués par le DHCP.
+
+**Solutions alternatives :**
+
+1.  **Configuration manuelle sur les appareils** :
+    *   Sur chaque appareil (PC, Smartphone), modifier les paramètres WiFi/Ethernet pour utiliser `192.168.1.101` comme serveur DNS.
+
+2.  **Désactiver le DHCP Livebox (Expert)** :
+    *   Désactiver le DHCP de la Livebox.
+    *   Activer le serveur DHCP intégré à **AdGuard Home** sur le Raspberry Pi (`http://mon.essensys.fr:3000` -> Paramètres -> Paramètres DHCP).
+    *   *Attention : Si le Raspberry Pi s'arrête, plus aucun appareil n'aura d'adresse IP.*
 
 ## Vérification
 

@@ -64,7 +64,16 @@ graph TB
 
 ## Configuration DNS local
 
-La Freebox gère automatiquement le DNS local. Pour ajouter une entrée personnalisée, utiliser l'interface Freebox ou configurer directement sur les machines clientes via `/etc/hosts`.
+### Via l'interface Freebox (DHCP)
+
+Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau :
+
+1.  Se connecter à l'interface Freebox (http://mafreebox.freebox.fr) en mode **Avancé**.
+2.  Aller dans **Paramètres de la Freebox** → **Réseau Local** → **Serveur DHCP** → **Configuration**.
+3.  Dans le champ **Serveur DNS 1**, entrer l'IP du Raspberry Pi : `192.168.1.101`.
+4.  Laisser les autres vides ou mettre un DNS public en secours (attention, si le Pi est éteint, `mon.essensys.fr` ne marchera plus).
+5.  Valider.
+6.  Redémarrer les appareils clients (ou désactiver/réactiver leur WiFi) pour qu'ils prennent en compte le nouveau DNS.
 
 ## Vérification
 
