@@ -2,7 +2,7 @@
 
 Le système Essensys inclut désormais une interface de monitoring en console (HMI) développée en Python, permettant de suivre l'état du serveur directement depuis l'écran connecté au Raspberry Pi (ou via SSH).
 
-![Console Monitor](img/console.png)
+![Console Monitor](img/console.jpg)
 
 ## Fonctionnalités
 
