@@ -115,6 +115,17 @@ else
     fi
 fi
 
+# Service Nginx
+if systemctl is-active --quiet nginx 2>/dev/null; then
+    log_info "Arrêt du service nginx..."
+    systemctl stop nginx
+fi
+
+if systemctl is-enabled --quiet nginx 2>/dev/null; then
+    log_info "Désactivation du service nginx..."
+    systemctl disable nginx
+fi
+
 # Supprimer les fichiers de service systemd
 log_info "Suppression des fichiers de service systemd..."
 SERVICES_REMOVED=false
