@@ -21,8 +21,8 @@ Une fois connecté, vous arrivez sur votre tableau de bord.
 2.  Vous y verrez votre **Token** (une longue suite de caractères).
 3.  **Copiez ce Token** (ou gardez l'onglet ouvert), vous en aurez besoin pour le script d'installation.
 
-![DuckDNS Token](../img/duckdns-token.png)
-*(Exemple d'affichage du Token)*
+![DuckDNS Dashboard](../img/duckdns-dashboard.png)
+*(Tableau de bord DuckDNS avec Token et Domaines)*
 
 ## 3. Création du Domaine
 
@@ -31,7 +31,8 @@ Une fois connecté, vous arrivez sur votre tableau de bord.
     *   Le domaine complet sera : `ma-maison-essensys.duckdns.org`
 3.  Cliquez sur le bouton vert **add domain**.
 
-![DuckDNS Add Domain](../img/duckdns-add.png)
+![DuckDNS Add Domain](../img/duckdns-dashboard.png)
+*(Utilisez le champ 'sub domain' pour créer votre adresse)*
 
 4.  Si le domaine est libre, il s'ajoute à la liste en dessous.
 5.  **Notez ce nom de sous-domaine**.
