@@ -550,7 +550,7 @@ if [ ! -d "$ADGUARD_DIR" ]; then
         # FIX: S'assurer que la clé 'os: linux' (invalide) est absente
         if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
              log_info "Correction de la configuration AdGuard (suppression de os: linux)..."
-             sed -i '/^os: linux/d' "$ADGUARD_DIR/AdGuardHome.yaml"
+             sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
         fi
         
         # Ajouter la règle de réécriture pour mon.essensys.fr
