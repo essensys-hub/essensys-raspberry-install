@@ -382,13 +382,15 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "'q': Quit | 'a': AdGuard | 'c': Config | 'l': Login | 'r': Reboot"
+                cmds = "'q': Quit | 'u': Refresh | 'a': AdGuard | 'c': Config | 'l': Login | 'r': Reboot"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
             key = stdscr.getch()
             if key == ord('q'):
                 break
+            elif key == ord('u'):
+                monitor.last_service_check = 0 # Force refresh on next loop
             elif key == ord('c'):
                 monitor.open_raspi_config(stdscr)
             elif key == ord('l'):

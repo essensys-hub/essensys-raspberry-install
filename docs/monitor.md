@@ -41,6 +41,7 @@ sudo ./setup_monitor.sh
 | **F** | Redémarrer le service **Frontend** (Nginx) |
 | **T** | Redémarrer le service **Traefik** |
 | **A** | Redémarrer le service **AdGuard Home** |
+| **U** | **Update** (Forcer le rafraîchissement des services) |
 | **R** | **Reboot** (Redémarrer le Raspberry Pi) |
 | **C** | **Config** (Lancer `raspi-config`) |
 | **L** | **Login** (Quitter et se connecter au shell) |
