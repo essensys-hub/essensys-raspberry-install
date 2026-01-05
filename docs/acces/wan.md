@@ -111,6 +111,26 @@ dig essensys.acme.com
 sudo tail -f /var/log/traefik/traefik.log
 ```
 
+#### Forcer le renouvellement
+Si le certificat est invalide ou expiré et ne se renouvelle pas :
+
+1. Arrêter Traefik :
+```bash
+sudo systemctl stop traefik
+```
+
+2. Supprimer (ou renommer) le fichier de stockage des certificats :
+```bash
+sudo mv /etc/traefik/acme.json /etc/traefik/acme.json.bak
+```
+
+3. Redémarrer Traefik :
+```bash
+sudo systemctl start traefik
+```
+
+Traefik va automatiquement régénérer le fichier et demander un nouveau certificat à Let's Encrypt. Vérifiez les logs pour confirmer le succès.
+
 ### Impossible de se connecter
 
 1. Vérifier le NAT/port forwarding sur le routeur
