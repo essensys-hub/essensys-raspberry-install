@@ -166,6 +166,23 @@ class SystemMonitor:
             self.cached_logs_size = self._get_dir_size('/var/logs') if os.path.exists('/var/logs') else self._get_dir_size('/var/log')
             self.last_disk_check = time.time()
 
+    def get_network_interfaces(self):
+        interfaces = []
+        try:
+            # Get IPs: ip -o -4 addr show
+            output = subprocess.check_output(['ip', '-o', '-4', 'addr', 'show'], text=True)
+            for line in output.splitlines():
+                parts = line.split()
+                if len(parts) >= 4:
+                    iface = parts[1]
+                    if iface == 'lo': continue
+                    ip = parts[3].split('/')[0]
+                    mac = self.get_mac_address(iface)
+                    interfaces.append({'name': iface, 'ip': ip, 'mac': mac})
+        except:
+            pass
+        return interfaces
+
     def get_mac_address(self, interface):
         try:
             path = f"/sys/class/net/{interface}/address"
@@ -187,18 +204,15 @@ class SystemMonitor:
 
     def _get_dir_size(self, path):
         try:
-            # Using du -sb for bytes (recursive)
-            # busybox du might not support -b, using -s with block size 1k?
-            # Standard linux du supports -b or -k. Let's try -sk (kb) for compatibility
             cmd = ['du', '-sk', path]
-            output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode().split()[0]
-            return int(output) * 1024 # Convert KB to bytes
+            output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True).split()[0]
+            return int(output) * 1024 
         except:
             return 0
 
     def reboot_system(self):
         def _reboot():
-            time.sleep(1) # Visual feedback delay
+            time.sleep(1)
             subprocess.call(["sudo", "reboot"])
         
         t = threading.Thread(target=_reboot)
@@ -206,8 +220,6 @@ class SystemMonitor:
         return "Rebooting system..."
 
     def prompt_login(self, stdscr):
-        # We want to exit monitor and execute login
-        # This will replace the current process
         self.running = False
         stdscr.clear()
         stdscr.refresh()
@@ -215,21 +227,19 @@ class SystemMonitor:
         os.execl("/bin/login", "login")
 
     def open_raspi_config(self, stdscr):
-        curses.def_prog_mode() # Save curses state
-        curses.endwin()        # Restore terminal
+        curses.def_prog_mode()
+        curses.endwin()
         try:
             subprocess.call(["sudo", "raspi-config"])
         except Exception as e:
-            print(f"Error launching raspi-config: {e}")
-            time.sleep(2)
-        curses.reset_prog_mode() # Restore curses state
+            pass
+        curses.reset_prog_mode()
         stdscr.refresh()
 
     def _tail_log(self):
         if not os.path.exists(LOG_FILE):
              with self.log_lock:
                  self.log_buffer.append(f"Log file not found: {LOG_FILE}")
-             # Wait for file to appear
              while not os.path.exists(LOG_FILE) and self.running:
                  time.sleep(2)
         
@@ -238,12 +248,6 @@ class SystemMonitor:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
             
             while self.running:
-                # Non-blocking read needed or select? 
-                # Actually readline is blocking. We can use select to timeout.
-                # But since this is a thread, blocking is fine as long as we can kill it?
-                # subprocess doesn't die easily.
-                # Let's just use it. When self.running becomes False, we might be stuck in readline.
-                # That's acceptable for a simple script, main thread will exit.
                 line = process.stdout.readline()
                 if not line:
                     break
@@ -300,12 +304,7 @@ def main(stdscr):
             
             # --- Header ---
             hostname = os.uname()[1]
-            try:
-                ip = subprocess.check_output(['hostname', '-I']).decode().strip().split()[0]
-            except:
-                ip = "?"
-            
-            header = f"ESSENSYS RASPBERRY PI MONITOR - {hostname} ({ip})"
+            header = f"ESSENSYS RASPBERRY PI MONITOR - {hostname}"
             draw_centered(stdscr, 0, header, curses.color_pair(3) | curses.A_BOLD)
             stdscr.hline(1, 0, curses.ACS_HLINE, w)
             
@@ -319,24 +318,28 @@ def main(stdscr):
             root_used, root_total, root_pct = monitor.cached_disk_usage
             logs_size = monitor.cached_logs_size
             
-            # MAC Addresses
-            mac_eth0 = monitor.get_mac_address("eth0")
-            mac_wlan0 = monitor.get_mac_address("wlan0")
-            
             stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)}MB) | CLIENTS: {clients}"
             stats_str2 = f"DISK /: {root_pct:.1f}% ({format_bytes(root_used)}/{format_bytes(root_total)}) | /var/logs: {format_bytes(logs_size)}"
-            stats_str3 = f"MAC: eth0 [{mac_eth0}] | wlan0 [{mac_wlan0}]"
             
             draw_centered(stdscr, 2, stats_str)
             draw_centered(stdscr, 3, stats_str2)
-            draw_centered(stdscr, 4, stats_str3)
-            stdscr.hline(5, 0, curses.ACS_HLINE, w)
+            
+            # --- Network Interfaces ---
+            interfaces = monitor.get_network_interfaces()
+            line_idx = 4
+            for iface in interfaces:
+                net_str = f"{iface['name']}: {iface['ip']} [{iface['mac']}]"
+                draw_centered(stdscr, line_idx, net_str)
+                line_idx += 1
+            
+            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
+            line_idx += 1
 
             # --- Services ---
             monitor.update_services(SERVICES)
             refresh_sec = monitor.get_service_refresh_remaining()
             
-            # Calculate layout
+            # Calculate layout (Box services)
             col_width = w // len(SERVICES)
             for i, service in enumerate(SERVICES):
                 status = monitor.get_service_status(service['service'])
@@ -347,24 +350,26 @@ def main(stdscr):
                 bx = i * col_width
                 # content
                 try:
-                    stdscr.addstr(6, bx + 2, f"{service['name']}", curses.A_BOLD)
-                    stdscr.addstr(7, bx + 2, f"Status: {status_txt}", color)
-                    stdscr.addstr(8, bx + 2, f"Restart: '{service['key']}'")
+                    stdscr.addstr(line_idx, bx + 2, f"{service['name']}", curses.A_BOLD)
+                    stdscr.addstr(line_idx + 1, bx + 2, f"Status: {status_txt}", color)
+                    stdscr.addstr(line_idx + 2, bx + 2, f"Restart: '{service['key']}'")
                 except:
                     pass
 
-            stdscr.hline(9, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(9, 2, f" LOGS (Refresh in {refresh_sec}s) ", curses.color_pair(3))
+            line_idx += 3
+            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
+            stdscr.addstr(line_idx, 2, f" LOGS (Refresh in {refresh_sec}s) ", curses.color_pair(3))
 
             # --- Logs ---
-            log_h = h - 11
+            log_start_y = line_idx + 1
+            log_h = h - log_start_y - 2 # Reserve bottom for status bar
             if log_h > 0:
                 with monitor.log_lock:
                     logs = list(monitor.log_buffer)[-log_h:]
                 
                 for i, line in enumerate(logs):
                     try:
-                        stdscr.addstr(10 + i, 1, line[:w-2])
+                        stdscr.addstr(log_start_y + i, 1, line[:w-2])
                     except:
                         pass
             

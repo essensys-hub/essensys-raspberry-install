@@ -19,7 +19,7 @@ Cette interface permet de :
     *   Utilisation Mémoire
     *   **Utilisation Disque** : Affichage de l'espace utilisé sur la racine (`/`) et `/var/logs`.
     *   **Nombre de clients** : Connexions actives sur les ports 80, 443, 7070.
-*   **Réseau** : Affichage des adresses MAC pour `eth0` et `wlan0` (utile pour DHCP).
+*   **Réseau** : Affichage dynamique de toutes les interfaces réseau (IP et MAC), sans limitation à `eth0`/`wlan0`.
 *   **Logs en temps réel** : Affichage des logs du backend (`/var/logs/Essensys/backend/console.out.log`) via `tail -f`.
 
 ## Démarrage automatique
