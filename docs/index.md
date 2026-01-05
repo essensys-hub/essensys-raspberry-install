@@ -6,7 +6,25 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 
 1. **[Préparation du matériel](installation/preparation.md)** - SSD, adaptateur USB-SATA, Raspberry Pi 4
 2. **[Installation de l'OS](installation/os-installation.md)** - Installation de Raspberry Pi OS sur le SSD
-3. **[Installation Essensys](installation/essensys-installation.md)** - Déploiement du backend et frontend
+
+### 2.1 Pré-requis système & Clonage
+Ouvrez un terminal sur votre Raspberry Pi et lancez cette commande pour installer Git et télécharger les sources :
+```bash
+curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/main/requirements.sh | sudo bash
+```
+
+### 2.2 Choix du Domaine WAN
+Pour accéder à Essensys depuis l'extérieur, vous devez choisir une méthode de nom de domaine :
+*   **Option Recommandée (Gratuit)** : **[DuckDNS](acces/duckdns.md)** (Configuration automatique incluse)
+*   **Option Avancée** : Domaine personnalisé (OVH, etc.) - voir [Accès WAN](acces/wan.md)
+
+### 3. Installation Essensys
+Une fois le dépôt cloné (étape 2.1), lancez l'installation :
+```bash
+cd essensys-raspberry-install
+sudo ./install.sh
+```
+
 4. **[Configuration réseau](connexion/configuration-reseau.md)** - Configuration SSH et réseau
 5. **[Accès aux services](acces/index.md)** - URLs locales et WAN
 
