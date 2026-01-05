@@ -66,6 +66,7 @@ nav:
   - Accueil: index.md
   - Client iOS: client-ios.md
   - Client Android: client-android.md
+  - Moniteur Console (HMI): monitor.md
 
   - Installation:
     - installation/index.md
