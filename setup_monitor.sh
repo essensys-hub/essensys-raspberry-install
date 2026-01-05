@@ -3,6 +3,8 @@
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MONITOR_SCRIPT="$SCRIPT_DIR/monitor.py"
+SERVICE_USER="essensys"
+USER_HOME="/home/$SERVICE_USER"
 
 # Couleurs
 GREEN='\033[0;32m'
@@ -10,7 +12,13 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== Installation du Moniteur Essensys ===${NC}"
+echo -e "${GREEN}=== Configuration Automatique du Moniteur Essensys ===${NC}"
+
+# Vérifier root
+if [ "$EUID" -ne 0 ]; then 
+    echo -e "${RED}[ERROR]${NC} Ce script doit être exécuté en tant que root (sudo)."
+    exit 1
+fi
 
 # 1. Rendre le script exécutable
 if [ -f "$MONITOR_SCRIPT" ]; then
@@ -21,49 +29,55 @@ else
     exit 1
 fi
 
-# 2. Vérifier les dépendances
-echo -e "\nVérification des dépendances..."
-if command -v python3 &> /dev/null; then
-    echo -e "${GREEN}[OK]${NC} Python 3 est installé"
+# 2. Configurer le démarrage automatique (Autologin) sur tty1
+echo -e "\n${GREEN}Configuration de l'autologin sur tty1...${NC}"
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I \$TERM
+EOF
+systemctl daemon-reload
+echo -e "${GREEN}[OK]${NC} Autologin configuré pour l'utilisateur $SERVICE_USER sur tty1."
+
+# 3. Configurer sudo sans mot de passe pour le script
+echo -e "\n${GREEN}Configuration de sudoers...${NC}"
+SUDOERS_FILE="/etc/sudoers.d/essensys-monitor"
+echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/python3 $MONITOR_SCRIPT" > "$SUDOERS_FILE"
+echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart essensys-backend" >> "$SUDOERS_FILE"
+echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx" >> "$SUDOERS_FILE"
+echo "$SERVICE_USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart traefik" >> "$SUDOERS_FILE"
+chmod 440 "$SUDOERS_FILE"
+echo -e "${GREEN}[OK]${NC} Permissions sudo configurées dans $SUDOERS_FILE."
+
+# 4. Ajouter le lancement dans .bashrc
+echo -e "\n${GREEN}Configuration de .bashrc...${NC}"
+BASHRC="$USER_HOME/.bashrc"
+MARKER="# ESSENSYS MONITOR AUTOSTART"
+
+if [ -f "$BASHRC" ]; then
+    if ! grep -q "$MARKER" "$BASHRC"; then
+        cat >> "$BASHRC" <<EOF
+
+$MARKER
+# Lancer le moniteur uniquement sur tty1 (écran physique)
+if [ -z "\$SSH_CLIENT" ] && [ -z "\$SSH_TTY" ]; then
+    if [ "\$(tty)" = "/dev/tty1" ]; then
+        # Attendre un peu que le réseau soit prêt
+        sleep 5
+        sudo /usr/bin/python3 $MONITOR_SCRIPT
+    fi
+fi
+EOF
+        echo -e "${GREEN}[OK]${NC} Lancement automatique ajouté à $BASHRC"
+        chown "$SERVICE_USER:$SERVICE_USER" "$BASHRC"
+    else
+        echo -e "${YELLOW}[INFO]${NC} Configuration déjà présente dans $BASHRC"
+    fi
 else
-    echo -e "${RED}[ERROR]${NC} Python 3 n'est pas installé. Installez-le avec 'sudo apt install python3'"
+    echo -e "${RED}[ERROR]${NC} Fichier $BASHRC introuvable. L'utilisateur $SERVICE_USER existe-t-il ?"
 fi
 
-if command -v ss &> /dev/null; then
-    echo -e "${GREEN}[OK]${NC} ss (iproute2) est installé"
-else
-    echo -e "${YELLOW}[WARN]${NC} ss n'est pas trouvé. Le compteur de clients risque de ne pas fonctionner."
-fi
-
-# 3. Vérifier les permissions logs
-LOG_FILE="/var/logs/Essensys/backend/console.out.log"
-if [ -r "$LOG_FILE" ]; then
-    echo -e "${GREEN}[OK]${NC} Le fichier de log est lisible"
-elif [ -f "$LOG_FILE" ]; then
-    echo -e "${YELLOW}[WARN]${NC} Le fichier de log existe mais n'est pas lisible par l'utilisateur actuel."
-    echo "       Le script devra probablement être lancé avec 'sudo'."
-else
-    echo -e "${YELLOW}[WARN]${NC} Le fichier de log n'existe pas encore ($LOG_FILE)."
-fi
-
-# 4. Instructions pour le démarrage automatique
-echo -e "\n${GREEN}=== Instructions pour le démarrage automatique ===${NC}"
-echo "Pour lancer ce moniteur automatiquement au démarrage sur l'écran connecté (HDMI/Ecran officiel),"
-echo "ajoutez les lignes suivantes à la fin de votre fichier ~/.bashrc :"
-echo ""
-echo -e "${YELLOW}"
-echo "# Lancer le moniteur Essensys uniquement sur tty1 (écran physique)"
-echo "if [ -z \"\$SSH_CLIENT\" ] && [ -z \"\$SSH_TTY\" ]; then"
-echo "    if [ \"\$(tty)\" = \"/dev/tty1\" ]; then"
-echo "        # Attendre un peu que le réseau soit prêt"
-echo "        # sleep 5"
-echo "        sudo $MONITOR_SCRIPT"
-echo "    fi"
-echo "fi"
-echo -e "${NC}"
-echo ""
-echo "Assurez-vous également que le Raspberry Pi est configuré pour se connecter automatiquement en console (Autologin Console)."
-echo "Vous pouvez configurer cela via 'sudo raspi-config' -> 'System Options' -> 'Boot / Auto Login' -> 'Console Autologin'."
-echo ""
-echo "Pour tester le moniteur maintenant :"
-echo "sudo $MONITOR_SCRIPT"
+echo -e "\n${GREEN}=== Configuration terminée ===${NC}"
+echo "Le moniteur se lancera automatiquement au prochain redémarrage."
+echo "Pour tester maintenant : sudo reboot"
