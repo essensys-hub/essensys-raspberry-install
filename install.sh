@@ -513,16 +513,20 @@ ADGUARD_DIR="/opt/AdGuardHome"
 ADGUARD_CONFIG_DIR="$SCRIPT_DIR/adguard-config"
 
 # Désactiver le stub listener de systemd-resolved sur le port 53
-if grep -q "#DNSStubListener=yes" /etc/systemd/resolved.conf || ! grep -q "DNSStubListener=no" /etc/systemd/resolved.conf; then
-    log_info "Désactivation du DNSStubListener (port 53) pour systemd-resolved..."
-    sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
-    sed -i 's/DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
-    systemctl restart systemd-resolved
-fi
-
-# Créer le lien symbolique pour resolv.conf si nécessaire
-if [ -L /etc/resolv.conf ]; then
-     ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+if [ -f /etc/systemd/resolved.conf ]; then
+    if grep -q "#DNSStubListener=yes" /etc/systemd/resolved.conf || ! grep -q "DNSStubListener=no" /etc/systemd/resolved.conf; then
+        log_info "Désactivation du DNSStubListener (port 53) pour systemd-resolved..."
+        sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+        sed -i 's/DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+        systemctl restart systemd-resolved
+    fi
+    
+    # Créer le lien symbolique pour resolv.conf si nécessaire
+    if [ -L /etc/resolv.conf ]; then
+         ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    fi
+else
+    log_info "Fichier /etc/systemd/resolved.conf non trouvé. Ignoré (systemd-resolved probablement absent)."
 fi
 
 if [ ! -d "$ADGUARD_DIR" ]; then
