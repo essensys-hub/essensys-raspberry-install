@@ -34,6 +34,11 @@ class SystemMonitor:
         self.cached_disk_usage = (0, 0, 0)
         self.cached_logs_size = 0
 
+        # Cache for services
+        self.last_service_check = 0
+        self.service_cache = {}
+        self.service_refresh_interval = 60 # Check every 60s
+
     def _read_cpu_stats(self):
         try:
             with open('/proc/stat', 'r') as f:
@@ -110,16 +115,46 @@ class SystemMonitor:
         except:
             return 0
 
+    def update_services(self, services_list):
+        # Force initial check or check if interval passed
+        if self.last_service_check == 0 or (time.time() - self.last_service_check > self.service_refresh_interval):
+            for s in services_list:
+                name = s['service']
+                try:
+                    ret = subprocess.call(["systemctl", "is-active", "--quiet", name])
+                    self.service_cache[name] = (ret == 0)
+                except:
+                    self.service_cache[name] = False
+            self.last_service_check = time.time()
+
+    def get_service_refresh_remaining(self):
+        if self.last_service_check == 0: return 0
+        elapsed = time.time() - self.last_service_check
+        remaining = self.service_refresh_interval - elapsed
+        return max(0, int(remaining))
+
     def get_service_status(self, service_name):
-        try:
-            ret = subprocess.call(["systemctl", "is-active", "--quiet", service_name])
-            return ret == 0
-        except:
-            return False
+        return self.service_cache.get(service_name, False)
 
     def restart_service(self, service_name):
         def _restart():
             subprocess.call(["sudo", "systemctl", "restart", service_name])
+            # Invalide cache for this service to force update on next loop?
+            # Or simplified: force global refresh shortly?
+            # Let's set the cache to False temporarily or just wait for refresh.
+            # Ideally we want immediate feedback.
+            # We can force a refresh after restart command finishes (in this thread).
+            # But the main loop controls the refresh time.
+            # Let's just reset the timer logic? No, let's create a "force_refresh" flag if needed.
+            # For now simpler: User waits 1 min or manual restart updates? 
+            # Actually, when restarting, we usually want to see result.
+            # Let's force an update after 2-3 seconds in the thread.
+            time.sleep(3)
+            try:
+                ret = subprocess.call(["systemctl", "is-active", "--quiet", service_name])
+                self.service_cache[service_name] = (ret == 0)
+            except:
+                pass
         
         t = threading.Thread(target=_restart)
         t.start()
@@ -298,6 +333,9 @@ def main(stdscr):
             stdscr.hline(5, 0, curses.ACS_HLINE, w)
 
             # --- Services ---
+            monitor.update_services(SERVICES)
+            refresh_sec = monitor.get_service_refresh_remaining()
+            
             # Calculate layout
             col_width = w // len(SERVICES)
             for i, service in enumerate(SERVICES):
@@ -316,7 +354,7 @@ def main(stdscr):
                     pass
 
             stdscr.hline(9, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(9, 2, " LOGS (tail -f) ", curses.color_pair(3))
+            stdscr.addstr(9, 2, f" LOGS (Refresh in {refresh_sec}s) ", curses.color_pair(3))
 
             # --- Logs ---
             log_h = h - 11
