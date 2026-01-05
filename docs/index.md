@@ -19,7 +19,9 @@ Pour accéder à Essensys depuis l'extérieur, vous devez choisir une méthode d
 *   **Option Avancée** : Domaine personnalisé (OVH, etc.) - voir [Accès WAN](acces/wan.md)
 
 ### 3. Installation Essensys
-Une fois le dépôt cloné (étape 2.1), lancez l'installation :
+Une fois le dépôt cloné (étape 2.1), suivre le guide détaillé ou lancer directement :
+**[Voir le guide complet d'installation](installation/essensys-installation.md)**
+
 ```bash
 cd essensys-raspberry-install
 sudo ./install.sh

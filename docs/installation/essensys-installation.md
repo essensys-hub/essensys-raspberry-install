@@ -10,12 +10,12 @@ Cette section explique comment installer Essensys (backend et frontend) sur le R
 
 ## Installation automatique
 
-### Étape 1 : Cloner le dépôt d'installation
+### Étape 1 : Se placer dans le dossier
+
+Suite à l'exécution du script de pré-requis (`requirements.sh`) du guide de démarrage, le dépôt est déjà cloné.
 
 ```bash
-cd /home/essensys
-git clone https://github.com/essensys-hub/essensys-raspberry-install.git
-cd essensys-raspberry-install
+cd /home/essensys/essensys-raspberry-install
 ```
 
 ### Étape 2 : Exécuter le script d'installation
