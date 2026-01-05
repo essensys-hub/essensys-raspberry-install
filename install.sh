@@ -551,19 +551,29 @@ if [ ! -f "$ADGUARD_DIR/AdGuardHome.yaml" ] && [ -f "$ADGUARD_CONFIG_DIR/AdGuard
     cp "$ADGUARD_CONFIG_DIR/AdGuardHome.yaml.template" "$ADGUARD_DIR/AdGuardHome.yaml"
 fi
 
-# 2. Arrêter le service pour éviter qu'il n'écrase la conf
-if systemctl is-active --quiet AdGuardHome 2>/dev/null; then
-    log_info "Arrêt temporaire de AdGuard Home pour mise à jour de la configuration..."
-    systemctl stop AdGuardHome
+# 2. Installer le service AVANT la configuration finale pour laisser AdGuard faire son init
+if [ -x "$ADGUARD_DIR/AdGuardHome" ]; then
+    cd "$ADGUARD_DIR"
+    # L'installation du service est idempotente ou échoue sans dégâts si déjà installé
+    # AdGuard démarre souvent automatiquement après install
+    ./AdGuardHome -s install 2>/dev/null || true
+    log_info "Service AdGuard Home installé (init)."
 fi
 
-# 3. Utiliser le script Python pour une mise à jour robuste du YAML
+# 3. Arrêter le service pour éviter qu'il n'écrase la conf lors de l'update
+log_info "Arrêt temporaire de AdGuard Home pour mise à jour de la configuration..."
+if systemctl is-active --quiet AdGuardHome 2>/dev/null; then
+    systemctl stop AdGuardHome
+    # Attendre un peu que l'arrêt soit effectif et que le fichier soit relâché
+    sleep 2
+fi
+
+# 4. Utiliser le script Python pour une mise à jour robuste du YAML
 if [ -f "$ADGUARD_CONFIG_DIR/update_dns.py" ]; then
     log_info "Mise à jour de la configuration AdGuard via script Python..."
     python3 "$ADGUARD_CONFIG_DIR/update_dns.py" "$ADGUARD_DIR/AdGuardHome.yaml" "$LOCAL_IP"
 else
     log_warn "Script update_dns.py non trouvé. Tentative de configuration manuelle (moins robuste)..."
-    # Fallback shell si python script absent (mais on vient de l'installer)
     if [ -f "$ADGUARD_DIR/AdGuardHome.yaml" ]; then
          if grep -q "^os: linux" "$ADGUARD_DIR/AdGuardHome.yaml"; then
              sed -i '/^os:[[:space:]]*linux[[:space:]]*$/d' "$ADGUARD_DIR/AdGuardHome.yaml"
@@ -580,14 +590,6 @@ rewrites:
 YAML
          fi
     fi
-fi
-
-# Installation du service si nécessaire
-if [ -x "$ADGUARD_DIR/AdGuardHome" ]; then
-    cd "$ADGUARD_DIR"
-    # L'installation du service est idempotente ou échoue sans dégâts si déjà installé
-    ./AdGuardHome -s install 2>/dev/null || true
-    log_info "Service AdGuard Home vérifié."
 fi
 
 # Recharger systemd et démarrer les services
