@@ -73,10 +73,11 @@ nav:
     - installation/preparation.md
     - installation/os-installation.md
     - installation/essensys-installation.md
-  - Connexion:
+   - Connexion:
     - connexion/index.md
     - connexion/ssh.md
     - connexion/configuration-reseau.md
+    - connexion/duckdns.md
   - Logs:
     - logs/index.md
     - logs/backend.md
