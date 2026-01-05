@@ -131,6 +131,16 @@ class SystemMonitor:
             self.cached_logs_size = self._get_dir_size('/var/logs') if os.path.exists('/var/logs') else self._get_dir_size('/var/log')
             self.last_disk_check = time.time()
 
+    def get_mac_address(self, interface):
+        try:
+            path = f"/sys/class/net/{interface}/address"
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    return f.read().strip()
+        except:
+            pass
+        return "N/A"
+
     def _get_disk_usage(self, path):
         try:
             st = os.statvfs(path)
@@ -274,12 +284,18 @@ def main(stdscr):
             root_used, root_total, root_pct = monitor.cached_disk_usage
             logs_size = monitor.cached_logs_size
             
+            # MAC Addresses
+            mac_eth0 = monitor.get_mac_address("eth0")
+            mac_wlan0 = monitor.get_mac_address("wlan0")
+            
             stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)}MB) | CLIENTS: {clients}"
             stats_str2 = f"DISK /: {root_pct:.1f}% ({format_bytes(root_used)}/{format_bytes(root_total)}) | /var/logs: {format_bytes(logs_size)}"
+            stats_str3 = f"MAC: eth0 [{mac_eth0}] | wlan0 [{mac_wlan0}]"
             
             draw_centered(stdscr, 2, stats_str)
             draw_centered(stdscr, 3, stats_str2)
-            stdscr.hline(4, 0, curses.ACS_HLINE, w)
+            draw_centered(stdscr, 4, stats_str3)
+            stdscr.hline(5, 0, curses.ACS_HLINE, w)
 
             # --- Services ---
             # Calculate layout
@@ -293,24 +309,24 @@ def main(stdscr):
                 bx = i * col_width
                 # content
                 try:
-                    stdscr.addstr(5, bx + 2, f"{service['name']}", curses.A_BOLD)
-                    stdscr.addstr(6, bx + 2, f"Status: {status_txt}", color)
-                    stdscr.addstr(7, bx + 2, f"Restart: '{service['key']}'")
+                    stdscr.addstr(6, bx + 2, f"{service['name']}", curses.A_BOLD)
+                    stdscr.addstr(7, bx + 2, f"Status: {status_txt}", color)
+                    stdscr.addstr(8, bx + 2, f"Restart: '{service['key']}'")
                 except:
                     pass
 
-            stdscr.hline(8, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(8, 2, " LOGS (tail -f) ", curses.color_pair(3))
+            stdscr.hline(9, 0, curses.ACS_HLINE, w)
+            stdscr.addstr(9, 2, " LOGS (tail -f) ", curses.color_pair(3))
 
             # --- Logs ---
-            log_h = h - 10
+            log_h = h - 11
             if log_h > 0:
                 with monitor.log_lock:
                     logs = list(monitor.log_buffer)[-log_h:]
                 
                 for i, line in enumerate(logs):
                     try:
-                        stdscr.addstr(9 + i, 1, line[:w-2])
+                        stdscr.addstr(10 + i, 1, line[:w-2])
                     except:
                         pass
             

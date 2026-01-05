@@ -17,8 +17,9 @@ Cette interface permet de :
 *   **Monitoring système** :
     *   Utilisation CPU
     *   Utilisation Mémoire
-    *   **Utilisation Disque** : Espace disque `/` et taille de `/var/logs`
-    *   Nombre de clients connectés (sur les ports 80, 443, 7070)
+    *   **Utilisation Disque** : Affichage de l'espace utilisé sur la racine (`/`) et `/var/logs` (filtrage pour éviter la surcharge I/O).
+*   **Réseau** : Affichage des adresses MAC pour `eth0` et `wlan0`.
+*   **Services** : Statut en temps réel (Actif/Inactif) pour Backend, Frontend, Traefik, AdGuard.443, 7070)
 *   **Logs en temps réel** : Affichage des logs du backend (`/var/logs/Essensys/backend/console.out.log`) via `tail -f`.
 
 ## Démarrage automatique
