@@ -185,20 +185,28 @@ if [ "$NGINX_CONFIG_REMOVED" = true ] && systemctl is-active --quiet nginx 2>/de
     if nginx -t 2>/dev/null; then
         log_info "Rechargement de nginx..."
         systemctl reload nginx
-        if [ $? -ne 0 ]; then
-            log_warn "Échec du rechargement de nginx (peut être normal si aucun site n'est configuré)"
-        fi
     else
-        log_warn "La configuration nginx est invalide (peut être normal après suppression)"
         # Essayer de redémarrer nginx si possible, sinon l'arrêter
         if [ -f "/etc/nginx/sites-enabled/default" ] || [ "$(ls -A /etc/nginx/sites-enabled/ 2>/dev/null)" ]; then
             log_info "Tentative de redémarrage de nginx..."
-            systemctl restart nginx 2>/dev/null || log_warn "Impossible de redémarrer nginx"
+            systemctl restart nginx 2>/dev/null || true
         else
             log_info "Aucun site nginx configuré, arrêt de nginx..."
-            systemctl stop nginx 2>/dev/null || log_warn "Impossible d'arrêter nginx"
+            systemctl stop nginx 2>/dev/null || true
         fi
     fi
+fi
+
+# Demander si on veut désinstaller complètement le paquet Nginx
+log_warn ""
+read -p "Voulez-vous désinstaller complètement le paquet Nginx (apt remove)? (oui/non): " remove_nginx
+if [ "$remove_nginx" = "oui" ]; then
+    log_info "Désinstallation du paquet Nginx..."
+    apt-get remove -y nginx nginx-common nginx-full
+    apt-get autoremove -y
+    log_info "✓ Paquet Nginx désinstallé"
+else
+    log_info "Paquet Nginx conservé"
 fi
 
 # Supprimer les fichiers d'installation
