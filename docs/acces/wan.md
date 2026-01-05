@@ -131,6 +131,16 @@ sudo systemctl start traefik
 
 Traefik va automatiquement régénérer le fichier et demander un nouveau certificat à Let's Encrypt. Vérifiez les logs pour confirmer le succès.
 
+#### Erreur 429 (Rate Limit)
+Si vous voyez `acme: error: 429 :: POST ... :: too many certificates`, vous avez demandé trop de certificats récemment.
+**Solution** :
+1. Attendre (le log indique `retry after ...`).
+2. OU utiliser le serveur de *Staging* pour tester :
+   - Éditer `/etc/traefik/traefik.yml`.
+   - Ajouter `caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"` dans la section `certificatesResolvers.letsencrypt.acme`.
+   - Redémarrer Traefik.
+   - *Note : Le certificat sera "Non sécurisé" mais cela validera la config.*
+
 ### Impossible de se connecter
 
 1. Vérifier le NAT/port forwarding sur le routeur

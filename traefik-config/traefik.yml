@@ -53,6 +53,8 @@ certificatesResolvers:
     acme:
       email: admin@acme.com  # À modifier avec votre email
       storage: /etc/traefik/acme.json
+      # Serveur de staging (décommenter pour tester si erreur 429/Rate Limit)
+      # caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       # Utiliser TLS-ALPN challenge sur port 443 (pas besoin de port 80)
       tlsChallenge: {}
       # Alternative: httpChallenge nécessite port 80, mais Nginx le gère
