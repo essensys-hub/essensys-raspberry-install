@@ -26,14 +26,22 @@ def update_config(config_path, local_ip, domain="mon.essensys.fr"):
         changed = True
 
     # 2. Add DNS rewrite
-    if 'rewrites' not in config or config['rewrites'] is None:
-        config['rewrites'] = []
+    # Check location of rewrites based on schema (v32+ uses filtering.rewrites)
+    target_container = config
+    location_name = "top-level"
+    
+    if 'filtering' in config and isinstance(config['filtering'], dict):
+        target_container = config['filtering']
+        location_name = "filtering.rewrites"
+    
+    if 'rewrites' not in target_container or target_container['rewrites'] is None:
+        target_container['rewrites'] = []
 
     # Check if domain exists
     rewrite_exists = False
-    for rule in config['rewrites']:
+    for rule in target_container['rewrites']:
         if isinstance(rule, dict) and rule.get('domain') == domain:
-            print(f"Domain {domain} already exists. Updating IP to {local_ip}")
+            print(f"Domain {domain} already exists in {location_name}. Updating IP to {local_ip}")
             if rule.get('answer') != local_ip:
                 rule['answer'] = local_ip
                 changed = True
@@ -41,8 +49,8 @@ def update_config(config_path, local_ip, domain="mon.essensys.fr"):
             break
     
     if not rewrite_exists:
-        print(f"Adding rewrite rule for {domain} -> {local_ip}")
-        config['rewrites'].append({
+        print(f"Adding rewrite rule for {domain} -> {local_ip} in {location_name}")
+        target_container['rewrites'].append({
             'domain': domain,
             'answer': local_ip
         })

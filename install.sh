@@ -606,6 +606,7 @@ systemctl restart essensys-backend
 systemctl restart traefik-block-service
 systemctl restart traefik
 systemctl restart nginx
+systemctl restart AdGuardHome
 
 # Vérifier le statut des services
 log_info "Vérification du statut des services..."
