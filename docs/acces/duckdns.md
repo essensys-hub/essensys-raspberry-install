@@ -5,6 +5,7 @@ Pour accéder à votre serveur Essensys depuis l'extérieur (WAN) sans adresse I
 ## Prérequis
 
 1.  Avoir un compte sur [DuckDNS.org](https://www.duckdns.org) (connexion via Google/GitHub...).
+    *   **[> Voir le guide détaillé : Créer son compte et son domaine](duckdns-guide.md)**
 2.  Avoir récupéré votre **Token** (affiché en haut de la page une fois connecté).
 3.  Avoir choisi un nom de sous-domaine (mais ne pas nécessairement l'avoir créé avec une IP, le script va le mettre à jour).
 
