@@ -339,6 +339,11 @@ def main(stdscr):
             monitor.update_services(SERVICES)
             refresh_sec = monitor.get_service_refresh_remaining()
             
+            # Service Header with Timer
+            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
+            stdscr.addstr(line_idx, 2, f" SERVICES (Next refresh: {refresh_sec}s) ", curses.color_pair(3))
+            line_idx += 1
+            
             # Calculate layout (Box services)
             col_width = w // len(SERVICES)
             for i, service in enumerate(SERVICES):
@@ -358,7 +363,7 @@ def main(stdscr):
 
             line_idx += 3
             stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(line_idx, 2, f" LOGS (Refresh in {refresh_sec}s) ", curses.color_pair(3))
+            stdscr.addstr(line_idx, 2, " LOGS (tail -f) ", curses.color_pair(3))
 
             # --- Logs ---
             log_start_y = line_idx + 1
