@@ -131,5 +131,4 @@ log_max_files: 0
 log_compress: false
 log_localtime: false
 verbose: false
-os: linux
 schema_version: 20
