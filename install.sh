@@ -529,6 +529,24 @@ systemctl status essensys-backend --no-pager -l || true
 systemctl status traefik --no-pager -l || true
 systemctl status nginx --no-pager -l || true
 
+# Configurer le moniteur
+log_info "Configuration du moniteur..."
+if [ -f "$SCRIPT_DIR/monitor.py" ] && [ -f "$SCRIPT_DIR/setup_monitor.sh" ]; then
+    cp "$SCRIPT_DIR/monitor.py" "$INSTALL_DIR/"
+    cp "$SCRIPT_DIR/setup_monitor.sh" "$INSTALL_DIR/"
+    chmod +x "$INSTALL_DIR/monitor.py"
+    chmod +x "$INSTALL_DIR/setup_monitor.sh"
+    
+    log_info "Exécution du script de configuration du moniteur..."
+    if [ -x "$INSTALL_DIR/setup_monitor.sh" ]; then
+        "$INSTALL_DIR/setup_monitor.sh"
+    else
+        log_warn "Impossible d'exécuter setup_monitor.sh"
+    fi
+else
+    log_warn "Scripts du moniteur non trouvés dans $SCRIPT_DIR"
+fi
+
 log_info ""
 log_info "=========================================="
 log_info "Installation terminée avec succès!"
