@@ -4,9 +4,10 @@ Accès aux services Essensys depuis Internet (WAN) avec HTTPS et authentificatio
 
 ## Prérequis
 
-1. **Domaine WAN configuré** : Votre domaine doit pointer vers votre IP publique
-2. **NAT/Port forwarding** : Ports 80 et 443 redirigés vers le Raspberry Pi
-3. **Fichier domain.txt** : Contient le domaine WAN (`/home/essensys/domain.txt`)
+1. **[Configuration DuckDNS](duckdns.md)** : Si vous n'avez pas d'IP fixe (recommandé)
+2. **Domaine WAN configuré** : Votre domaine doit pointer vers votre IP publique
+3. **NAT/Port forwarding** : Ports 80 et 443 redirigés vers le Raspberry Pi
+4. **Fichier domain.txt** : Contient le domaine WAN (`/home/essensys/domain.txt`)
 
 ## Configuration
 

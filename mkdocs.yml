@@ -77,7 +77,6 @@ nav:
     - connexion/index.md
     - connexion/ssh.md
     - connexion/configuration-reseau.md
-    - connexion/duckdns.md
   - Logs:
     - logs/index.md
     - logs/backend.md
@@ -87,6 +86,7 @@ nav:
     - acces/index.md
     - acces/local.md
     - acces/wan.md
+    - acces/duckdns.md
   - Configuration Routeur:
     - router/index.md
     - router/ubiquiti-udm-pro.md
