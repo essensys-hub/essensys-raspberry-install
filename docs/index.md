@@ -99,3 +99,4 @@ graph TB
 - Nginx est configuré spécifiquement pour cette compatibilité
 - Traefik gère uniquement le frontend WAN, les API locales restent sur Nginx
 
+

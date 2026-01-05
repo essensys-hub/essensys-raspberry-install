@@ -89,3 +89,4 @@ Pour une compatibilité maximale avec le client legacy :
 3. Configurer des timeouts appropriés
 4. Surveiller les logs pour détecter les problèmes
 
+

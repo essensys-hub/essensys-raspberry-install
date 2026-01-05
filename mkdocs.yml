@@ -65,6 +65,7 @@ plugins:
 nav:
   - Accueil: index.md
   - Client iOS: client-ios.md
+  - Client Android: client-android.md
 
   - Installation:
     - installation/index.md

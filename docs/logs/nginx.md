@@ -149,3 +149,4 @@ sudo nginx -t
 - Vérifier que Nginx reçoit des requêtes
 - Vérifier la configuration des logs dans `/etc/nginx/sites-available/essensys`
 
+

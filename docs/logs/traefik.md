@@ -131,3 +131,4 @@ sudo cat /etc/traefik/traefik.yml | grep -A 5 "log:"
 - Vérifier le niveau de log (doit être au moins `INFO`)
 - Vérifier que les entrypoints sont correctement configurés
 
+

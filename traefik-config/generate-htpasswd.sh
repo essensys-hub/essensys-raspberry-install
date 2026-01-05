@@ -80,3 +80,4 @@ log_info "Utilisateur: $USERNAME"
 log_info ""
 log_info "Pour ajouter d'autres utilisateurs, exécutez à nouveau ce script"
 
+
