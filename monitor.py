@@ -26,7 +26,12 @@ REFRESH_RATE = 1.0  # seconds
 class SystemMonitor:
     def __init__(self):
         self.cpu_prev = self._read_cpu_stats()
-        self.log_buffer = deque(maxlen=100)
+        # Separate buffers for each source
+        self.log_buffers = {
+            "Backend": deque(maxlen=200),
+            "Traefik": deque(maxlen=200),
+            "Nginx": deque(maxlen=200)
+        }
         self.log_lock = threading.Lock()
         self.running = True
         
@@ -63,12 +68,9 @@ class SystemMonitor:
             return 0.0
         
         # Calculate diffs
-        # user+nice+system+idle+iowait
         prev_sum = sum(self.cpu_prev)
         curr_sum = sum(curr)
         
-        # idle is index 3, iowait is index 4 (if present, usually yes for linux 2.6+)
-        # idle time = idle + iowait
         prev_idle = self.cpu_prev[3]
         curr_idle = curr[3]
         if len(self.cpu_prev) > 4:
@@ -102,26 +104,14 @@ class SystemMonitor:
             return 0.0, 0, 0
 
     def get_client_count(self):
-        # Count established connections on ports 80, 443, 7070
-        # Using ss is cleaner and faster than netstat
-        cmd = "ss -tun state established '( dport = :80 or dport = :443 or dport = :7070 )' | wc -l"
         try:
+            cmd = "ss -tnH state established '( dport = :80 or dport = :443 or dport = :7070 )' | wc -l"
             output = subprocess.check_output(cmd, shell=True)
-            count = int(output.strip())
-            # ss output includes header line if not empty, but 'wc -l' counts lines.
-            # ss header: "Netid Recv-Q Send-Q Local Address:Port Peer Address:Port Process"
-            # However, 'state established' might filter. 
-            # Ideally verify output. For now, assuming count - 1 if header exists?
-            # Actually easier: just count lines. If 0 lines, 0 clients. If 1 line (header?), 0 clients.
-            # Let's use grep -v to skip header just in case.
-            cmd2 = "ss -tnH state established '( dport = :80 or dport = :443 or dport = :7070 )' | wc -l"
-            output = subprocess.check_output(cmd2, shell=True)
             return int(output.strip())
         except:
             return 0
 
     def update_services(self, services_list):
-        # Force initial check or check if interval passed
         if self.last_service_check == 0 or (time.time() - self.last_service_check > self.service_refresh_interval):
             for s in services_list:
                 name = s['service']
@@ -143,19 +133,9 @@ class SystemMonitor:
 
     def restart_service(self, service_name):
         def _restart():
-            subprocess.call(["sudo", "systemctl", "restart", service_name])
-            # Invalide cache for this service to force update on next loop?
-            # Or simplified: force global refresh shortly?
-            # Let's set the cache to False temporarily or just wait for refresh.
-            # Ideally we want immediate feedback.
-            # We can force a refresh after restart command finishes (in this thread).
-            # But the main loop controls the refresh time.
-            # Let's just reset the timer logic? No, let's create a "force_refresh" flag if needed.
-            # For now simpler: User waits 1 min or manual restart updates? 
-            # Actually, when restarting, we usually want to see result.
-            # Let's force an update after 2-3 seconds in the thread.
             time.sleep(3)
             try:
+                subprocess.call(["sudo", "systemctl", "restart", service_name])
                 ret = subprocess.call(["systemctl", "is-active", "--quiet", service_name])
                 self.service_cache[service_name] = (ret == 0)
             except:
@@ -165,7 +145,6 @@ class SystemMonitor:
         t.start()
 
     def update_disk_stats(self):
-        # Update every 120 seconds
         if time.time() - self.last_disk_check > 120:
             self.cached_disk_usage = self._get_disk_usage('/')
             self.cached_logs_size = self._get_dir_size('/var/logs') if os.path.exists('/var/logs') else self._get_dir_size('/var/log')
@@ -174,7 +153,6 @@ class SystemMonitor:
     def get_network_interfaces(self):
         interfaces = []
         try:
-            # Get IPs: ip -o -4 addr show
             output = subprocess.check_output(['ip', '-o', '-4', 'addr', 'show'], text=True)
             for line in output.splitlines():
                 parts = line.split()
@@ -242,17 +220,12 @@ class SystemMonitor:
         stdscr.refresh()
 
     def _tail_log(self):
-        # Create a mapping from filename to nice name
         file_map = {f[0]: f[1] for f in LOG_FILES}
         files_to_tail = [f[0] for f in LOG_FILES]
-        
-        # Determine initial context (default to first one if unsure, but we'll try to sync with output)
-        current_source = "System"
+        current_source = "Backend" # Default
 
         try:
-            # tail -F -n 10 file1 file2 ...
-            # We use -n 10 to limit initial noise
-            cmd = ['tail', '-F', '-n', '10'] + files_to_tail
+            cmd = ['tail', '-F', '-n', '20'] + files_to_tail
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
             
             while self.running:
@@ -263,26 +236,25 @@ class SystemMonitor:
                 line = line.strip()
                 if not line: continue
 
-                # Check for header: ==> file <==
                 header_match = re.match(r'^==> (.+) <==$', line)
                 if header_match:
                     fname = header_match.group(1)
-                    current_source = file_map.get(fname, os.path.basename(fname))
+                    current_source = file_map.get(fname, "Backend") # Fallback to Backend if unknown
                     continue
                 
-                # Format line with source
-                formatted_line = f"[{current_source}] {line}"
-                
                 with self.log_lock:
-                    self.log_buffer.append(formatted_line)
+                    if current_source in self.log_buffers:
+                        self.log_buffers[current_source].append(line)
+                    else:
+                        # Should not happen given config, but just in case
+                        self.log_buffers["Backend"].append(f"[{current_source}] {line}")
                     
         except Exception as e:
             with self.log_lock:
-                self.log_buffer.append(f"Error reading logs: {str(e)}")
+                self.log_buffers["Backend"].append(f"Error reading logs: {str(e)}")
 
     def stop(self):
         self.running = False
-
 
 def format_bytes(size):
     power = 2**10
@@ -301,6 +273,35 @@ def draw_centered(stdscr, y, text, attr=0):
     except:
         pass
 
+def draw_box(stdscr, y, x, h, w, title, logs, color):
+    # Draw simple box borders if possible, or just background
+    # y, x is top-left
+    # h, w is size
+    
+    # Check bounds
+    max_y, max_x = stdscr.getmaxyx()
+    if y >= max_y or x >= max_x: return
+    h = min(h, max_y - y)
+    w = min(w, max_x - x)
+    
+    # Draw Header
+    header = f" {title} "
+    try:
+        stdscr.addstr(y, x, header[:w], color | curses.A_BOLD | curses.A_REVERSE)
+        # Fill rest of header line
+        if len(header) < w:
+            stdscr.addstr(y, x + len(header), " " * (w - len(header)), color | curses.A_REVERSE)
+            
+        # Draw logs
+        content_h = h - 1
+        visible_logs = list(logs)[-content_h:]
+        for i, line in enumerate(visible_logs):
+            if y + 1 + i < max_y:
+                stdscr.addstr(y + 1 + i, x, line[:w])
+                
+    except:
+        pass
+
 def main(stdscr):
     # Setup curses
     curses.start_color()
@@ -309,16 +310,20 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_RED, -1)     # Status Error/Inactive
     curses.init_pair(3, curses.COLOR_CYAN, -1)    # Header
     curses.init_pair(4, curses.COLOR_YELLOW, -1)  # Warnings/Info
+    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLUE) # Focused/Box Header
     
-    stdscr.nodelay(True) # Non-blocking input
-    stdscr.timeout(1000) # Refresh every 1s if no input
-    curses.curs_set(0)   # Hide cursor
+    stdscr.nodelay(True)
+    stdscr.timeout(1000)
+    curses.curs_set(0)
 
     monitor = SystemMonitor()
     
-    # Store last restart times to show feedback
     last_restart_msg = ""
     last_restart_time = 0
+    
+    # View State: 0=All, 1=Backend, 2=Traefik, 3=Nginx
+    view_mode = 0 
+    VIEW_NAMES = {0: "Overview", 1: "Backend", 2: "Traefik", 3: "Nginx"}
 
     try:
         while True:
@@ -327,101 +332,71 @@ def main(stdscr):
             
             # --- Header ---
             hostname = os.uname()[1]
-            header = f"ESSENSYS RASPBERRY PI MONITOR - {hostname}"
+            header = f"ESSENSYS PI MONITOR - {VIEW_NAMES[view_mode]} View"
             draw_centered(stdscr, 0, header, curses.color_pair(3) | curses.A_BOLD)
             stdscr.hline(1, 0, curses.ACS_HLINE, w)
             
-            # --- Stats ---
-            cpu_pct = monitor.get_cpu_usage()
-            mem_pct, mem_used, mem_total = monitor.get_mem_usage()
-            clients = monitor.get_client_count()
-            
-            # Disk Usage (Cached)
-            monitor.update_disk_stats()
-            root_used, root_total, root_pct = monitor.cached_disk_usage
-            logs_size = monitor.cached_logs_size
-            
-            stats_str = f"CPU: {cpu_pct:.1f}% | MEM: {mem_pct:.1f}% ({int(mem_used)}/{int(mem_total)}MB) | CLIENTS: {clients}"
-            stats_str2 = f"DISK /: {root_pct:.1f}% ({format_bytes(root_used)}/{format_bytes(root_total)}) | /var/logs: {format_bytes(logs_size)}"
-            
-            draw_centered(stdscr, 2, stats_str)
-            draw_centered(stdscr, 3, stats_str2)
-            
-            # --- Network Interfaces ---
-            interfaces = monitor.get_network_interfaces()
-            line_idx = 4
-            for iface in interfaces:
-                net_str = f"{iface['name']}: {iface['ip']} [{iface['mac']}]"
-                draw_centered(stdscr, line_idx, net_str)
-                line_idx += 1
-            
-            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
-            line_idx += 1
-
-            # --- Services ---
+            # --- Services Status (Small strip at top) ---
             monitor.update_services(SERVICES)
-            refresh_sec = monitor.get_service_refresh_remaining()
+            # Just show simple status line: "B: OK | T: ERR | ..."
+            status_line = ""
+            for s in SERVICES:
+                st = "OK" if monitor.get_service_status(s['service']) else "ERR"
+                status_line += f"{s['name']}: {st} | "
+            draw_centered(stdscr, 2, status_line[:-3])
             
-            # Service Header with Timer
-            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(line_idx, 2, f" SERVICES (Next refresh: {refresh_sec}s) ", curses.color_pair(3))
-            line_idx += 1
+            # --- Logs Section ---
+            log_start_y = 4
+            log_area_h = h - log_start_y - 2 # Reserve bottom
             
-            # Calculate layout (Box services)
-            col_width = w // len(SERVICES)
-            for i, service in enumerate(SERVICES):
-                status = monitor.get_service_status(service['service'])
-                color = curses.color_pair(1) if status else curses.color_pair(2)
-                status_txt = "ACTIVE" if status else "INACTIVE"
-                
-                # Draw Box
-                bx = i * col_width
-                # content
-                try:
-                    stdscr.addstr(line_idx, bx + 2, f"{service['name']}", curses.A_BOLD)
-                    stdscr.addstr(line_idx + 1, bx + 2, f"Status: {status_txt}", color)
-                    stdscr.addstr(line_idx + 2, bx + 2, f"Restart: '{service['key']}'")
-                except:
-                    pass
-
-            line_idx += 3
-            stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(line_idx, 2, " LOGS (tail -f Multi-Source) ", curses.color_pair(3))
-
-            # --- Logs ---
-            log_start_y = line_idx + 1
-            log_h = h - log_start_y - 2 # Reserve bottom for status bar
-            if log_h > 0:
+            if log_area_h > 0:
                 with monitor.log_lock:
-                    logs = list(monitor.log_buffer)[-log_h:]
-                
-                for i, line in enumerate(logs):
-                    try:
-                        # Colorize based on source? Simple white for now.
-                        stdscr.addstr(log_start_y + i, 1, line[:w-2])
-                    except:
-                        pass
-            
+                    if view_mode == 0:
+                        # 3 Horizontal Panels (Stacked) to maximize width, OR 3 Vertical?
+                        # User said "chaqun sa boite". 3 Vertical columns is better for overview if terminal is wide.
+                        # But standard terminal 80 chars -> 26 chars per col is useless.
+                        # Let's check width.
+                        if w > 120:
+                            # 3 Columns
+                            col_w = w // 3
+                            draw_box(stdscr, log_start_y, 0, log_area_h, col_w-1, "Backend", monitor.log_buffers["Backend"], curses.color_pair(5))
+                            draw_box(stdscr, log_start_y, col_w, log_area_h, col_w-1, "Traefik", monitor.log_buffers["Traefik"], curses.color_pair(5))
+                            draw_box(stdscr, log_start_y, col_w*2, log_area_h, col_w-1, "Nginx", monitor.log_buffers["Nginx"], curses.color_pair(5))
+                        else:
+                            # 3 Stacked Rows
+                            row_h = log_area_h // 3
+                            draw_box(stdscr, log_start_y, 0, row_h, w, "Backend", monitor.log_buffers["Backend"], curses.color_pair(5))
+                            draw_box(stdscr, log_start_y + row_h, 0, row_h, w, "Traefik", monitor.log_buffers["Traefik"], curses.color_pair(5))
+                            draw_box(stdscr, log_start_y + row_h*2, 0, log_area_h - row_h*2, w, "Nginx", monitor.log_buffers["Nginx"], curses.color_pair(5))
+                    
+                    elif view_mode == 1:
+                        draw_box(stdscr, log_start_y, 0, log_area_h, w, "Backend (Maximized)", monitor.log_buffers["Backend"], curses.color_pair(5))
+                    elif view_mode == 2:
+                        draw_box(stdscr, log_start_y, 0, log_area_h, w, "Traefik (Maximized)", monitor.log_buffers["Traefik"], curses.color_pair(5))
+                    elif view_mode == 3:
+                        draw_box(stdscr, log_start_y, 0, log_area_h, w, "Nginx (Maximized)", monitor.log_buffers["Nginx"], curses.color_pair(5))
+
+
             # --- Status Bar ---
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "'q': Quit | 'u': Refresh | 'a': AdGuard | 'c': Config | 'l': Login | 'r': Reboot"
+                cmds = "1:Backend 2:Traefik 3:Nginx 0:All | q:Logoff | r:Reboot | b/f/t/a:Restart Svc"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
-            # --- Input Handling ---
+            # --- Input ---
             key = stdscr.getch()
             if key == ord('q'):
                 monitor.prompt_login(stdscr)
                 break
-            elif key == ord('u'):
-                monitor.last_service_check = 0 # Force refresh on next loop
-            elif key == ord('c'):
-                monitor.open_raspi_config(stdscr)
-            elif key == ord('l'):
-                monitor.prompt_login(stdscr)
-                # If prompt_login returns (it shouldn't if exec works), break
-                break
+            elif key == ord('0') or key == 27: # 27 is ESC
+                view_mode = 0
+            elif key == ord('1'):
+                view_mode = 1
+            elif key == ord('2'):
+                view_mode = 2
+            elif key == ord('3'):
+                view_mode = 3
             elif key == ord('r'):
                 last_restart_msg = monitor.reboot_system()
                 last_restart_time = time.time()
@@ -431,7 +406,7 @@ def main(stdscr):
                 last_restart_time = time.time()
             elif key == ord('f'):
                 monitor.restart_service("nginx")
-                last_restart_msg = "Restarting Frontend (Nginx)..."
+                last_restart_msg = "Restarting Nginx..."
                 last_restart_time = time.time()
             elif key == ord('t'):
                 monitor.restart_service("traefik")
@@ -450,7 +425,5 @@ def main(stdscr):
         monitor.stop()
 
 if __name__ == '__main__':
-    # Ensure terminal size is sufficient
-    # Set ESC delay to 0 to avoid lag
     os.environ.setdefault('ESCDELAY', '25')
     curses.wrapper(main)
