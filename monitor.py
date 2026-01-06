@@ -9,7 +9,12 @@ from collections import deque
 import re
 
 # Configuration
-LOG_FILE = "/var/logs/Essensys/backend/console.out.log"
+LOG_FILES = [
+    ("/var/logs/Essensys/backend/console.out.log", "Backend"),
+    ("/var/log/traefik/traefik-error.log", "Traefik"),
+    ("/var/log/nginx/essensys-api-error.log", "Nginx")
+]
+
 SERVICES = [
     {"name": "Backend", "service": "essensys-backend", "key": "b"},
     {"name": "Frontend", "service": "nginx", "key": "f"},
@@ -237,22 +242,40 @@ class SystemMonitor:
         stdscr.refresh()
 
     def _tail_log(self):
-        if not os.path.exists(LOG_FILE):
-             with self.log_lock:
-                 self.log_buffer.append(f"Log file not found: {LOG_FILE}")
-             while not os.path.exists(LOG_FILE) and self.running:
-                 time.sleep(2)
+        # Create a mapping from filename to nice name
+        file_map = {f[0]: f[1] for f in LOG_FILES}
+        files_to_tail = [f[0] for f in LOG_FILES]
         
+        # Determine initial context (default to first one if unsure, but we'll try to sync with output)
+        current_source = "System"
+
         try:
-            cmd = ['tail', '-F', '-n', '20', LOG_FILE]
+            # tail -F -n 10 file1 file2 ...
+            # We use -n 10 to limit initial noise
+            cmd = ['tail', '-F', '-n', '10'] + files_to_tail
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
             
             while self.running:
                 line = process.stdout.readline()
                 if not line:
                     break
+                
+                line = line.strip()
+                if not line: continue
+
+                # Check for header: ==> file <==
+                header_match = re.match(r'^==> (.+) <==$', line)
+                if header_match:
+                    fname = header_match.group(1)
+                    current_source = file_map.get(fname, os.path.basename(fname))
+                    continue
+                
+                # Format line with source
+                formatted_line = f"[{current_source}] {line}"
+                
                 with self.log_lock:
-                    self.log_buffer.append(line.strip())
+                    self.log_buffer.append(formatted_line)
+                    
         except Exception as e:
             with self.log_lock:
                 self.log_buffer.append(f"Error reading logs: {str(e)}")
@@ -363,7 +386,7 @@ def main(stdscr):
 
             line_idx += 3
             stdscr.hline(line_idx, 0, curses.ACS_HLINE, w)
-            stdscr.addstr(line_idx, 2, " LOGS (tail -f) ", curses.color_pair(3))
+            stdscr.addstr(line_idx, 2, " LOGS (tail -f Multi-Source) ", curses.color_pair(3))
 
             # --- Logs ---
             log_start_y = line_idx + 1
@@ -374,6 +397,7 @@ def main(stdscr):
                 
                 for i, line in enumerate(logs):
                     try:
+                        # Colorize based on source? Simple white for now.
                         stdscr.addstr(log_start_y + i, 1, line[:w-2])
                     except:
                         pass

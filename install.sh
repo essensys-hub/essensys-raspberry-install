@@ -643,6 +643,17 @@ else
     log_warn "Scripts du moniteur non trouvés dans $SCRIPT_DIR"
 fi
 
+# Configurer logrotate
+log_info "Configuration de la rotation des logs (30 jours)..."
+if [ -f "$SCRIPT_DIR/essensys-logrotate.conf" ]; then
+    cp "$SCRIPT_DIR/essensys-logrotate.conf" /etc/logrotate.d/essensys
+    chmod 644 /etc/logrotate.d/essensys
+    chown root:root /etc/logrotate.d/essensys
+    log_info "Configuration logrotate installée dans /etc/logrotate.d/essensys"
+else
+    log_warn "Fichier de configuration logrotate non trouvé: $SCRIPT_DIR/essensys-logrotate.conf"
+fi
+
 log_info ""
 log_info "=========================================="
 log_info "Installation terminée avec succès!"
