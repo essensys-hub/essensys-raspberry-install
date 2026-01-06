@@ -412,6 +412,7 @@ def main(stdscr):
             # --- Input Handling ---
             key = stdscr.getch()
             if key == ord('q'):
+                monitor.prompt_login(stdscr)
                 break
             elif key == ord('u'):
                 monitor.last_service_check = 0 # Force refresh on next loop
