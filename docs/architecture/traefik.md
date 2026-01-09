@@ -18,12 +18,12 @@ graph TD
         UserLAN((Utilisateur Local))
         
         subgraph RaspberryPi [Raspberry Pi]
-            Traefik[Traefik Proxy<br/>Port 443 (HTTPS)]
-            Nginx[Nginx Web Server<br/>Port 80 (HTTP)]
+            Traefik["Traefik Proxy\nPort 443 (HTTPS)"]
+            Nginx["Nginx Web Server\nPort 80 (HTTP)"]
             
-            Backend[Backend API<br/>Port 7070]
-            Frontend[Frontend Files<br/>Port 9090]
-            BlockService[Block Service<br/>Port 8082]
+            Backend["Backend API\nPort 7070"]
+            Frontend["Frontend Files\nPort 9090"]
+            BlockService["Block Service\nPort 8082"]
         end
     end
 
@@ -84,18 +84,18 @@ Voici comment Traefik décide où envoyer une requête venant d'internet :
 
 ```mermaid
 flowchart TD
-    Request[Nouvelle Requête WAN] --> CheckHTTPS{Port 443<br/>HTTPS?}
+    Request[Nouvelle Requête WAN] --> CheckHTTPS{Port 443 / HTTPS?}
     CheckHTTPS -- Non --> RedirHTTPS[Redirection HTTPS]
-    CheckHTTPS -- Oui --> CheckAuth{Basic Auth<br/>Valide?}
-    
-    CheckAuth -- Non --> 401[Erreur 401<br/>Unauthorized]
+    CheckHTTPS -- Oui --> CheckAuth{Basic Auth / Valide?}
+
+    CheckAuth -- Non --> 401[Erreur 401 / Unauthorized]
     CheckAuth -- Oui --> RouteCheck{Quelle URL ?}
-    
-    RouteCheck -- "/ (Racine)" --> ServiceFrontend[Service Frontend<br/>(Vers Nginx 9090)]
-    RouteCheck -- "/api/admin/inject" --> ServiceBackend[Service Backend<br/>(Vers Port 7070)]
-    RouteCheck -- "Autre /api/..." --> ServiceBlock[Service Block<br/>(Vers Port 8082)]
-    
-    ServiceBlock --> 403[Erreur 403<br/>Forbidden]
+
+    RouteCheck -- "/ (Racine)" --> ServiceFrontend["Service Frontend (Vers Nginx 9090)"]
+    RouteCheck -- "/api/admin/inject" --> ServiceBackend["Service Backend (Vers Port 7070)"]
+    RouteCheck -- "Autre /api/..." --> ServiceBlock["Service Block (Vers Port 8082)"]
+
+    ServiceBlock --> 403[Erreur 403 / Forbidden]
 ```
 
 ## Différences Réseau : Local vs WAN
