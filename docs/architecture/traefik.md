@@ -18,12 +18,17 @@ graph TD
         UserLAN((Utilisateur Local))
         
         subgraph RaspberryPi [Raspberry Pi]
-            Traefik["Traefik Proxy\nPort 443 (HTTPS)"]
-            Nginx["Nginx Web Server\nPort 80 (HTTP)"]
+            Traefik["Traefik Proxy Port 
+            443 (HTTPS)"]
+            Nginx["Nginx Web Server 
+            Port 80 (HTTP)"]
             
-            Backend["Backend API\nPort 7070"]
-            Frontend["Frontend Files\nPort 9090"]
-            BlockService["Block Service\nPort 8082"]
+            Backend["Backend API 
+            Port 7070"]
+            Frontend["Frontend Files
+            Port 9090"]
+            BlockService["Block Service
+            Port 8082"]
         end
     end
 
