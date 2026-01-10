@@ -25,10 +25,20 @@ chmod +x install.sh
 sudo ./install.sh
 ```
 
-> **Note (Erreur 429)** : Si vous rencontrez une erreur "Rate Limited" avec Let's Encrypt lors de l'installation, vous pouvez utiliser le mode staging (test) :
-> ```bash
-> sudo ./install.sh --staging
-> ```
+### Options du script
+
+Le script `install.sh` accepte les arguments suivants :
+
+| Option | Description |
+| :--- | :--- |
+| `--staging` | Active l'environnement de test (staging) pour Let's Encrypt. Utile pour éviter les limites de taux (Rate Limiting) lors des tests d'installation. Les certificats générés ne seront pas reconnus comme sécurisés par les navigateurs. |
+
+**Exemple d'utilisation avec l'option staging :**
+
+```bash
+sudo ./install.sh --staging
+```
+
 
 Le script va :
 
