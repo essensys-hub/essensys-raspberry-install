@@ -22,10 +22,19 @@ Pour accéder à Essensys depuis l'extérieur, vous devez choisir une méthode d
 Une fois le dépôt cloné (étape 2.1), suivre le guide détaillé ou lancer directement :
 **[Voir le guide complet d'installation](installation/essensys-installation.md)**
 
+!!! warning "IMPORTANT : Utiliser l'option Staging pour tester"
+    Lors de votre première installation ou pour des tests, **utilisez impérativement l'option `--staging`**.
+    Si vous tentez trop d'installations sans cette option, Let's Encrypt bloquera votre domaine pour cause de "Rate Limiting" pendant 1 semaine, rendant impossible l'obtention de certificats SSL valides et donc la connexion WAN.
+
+    ```bash
+    sudo ./install.sh --staging
+    ```
+
 ```bash
 cd essensys-raspberry-install
 sudo ./install.sh
 ```
+
 
 4. **[Configuration réseau](connexion/configuration-reseau.md)** - Configuration SSH et réseau
 5. **[Accès aux services](acces/index.md)** - URLs locales et WAN
