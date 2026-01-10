@@ -68,6 +68,7 @@ sudo ./install.sh
 - [Mise à jour](maintenance/update.md)
 - [Désinstallation](maintenance/uninstall.md)
 - [Dépannage](maintenance/troubleshooting.md)
+- [Interface de Débogage](maintenance/debug.md)
 
 ## 🏗️ Architecture
 
