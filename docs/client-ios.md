@@ -20,12 +20,26 @@ L'application iPhone **Mon Essensys** est le compagnon idéal pour piloter votre
     Accès rapide aux scènes et à la configuration.
 
 -   ![Eclairage](img/ios-app-lighting.png)
+    ![Eclairage](img/ios-app-lighting-002.png)
     **Éclairage**  
     Contrôle précis par pièce avec mode édition.
 
--   ![Volets](img/ios-app-shutters.png)
+-   ![Volets](img/ios-app-volets.png)
     **Volets**  
     Gestion centralisée des ouvrants.
+
+-   ![Chauffage](img/ios-app-chauffage.png)
+    **Chauffage**  
+    Gestion centralisée des chauffages.
+-   ![Alarme](img/ios-app-alarme.png)
+    **Alarme**  
+    Gestion centralisée des alarmes.
+-   ![Arrosage](img/ios-app-arrosage.png)
+    **Arrosage**  
+    Gestion centralisée des arrosages.
+-   ![Configuration](img/ios-app-config.png)
+    **Configuration**  
+    Personnalisez votre application avec vos propres paramètres.
 
 </div>
 
