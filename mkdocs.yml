@@ -102,9 +102,11 @@ nav:
     - architecture/adguard.md
     - architecture/ports.md
   - Maintenance:
+    - maintenance/index.md
     - maintenance/update.md
     - maintenance/uninstall.md
     - maintenance/troubleshooting.md
+    - maintenance/debug.md
 
 extra:
   social:
