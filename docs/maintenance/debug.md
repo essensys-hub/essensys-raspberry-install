@@ -184,5 +184,44 @@ Pour configurer un scénario "Personnalisé", il suffit d'écrire les valeurs so
 **Commande à injecter :** `857:1`
 Ensuite, déclencher le scénario 7 en injectant `590:7`.
 
+### Exemples de Configuration pour le Scénario 7 (Base 838)
+
+Voici deux exemples complets pour illustrer la logique.
+
+#### Exemple A : "Soirée TV" (Fermer Salon + Lumière Tamisée)
+**Objectif :**
+1.  Fermer les 3 volets du Salon.
+2.  Allumer le variateur du Salon.
+3.  Éteindre les lumières de la Cuisine (pour éviter les reflets).
+
+**Calculs & Injections :**
+
+| Action | Offset | Clé (838 + Offset) | Valeur (Bitmask) | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Fermer Volets Salon** | `+28` | **866** | `7` | `1` (Volet 1) + `2` (Volet 2) + `4` (Volet 3) = **7** |
+| **Allumer Var. Salon** | `+20` | **858** | `128` | `128` (Variateur Salon) cf. Table Allumer MSB |
+| **Eteindre Cuisine** | `+17` | **855** | `3` | `1` (Cuisine 1) + `2` (Cuisine 2) = **3** |
+
+**Résumé :** Injectez `866:7`, `858:128`, `855:3` -> Puis lancez `590:7`.
+
+#### Exemple B : "Sécurité Totale" (Départ Vacances Personnalisé)
+**Objectif :**
+1.  Mettre l'alarme.
+2.  Fermer TOUS les volets de la maison (PDV, CHB, PDE).
+3.  Couper l'arrivée d'eau (Sécurité).
+
+**Calculs & Injections :**
+
+| Action | Offset | Clé (838 + Offset) | Valeur | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Alarme ON** | `+1` | **839** | `1` | `1` = Mettre l'alarme |
+| **Fermer Volets PDV** | `+28` | **866** | `255` | `255` = Tous les bits à 1 (Salon, SAM, Bureau...) |
+| **Fermer Volets CHB** | `+29` | **867** | `255` | `255` = Toutes les chambres |
+| **Fermer Volets PDE** | `+30` | **868** | `255` | `255` = Cuisine, SDB, Store |
+| **Couper Eau** | `+31` | **869** | `1` | `1` = Couper prises/eau (Sécurité) |
+
+**Résumé :** Injectez `839:1`, `866:255`, `867:255`, `868:255`, `869:1` -> Puis lancez `590:7`.
+
+
 
 
