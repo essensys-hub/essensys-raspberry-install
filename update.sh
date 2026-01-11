@@ -13,6 +13,7 @@ NC='\033[0m' # No Color
 
 # Variables de configuration
 INSTALL_DIR="/opt/essensys"
+ESSENSYS_VERSION="V.1.1.0"
 BACKEND_DIR="$INSTALL_DIR/backend"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
 SERVICE_USER="essensys"
@@ -79,11 +80,11 @@ log_info "Arrêt des services avant mise à jour..."
 systemctl stop essensys-backend || true
 
 # Mettre à jour le backend
-log_info "Mise à jour du backend (Branch V.1.1.0)..."
+log_info "Mise à jour du backend (Branch ${ESSENSYS_VERSION})..."
 cd "$HOME_DIR/essensys-server-backend"
 sudo -u "$SERVICE_USER" git fetch origin
-sudo -u "$SERVICE_USER" git checkout V.1.1.0
-sudo -u "$SERVICE_USER" git pull origin V.1.1.0
+sudo -u "$SERVICE_USER" git checkout ${ESSENSYS_VERSION}
+sudo -u "$SERVICE_USER" git pull origin ${ESSENSYS_VERSION}
 if [ $? -ne 0 ]; then
     log_error "Échec de la mise à jour du backend"
     exit 1
@@ -166,11 +167,11 @@ if [ -f "$BACKEND_DIR/config.yaml" ]; then
 fi
 
 # Mettre à jour le frontend
-log_info "Mise à jour du frontend (Branch V.1.1.0)..."
+log_info "Mise à jour du frontend (Branch ${ESSENSYS_VERSION})..."
 cd "$HOME_DIR/essensys-server-frontend"
 sudo -u "$SERVICE_USER" git fetch origin
-sudo -u "$SERVICE_USER" git checkout V.1.1.0
-sudo -u "$SERVICE_USER" git pull origin V.1.1.0
+sudo -u "$SERVICE_USER" git checkout ${ESSENSYS_VERSION}
+sudo -u "$SERVICE_USER" git pull origin ${ESSENSYS_VERSION}
 if [ $? -ne 0 ]; then
     log_error "Échec de la mise à jour du frontend"
     exit 1

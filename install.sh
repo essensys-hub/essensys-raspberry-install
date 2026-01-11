@@ -25,6 +25,7 @@ TRAEFIK_CONFIG_DIR="$SCRIPT_DIR/traefik-config"
 NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
 ACME_EMAIL="admin@acme.com"  # À modifier avec votre email
 TRAEFIK_VERSION="v2.11"
+ESSENSYS_VERSION="V.1.1.0"
 
 # Fonction pour afficher les messages
 log_info() {
@@ -186,7 +187,7 @@ if [ -d "$HOME_DIR/essensys-server-backend" ]; then
         exit 1
     fi
 else
-    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b V.1.1.0 $BACKEND_REPO"; then
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b ${ESSENSYS_VERSION} $BACKEND_REPO"; then
         log_error "Échec du clonage du backend."
         log_error "Vérifiez que :"
         log_error "  1. La connexion Internet fonctionne"
