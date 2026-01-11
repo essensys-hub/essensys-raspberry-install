@@ -232,7 +232,7 @@ class SystemMonitor:
 
         try:
             cmd = ['tail', '-F', '-n', '20'] + files_to_tail
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, encoding='utf-8', errors='replace')
             
             while self.running:
                 line = process.stdout.readline()
