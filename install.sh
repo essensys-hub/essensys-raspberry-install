@@ -185,7 +185,7 @@ if [ -d "$HOME_DIR/essensys-server-backend" ]; then
         exit 1
     fi
 else
-    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $BACKEND_REPO"; then
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b V.1.0.0 $BACKEND_REPO"; then
         log_error "Échec du clonage du backend."
         log_error "Vérifiez que :"
         log_error "  1. La connexion Internet fonctionne"
@@ -204,7 +204,7 @@ if [ -d "$HOME_DIR/essensys-server-frontend" ]; then
         exit 1
     fi
 else
-    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $FRONTEND_REPO"; then
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b V.1.0.0 $FRONTEND_REPO"; then
         log_error "Échec du clonage du frontend."
         log_error "Vérifiez que :"
         log_error "  1. La connexion Internet fonctionne"
