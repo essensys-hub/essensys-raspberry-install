@@ -6,15 +6,17 @@ Cette page répertorie les versions du système Essensys.
 
 | Version | Statut | Date de sortie | Description |
 | :--- | :--- | :--- | :--- |
-| **V.1.0.0** | **Production** | 11 Janvier 2026 | Version stable initiale (Legacy). Sans Redis. Support client 100% stable. |
-| V.1.1.0 | Développement | À venir | Intégration de Redis pour la persistance des actions et tables de référence. |
+| **V.1.1.0** | **Production (Stable)** | 11 Janvier 2026 | **Version Actuelle.** Intégration complète de Redis pour la persistance et la fiabilité. |
+| V.1.0.0 | Legacy (Maintenance) | 11 Janvier 2026 | Ancienne version stable sans Redis. Support limité. |
 
-## Détails de la Version V.1.0.0 (Actuelle)
+## Détails de la Version V.1.1.0 (Redis)
 
-La version V.1.0.0 est la version certifiée pour la production. Elle garantit :
-*   Stabilité avec le matériel existant.
-*   Pas de dépendance à Redis (stockage en mémoire).
-*   Scripts d'installation verrouillés sur cette version.
+La version V.1.1.0 est la nouvelle référence pour la production.
 
-> [!IMPORTANT]
-> Pour toute nouvelle installation en production, utilisez cette version V.1.0.0.
+### Nouveautés majeures :
+*   **Persistance Redis** : Les états (lumières, volets, etc.) sont sauvegardés même en cas de redémarrage du backend.
+*   **Historique des Actions** : La file d'attente globale est gérée par Redis, assurant qu'aucun ordre n'est perdu.
+*   **Performance** : Traitement asynchrone amélioré grâce à la structure de données Redis.
+
+> [!NOTE]
+> Cette version nécessite `redis-server` installé sur le Raspberry Pi. Les scripts d'installation gèrent cela automatiquement.
