@@ -79,9 +79,11 @@ log_info "Arrêt des services avant mise à jour..."
 systemctl stop essensys-backend || true
 
 # Mettre à jour le backend
-log_info "Mise à jour du backend..."
+log_info "Mise à jour du backend (Branch V.1.1.0)..."
 cd "$HOME_DIR/essensys-server-backend"
-sudo -u "$SERVICE_USER" git pull
+sudo -u "$SERVICE_USER" git fetch origin
+sudo -u "$SERVICE_USER" git checkout V.1.1.0
+sudo -u "$SERVICE_USER" git pull origin V.1.1.0
 if [ $? -ne 0 ]; then
     log_error "Échec de la mise à jour du backend"
     exit 1
@@ -164,9 +166,11 @@ if [ -f "$BACKEND_DIR/config.yaml" ]; then
 fi
 
 # Mettre à jour le frontend
-log_info "Mise à jour du frontend..."
+log_info "Mise à jour du frontend (Branch V.1.1.0)..."
 cd "$HOME_DIR/essensys-server-frontend"
-sudo -u "$SERVICE_USER" git pull
+sudo -u "$SERVICE_USER" git fetch origin
+sudo -u "$SERVICE_USER" git checkout V.1.1.0
+sudo -u "$SERVICE_USER" git pull origin V.1.1.0
 if [ $? -ne 0 ]; then
     log_error "Échec de la mise à jour du frontend"
     exit 1

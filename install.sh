@@ -186,12 +186,11 @@ if [ -d "$HOME_DIR/essensys-server-backend" ]; then
         exit 1
     fi
 else
-    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $BACKEND_REPO"; then
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b V.1.1.0 $BACKEND_REPO"; then
         log_error "Échec du clonage du backend."
         log_error "Vérifiez que :"
         log_error "  1. La connexion Internet fonctionne"
-        log_error "  2. Le dépôt est accessible publiquement"
-        log_error "  3. Git est correctement installé"
+        log_error "  2. L'URL du dépôt est correcte : $BACKEND_REPO"
         exit 1
     fi
 fi
