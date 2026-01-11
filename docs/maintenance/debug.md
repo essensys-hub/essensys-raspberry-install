@@ -273,6 +273,33 @@ Utilisez ce tableau pour calculer n'importe quelle clé de configuration.
 | **+39** | **877** | `Scenario_Reveil_ON` | Réveil : Activation | `1`=Armer, `2`=Désactiver |
 | **+40** | **878** | `Scenario_Efface` | Effacer Scénario | `1`=Reset Paramètres |
 
+## Configuration des Temps (Volets & Lampes)
+
+Vous pouvez régler la durée de course des volets ou le temps d'extinction automatique des lampes.
+
+### Temps de Course des Volets (en Secondes)
+*Valeur : 1 à 255 secondes.*
+
+| Zone | Clé de Base | Description | Détail des Indices |
+| :--- | :--- | :--- | :--- |
+| **Volets PDV** | **566** | Salon, SAM, Bureau | `566`=Volet 1, `567`=Volet 2 ... `573`=Volet 8 |
+| **Volets CHB** | **574** | Chambres | `574`=Volet 1 ... `581`=Volet 8 |
+| **Volets PDE** | **582** | Cuis., SDB, Store | `582`=Volet 1 ... `589`=Volet 8 |
+
+**Exemple :** Régler le Volet 1 du Salon (Index 0 de PDV) à 20 secondes.
+*   Clé : `566`
+*   Valeur : `20`
+
+### Temps d'Extinction Automatique des Lampes (en Minutes)
+*Valeur : 1 à 255 minutes (0 = Pas d'extinction).*
+
+| Zone | Clé de Base | Description | Détail des Indices |
+| :--- | :--- | :--- | :--- |
+| **Lampes PDV** | **518** | Entrée, Salon... | `518`=Lampe 1 ... `533`=Lampe 16 |
+| **Lampes CHB** | **534** | Chambres | `534`=Lampe 1 ... `549`=Lampe 16 |
+| **Lampes PDE** | **550** | SDB, WC, Couloir | `550`=Lampe 1 ... `565`=Lampe 16 |
+
+
 
 
 
