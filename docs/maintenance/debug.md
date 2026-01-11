@@ -227,11 +227,21 @@ Voici deux exemples complets pour illustrer la logique.
 Utilisez ce tableau pour calculer n'importe quelle clé de configuration.
 **Clé Finale = Base Scénario + Offset**
 
-| Offset | Variable C | Fonction | Valeurs (Bitmask) |
+| Offset | Variable C | Fonction / Description | Valeurs (Bitmask) |
 | :--- | :--- | :--- | :--- |
 | **+0** | `Scenario_Confirme_Scenario` | Demande Confirmation | `1`=Oui (Géré par écran) |
 | **+1** | `Scenario_Alarme_ON` | Activation Alarme | `1`=ON, `2`=OFF |
-| **+2 à +12** | `Scenario_AlarmeConfig` | Config Alarme (11 Octets) | Voir `enumAlarmeConfig` |
+| **+2** | `AlarmeConfig_Code` | Config : Code Requis | `1`=Oui, `0`=Non |
+| **+3** | `AlarmeConfig_Detect1` | Config : Détecteur Présence 1 | `1`=Utilisé, `0`=Désactivé |
+| **+4** | `AlarmeConfig_Detect2` | Config : Détecteur Présence 2 | `1`=Utilisé, `0`=Désactivé |
+| **+5** | `AlarmeConfig_DetectOuv` | Config : Détecteur Ouverture | `1`=Utilisé, `0`=Désactivé |
+| **+6** | `AlarmeConfig_Detect1SurVoie` | Config : Présence 1 sur Voie | `1`=Oui, `0`=Non |
+| **+7** | `AlarmeConfig_Detect2SurVoie` | Config : Présence 2 sur Voie | `1`=Oui, `0`=Non |
+| **+8** | `AlarmeConfig_DetectOuvSurVoie`| Config : Ouverture sur Voie | `1`=Oui, `0`=Non |
+| **+9** | `AlarmeConfig_SireneInt` | Config : Sirène Intérieure | `1`=Activée, `0`=Non |
+| **+10** | `AlarmeConfig_SireneExt` | Config : Sirène Extérieure | `1`=Activée, `0`=Non |
+| **+11** | `AlarmeConfig_BloqueVolets` | Config : Bloquer Volets si Alarme| `1`=Oui, `0`=Non |
+| **+12** | `AlarmeConfig_ForcerEclairage` | Config : Forcer Lumières si Alarme| `1`=Oui, `0`=Non |
 | **+13** | `Scenario_Eteindre_PDV_LSB` | **Éteindre** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
 | **+14** | `Scenario_Eteindre_PDV_MSB` | **Éteindre** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
 | **+15** | `Scenario_Eteindre_CHB_LSB` | **Éteindre** CHB (Lampes) | Bits 0-6 (Chambres...) |
@@ -257,7 +267,10 @@ Utilisez ce tableau pour calculer n'importe quelle clé de configuration.
 | **+35** | `Scenario_Chauf_zsb1` | Chauffage SDB 1 | Idem |
 | **+36** | `Scenario_Chauf_zsb2` | Chauffage SDB 2 | Idem |
 | **+37** | `Scenario_Cumulus` | Cumulus | `0`=Auto, `1`=HC, `2`=OFF |
-| **+39** | `Scenario_Reveil_ON` | Réveil | `1`=Armer, `2`=Désactiver |
+| **+38** | `Scenario_Reveil_Reglage` | Réveil : Procédure Réglage | `1`=Lancer réglage |
+| **+39** | `Scenario_Reveil_ON` | Réveil : Activation | `1`=Armer, `2`=Désactiver |
+| **+40** | `Scenario_Efface` | Effacer Scénario | `1`=Reset Paramètres |
+
 
 
 
