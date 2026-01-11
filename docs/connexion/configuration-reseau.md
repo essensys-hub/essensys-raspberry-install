@@ -30,6 +30,8 @@ Pour connaître l'adresse MAC de votre Raspberry Pi :
 ```bash
 cat /sys/class/net/eth0/address
 ```
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 ---
 
@@ -39,31 +41,9 @@ Si vous ne pouvez pas configurer votre routeur, vous pouvez configurer l'IP dire
 
 > **Attention** : Assurez-vous de choisir une IP qui n'est **pas** déjà utilisée par un autre appareil et qui est **en dehors** de la plage DHCP de votre routeur (pour éviter les conflits).
 
-### Configuration via dhcpcd.conf
 
-1.  Éditez le fichier de configuration :
-    ```bash
-    sudo nano /etc/dhcpcd.conf
-    ```
-
-2.  Ajoutez les lignes suivantes à la fin du fichier (adaptez les IPs selon votre réseau) :
-
-    ```ini
-    # Exemple pour une box en 192.168.1.1 (Orange, SFR...)
-    interface eth0
-    static ip_address=192.168.1.101/24    # L'IP fixe désirée
-    static routers=192.168.1.1            # L'IP de votre Box
-    static domain_name_servers=1.1.1.1 8.8.8.8  # DNS (Cloudflare / Google)
-    ```
-
-    *Si votre box est en `192.168.0.1` (Freebox par défaut), remplacez les `1.1` et `1.101` par `0.1` et `0.101`.*
-
-3.  Sauvegardez (`Ctrl+X`, puis `Y`, puis `Entrée`).
-
-4.  Appliquez les changements :
-    ```bash
-    sudo systemctl restart dhcpcd
-    ```
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 ### Vérification
 
@@ -81,3 +61,49 @@ Si vous perdez la connexion après avoir changé l'IP fixe sur le Raspberry Pi :
 1.  Connectez un écran et un clavier directement au Raspberry Pi.
 2.  Annulez la modification dans `/etc/dhcpcd.conf` (supprimez les lignes ajoutées) pour repasser en mode automatique.
 3.  Redémarrez avec `sudo reboot`.
+### Configuration via nmtui (Recommandé sur Raspberry Pi OS récents)
+
+Sur les versions récentes de Raspberry Pi OS (Bookworm et ultérieur), la configuration se fait via NetworkManager.
+
+1.  Lancez l'outil de configuration réseau :
+    ```bash
+    sudo nmtui
+    ```
+
+2.  Sélectionnez **"Edit a connection"** (Modifier une connexion).
+3.  Sélectionnez votre connexion (ex: "Wired connection 1") et validez sur **<Edit...>** (Modifier).
+4.  Dans **IPv4 CONFIGURATION**, changez `<Automatic>` en **<Manual>**.
+5.  Cliquez sur **<Show>** (Afficher) pour déplier les options.
+6.  Remplissez les champs :
+    *   **Addresses** : `192.168.1.101/24` (Ajoutez le `/24` à la fin !)
+    *   **Gateway** : `192.168.1.1` (IP de votre Box)
+    *   **DNS servers** : `1.1.1.1` (ou l'IP de votre Box)
+7.  Descendez tout en bas et validez sur **<OK>**.
+8.  Faites **<Back>** (Retour) puis **<Quit>** (Quitter).
+9.  Appliquez les changements en reconnectant l'interface :
+    ```bash
+    sudo nmcli connection down "Wired connection 1" && sudo nmcli connection up "Wired connection 1"
+    ```
+
+### Configuration via dhcpcd.conf (Anciennes versions / Legacy)
+
+*À utiliser uniquement si vous êtes sur Raspberry Pi OS Bullseye ou antérieur.*
+
+1.  Éditez le fichier de configuration :
+    ```bash
+    sudo nano /etc/dhcpcd.conf
+    ```
+
+2.  Ajoutez les lignes suivantes à la fin du fichier :
+
+    ```ini
+    interface eth0
+    static ip_address=192.168.1.101/24
+    static routers=192.168.1.1
+    static domain_name_servers=1.1.1.1 8.8.8.8
+    ```
+
+3.  Sauvegardez (`Ctrl+X`, `Y`, `Entrée`) et redémarrez :
+    ```bash
+    sudo systemctl restart dhcpcd
+    ```
