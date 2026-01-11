@@ -121,7 +121,7 @@ graph TB
 
 - **Backend Go** : API REST et communication avec les clients Essensys legacy
 - **Frontend React** : Interface web moderne
-- **Nginx** : Reverse proxy pour les API locales et le frontend local
+- **Nginx** : [Configurations Nginx](https://github.com/essensys-hub/essensys-raspberry-install/tree/master/nginx-config) - Reverse proxy pour les API locales et le frontend local
 - **Traefik** : Reverse proxy avancé pour l'accès WAN avec HTTPS et authentification
 - **AdGuard Home** : Serveur DNS local et bloqueur de publicités
 
