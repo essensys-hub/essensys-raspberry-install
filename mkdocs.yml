@@ -1,4 +1,4 @@
-site_name: Essensys Raspberry Pi Installation
+site_name: Essensys V.1.0.0
 site_description: Documentation complète pour l'installation et la configuration d'Essensys sur Raspberry Pi 4
 site_author: Essensys Team
 site_url: https://essensys-hub.github.io/essensys-raspberry-install
@@ -64,6 +64,7 @@ plugins:
 
 nav:
   - Accueil: index.md
+  - Versions: versions.md
   - Client iOS: client-ios.md
   - Client Android: client-android.md
   - Moniteur Console (HMI): monitor.md
