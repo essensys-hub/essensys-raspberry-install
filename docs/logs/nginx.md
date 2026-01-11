@@ -83,6 +83,8 @@ Format : `combined` (par défaut)
 ```
 192.168.1.151 - - [02/Jan/2024:17:19:35 +0000] "GET /api/serverinfos HTTP/1.0" 200 1234 "-" "-"
 ```
+!!!WARNING "L'adresse IP `192.168.1.151` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre "essensys client" sur votre réseau local pour configurer les redirections de port correctement.
 
 ### Logs API détaillés
 

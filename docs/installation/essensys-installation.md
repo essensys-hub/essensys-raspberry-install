@@ -159,6 +159,10 @@ graph TB
     style Frontend fill:#fff4e1
 ```
 
+
+!!!WARNING "L'adresse IP `192.168.1.151` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre "essensys client" sur votre réseau local pour configurer les redirections de port correctement.
+
 ## Structure des fichiers installés
 
 ```
