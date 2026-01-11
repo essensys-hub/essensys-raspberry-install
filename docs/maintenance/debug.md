@@ -347,6 +347,46 @@ Vous pouvez piloter le système d'arrosage automatique.
 *   Clé : `363`
 *   Valeur : `30`
 
+## Configuration Fin de Vacances (Retour)
+
+Paramétrez la date de retour et le mode de chauffage à appliquer à ce moment-là.
+
+### Date et Heure de Fin (`VacanceFin`)
+
+| Clé | Description | Valeur |
+| :--- | :--- | :--- |
+| **354** | Heure | 0-23 |
+| **355** | Minute | 0-59 |
+| **356** | Jour | 1-31 |
+| **357** | Mois | 1-12 |
+| **358** | Année | 0-99 (ex: 25 pour 2025) |
+
+### Chauffage au Retour (`VacanceFin_Force`)
+
+Définit le mode de chauffage qui s'enclenchera à la date définie ci-dessus.
+
+| Clé | Zone |
+| :--- | :--- |
+| **359** | Zone Jour (zj) |
+| **360** | Zone Nuit (zn) |
+| **361** | SDB 1 (zsb1) |
+| **362** | SDB 2 (zsb2) |
+
+**Valeurs (Bitmask) :**
+La valeur combine la consigne (Bits 0-3) et le mode (Bits 4-5).
+*   **Consigne (b0-b3)** : `0`=OFF, `1`=Confort, `2`=Eco, `3`=Eco+, `4`=Eco++, `5`=Hors Gel.
+*   **Mode (b4-b5)** : `0`=Auto, `1`=Forcé, `2`=Anticipé.
+*   **Reprise (b7)** : `128` (0x80) = "Continuer le fonctionnement actuel" (Ignore le reste).
+
+**Exemples de Valeurs :**
+*   `1` (0x01) : Auto + Confort
+*   `2` (0x02) : Auto + Eco
+*   `5` (0x05) : Auto + Hors Gel
+*   `17` (0x11) : Forcé + Confort (16 + 1)
+*   `21` (0x15) : Forcé + Hors Gel (16 + 5)
+*   `128` (0x80) : Ne rien changer (Continuer)
+
+
 
 
 
