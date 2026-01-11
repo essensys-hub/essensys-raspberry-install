@@ -16,11 +16,30 @@ INSTALL_DIR="/opt/essensys"
 BACKEND_DIR="$INSTALL_DIR/backend"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
 SERVICE_USER="essensys"
-HOME_DIR="/home/essensys"
+# HOME_DIR sera défini plus bas
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
 TRAEFIK_CONFIG_DIR="$SCRIPT_DIR/traefik-config"
+# DOMAIN_FILE sera défini plus bas
+
+# Vérifier les arguments --user
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --user)
+            SERVICE_USER="$2"
+            shift # past argument
+            shift # past value
+            ;;
+        *)
+            shift # past argument
+            ;;
+    esac
+done
+
+HOME_DIR="/home/$SERVICE_USER"
 DOMAIN_FILE="$HOME_DIR/domain.txt"
+
+echo "Utilisateur configuré: $SERVICE_USER"
 
 # Fonction pour afficher les messages
 log_info() {

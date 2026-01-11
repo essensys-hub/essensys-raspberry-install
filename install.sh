@@ -15,12 +15,11 @@ NC='\033[0m' # No Color
 INSTALL_DIR="/opt/essensys"
 BACKEND_DIR="$INSTALL_DIR/backend"
 FRONTEND_DIR="$INSTALL_DIR/frontend"
-BACKEND_USER="essensys"
 SERVICE_USER="essensys"
-HOME_DIR="/home/essensys"
+# HOME_DIR sera défini après le parsing des arguments
 BACKEND_REPO="https://github.com/essensys-hub/essensys-server-backend.git"
 FRONTEND_REPO="https://github.com/essensys-hub/essensys-server-frontend.git"
-DOMAIN_FILE="$HOME_DIR/domain.txt"
+# DOMAIN_FILE sera défini après le parsing des arguments
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TRAEFIK_CONFIG_DIR="$SCRIPT_DIR/traefik-config"
 NGINX_CONFIG_DIR="$SCRIPT_DIR/nginx-config"
@@ -49,14 +48,33 @@ fi
 log_info "Démarrage de l'installation Essensys pour Raspberry Pi 4"
 log_info "Installation complète: Nginx + Traefik + Backend + Frontend"
 
-# Vérifier les arguments pour le mode Staging
+# Vérifier les arguments
 USE_STAGING=false
-for arg in "$@"; do
-    if [ "$arg" == "--staging" ]; then
-        USE_STAGING=true
-        log_warn "MODE STAGING ACTIVÉ: Les certificats Let's Encrypt seront non-sécurisés (test seulement)"
-    fi
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --staging)
+            USE_STAGING=true
+            log_warn "MODE STAGING ACTIVÉ: Les certificats Let's Encrypt seront non-sécurisés (test seulement)"
+            shift # past argument
+            ;;
+        --user)
+            SERVICE_USER="$2"
+            shift # past argument
+            shift # past value
+            ;;
+        *)
+            shift # past argument
+            ;;
+    esac
 done
+
+BACKEND_USER="$SERVICE_USER"
+HOME_DIR="/home/$SERVICE_USER"
+DOMAIN_FILE="$HOME_DIR/domain.txt"
+
+log_info "Utilisateur configuré: $SERVICE_USER"
+log_info "Répertoire home: $HOME_DIR"
 
 # Lire le domaine WAN depuis le fichier domain.txt
 WAN_DOMAIN="essensys.acme.com"  # Valeur par défaut

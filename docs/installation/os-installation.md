@@ -41,6 +41,7 @@ Cliquer sur l'icône d'engrenage (⚙️) pour ouvrir les options avancées :
   
 - **Nom d'utilisateur et mot de passe** :
   - Nom d'utilisateur : `essensys` (recommandé)
+    > **Note :** Si vous choisissez un autre nom d'utilisateur, vous devrez utiliser l'option `--user <votre_user>` lors de l'exécution du script `install.sh`.
   - Mot de passe : Définir un mot de passe fort
 
 - **Configurer le Wi-Fi** (optionnel) :

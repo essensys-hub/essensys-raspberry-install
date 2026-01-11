@@ -14,7 +14,25 @@ NC='\033[0m' # No Color
 # Variables de configuration
 INSTALL_DIR="/opt/essensys"
 SERVICE_USER="essensys"
-HOME_DIR="/home/essensys"
+# HOME_DIR sera défini plus bas
+
+# Vérifier les arguments --user
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --user)
+            SERVICE_USER="$2"
+            shift # past argument
+            shift # past value
+            ;;
+        *)
+            shift # past argument
+            ;;
+    esac
+done
+
+HOME_DIR="/home/$SERVICE_USER"
+
+echo "Utilisateur cible: $SERVICE_USER"
 
 # Fonction pour afficher les messages
 log_info() {

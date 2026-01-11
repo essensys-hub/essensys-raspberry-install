@@ -33,6 +33,8 @@ Une fois le dépôt cloné (étape 2.1), suivre le guide détaillé ou lancer di
 ```bash
 cd essensys-raspberry-install
 sudo ./install.sh
+# Si vous avez créé un utilisateur autre que 'essensys':
+# sudo ./install.sh --user <votre_user>
 ```
 
 

@@ -32,6 +32,7 @@ Le script `install.sh` accepte les arguments suivants :
 | Option | Description |
 | :--- | :--- |
 | `--staging` | Active l'environnement de test (staging) pour Let's Encrypt. Utile pour éviter les limites de taux (Rate Limiting) lors des tests d'installation. Les certificats générés ne seront pas reconnus comme sécurisés par les navigateurs. |
+| `--user <username>` | Définit un autre utilisateur que `essensys` (par défaut). Le script utilisera `/home/<username>` et installera les services sous cet utilisateur. |
 
 **Exemple d'utilisation avec l'option staging :**
 

@@ -6,7 +6,7 @@ Cette section couvre toutes les étapes d'installation, de la préparation du ma
 
 1. **[Préparation du matériel](preparation.md)** - Matériel nécessaire et préparation
 2. **[Installation de l'OS](os-installation.md)** - Installation de Raspberry Pi OS sur le SSD
-3. **[Installation Essensys](essensys-installation.md)** - Déploiement du backend et frontend
+3. **[Installation Essensys](essensys-installation.md)** - Déploiement du backend et frontend (avec support d'utilisateur personnalisé)
 
 ## Vue d'ensemble
 
