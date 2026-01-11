@@ -106,6 +106,13 @@ if ! dpkg -l | grep -q redis-server; then
     log_info "Redis n'est pas installé. Installation de redis-server..."
     apt-get update
     apt-get install -y redis-server
+    
+    # Assurer que le répertoire de données Redis existe et a les bonnes permissions
+    if [ ! -d "/var/lib/redis" ]; then
+        mkdir -p /var/lib/redis
+    fi
+    chown redis:redis /var/lib/redis
+
     systemctl enable redis-server
     systemctl start redis-server
     log_info "Redis installé et démarré."

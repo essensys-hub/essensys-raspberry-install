@@ -630,6 +630,12 @@ systemctl enable traefik-block-service
 systemctl enable traefik
 systemctl enable redis-server
 
+# Assurer que le répertoire de données Redis existe et a les bonnes permissions
+if [ ! -d "/var/lib/redis" ]; then
+    mkdir -p /var/lib/redis
+fi
+chown redis:redis /var/lib/redis
+
 # Démarrer les services
 log_info "Démarrage des autres services..."
 systemctl restart essensys-backend
