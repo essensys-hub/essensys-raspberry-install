@@ -74,6 +74,9 @@ Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau :
 1.  Se connecter à l'interface Freebox (http://mafreebox.freebox.fr) en mode **Avancé**.
 2.  Aller dans **Paramètres de la Freebox** → **Réseau Local** → **Serveur DHCP** → **Configuration**.
 3.  Dans le champ **Serveur DNS 1**, entrer l'IP du Raspberry Pi : `192.168.1.101`.
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
+    
 4.  Laisser les autres vides ou mettre un DNS public en secours (attention, si le Pi est éteint, `mon.essensys.fr` ne marchera plus).
 5.  Valider.
 6.  Redémarrer les appareils clients (ou désactiver/réactiver leur WiFi) pour qu'ils prennent en compte le nouveau DNS.
