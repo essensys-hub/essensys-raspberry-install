@@ -149,4 +149,40 @@ Pour déclencher un scénario, injectez son numéro (1-8) dans la clé **590**.
 | **7** | **Personnalisé 1** | 838 | *Vide par défaut*. Configurable par l'utilisateur. |
 | **8** | **Personnalisé 2** | 879 | *Vide par défaut*. Configurable par l'utilisateur. |
 
+## Personnalisation (Scénarios 7 et 8)
+
+D'après le code C (`TableEchange.h`), tous les scénarios partagent la même structure de données (définie par `enum enumScenario`).
+Pour configurer un scénario "Personnalisé", il suffit d'écrire les valeurs souhaitées aux adresses mémoire correspondantes.
+
+**Formule :** `Clé = Base_Scénario + Offset_Fonction`
+
+### Bases des Scénarios
+*   **Scénario 7** : `838`
+*   **Scénario 8** : `879`
+
+### Offsets des Fonctions (à ajouter à la Base)
+
+| Fonction | Offset | Description |
+| :--- | :--- | :--- |
+| **Alarme** | `+1` | `1`=Activer, `2`=Désactiver |
+| **Éteindre PDV (LSB)** | `+13` | Voir tableau "Éclairage" pour les valeurs (bits) |
+| **Allumer PDV (LSB)** | `+19` | Voir tableau "Éclairage" pour les valeurs |
+| **Ouvrir Volets PDV** | `+25` | Voir tableau "Volets - Ouvrir" |
+| **Fermer Volets PDV** | `+28` | Voir tableau "Volets - Fermer" |
+| **Sécurité** | `+31` | `1`=Couper, `2`=Rétablir |
+
+*(Note : Les offsets continuent séquentiellement pour MSB, CHB, PDE... Voir `TableEchange.h` pour la liste complète : +19=Allumer PDV LSB, +20=PDV MSB, +21=CHB LSB...)*
+
+### Exemple Concret
+**Objectif :** Configurer le **Scénario 7** pour qu'il **allume la lampe de l'Entrée** (`Valeur 1`).
+
+1.  **Base Scénario 7** = `838`
+2.  **Offset Allumer PDV LSB** = `+19`
+3.  **Clé à injecter** = 838 + 19 = **857**
+4.  **Valeur** = `1` (Entrée)
+
+**Commande à injecter :** `857:1`
+Ensuite, déclencher le scénario 7 en injectant `590:7`.
+
+
 
