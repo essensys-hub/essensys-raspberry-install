@@ -133,3 +133,20 @@ Voici la liste des constantes pour l'injection manuelle, basées sur les indices
 | | | `2` | Remettre machines à laver |
 | **Scenario** | **590** | `1...8` | **DÉCLENCHER UN SCÉNARIO** (1=Scen1) |
 
+## Description des Scénarios (Table de Vérité)
+
+Voici le comportement par défaut des scénarios (basé sur `table_ref.txt` et `TableEchange.h`).
+Pour déclencher un scénario, injectez son numéro (1-8) dans la clé **590**.
+
+| # | Nom | Base | Comportement par défaut |
+| :--- | :--- | :--- | :--- |
+| **1** | **Réservé Internet** | 592 | *Vide par défaut*. Utilisé pour les commandes manuelles via le debug (Zone de test). |
+| **2** | **Je sors** | 633 | **Alarme** : Active (ON).<br>**Volets** : Ferme TOUT.<br>**Sécurité** : Coupe les prises.<br>**Confirmation** : Requise sur l'écran. |
+| **3** | **Je pars en vacances** | 674 | **Alarme** : Active (ON).<br>**Volets** : Ferme TOUT.<br>**Chauffage** : Force HORS GEL (toutes zones).<br>**Eau/Machines** : Coupe l'eau (Securite) et les machines.<br>**Cumulus** : OFF. |
+| **4** | **Je rentre** | 715 | **Alarme** : Désactive (OFF).<br>**Volets** : Ouvre TOUT.<br>**Sécurité** : Rétablit les prises.<br>**Chauffage** : Reprend le dernier mode mémorisé.<br>**Machines** : Rétablit l'alimentation. |
+| **5** | **Je vais me coucher** | 756 | **Alarme** : Active (ON).<br>**Volets** : Ferme TOUT.<br>**Réveil** : Arme la fonction réveil.<br>**Sécurité** : Coupe les prises.<br>**Chauffage** : Continue le fonctionnement actuel. |
+| **6** | **Je me lève** | 797 | **Alarme** : Désactive (OFF).<br>**Volets** : Ouvre TOUT.<br>**Sécurité** : Rétablit les prises.<br>**Réveil** : Désactivé. |
+| **7** | **Personnalisé 1** | 838 | *Vide par défaut*. Configurable par l'utilisateur. |
+| **8** | **Personnalisé 2** | 879 | *Vide par défaut*. Configurable par l'utilisateur. |
+
+
