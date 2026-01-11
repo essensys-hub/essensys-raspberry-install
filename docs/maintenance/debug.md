@@ -482,7 +482,26 @@ Paramètres pour définir la répartition de la consommation "Autre" (calcul th�
 | **490** | `TeleInf_Repartition_Refroid` | Part Refroidissement (%) |
 | **491** | `TeleInf_Repartition_EauChaude` | Part Eau Chaude (%) |
 | **492** | `TeleInf_Repartition_Prises` | Part Prises (%) |
+| **492** | `TeleInf_Repartition_Prises` | Part Prises (%) |
 | **493** | `TeleInf_Repartition_Autres` | Part Autres (%) |
+
+### Note sur les Valeurs 16 bits (LSB / MSB)
+
+Les compteurs et puissances sont stockés sur 2 octets (16 bits).
+Pour simuler une valeur (ex: 500 VA), vous devez calculer les parties LSB (Poids faible) et MSB (Poids fort).
+
+**Formules :**
+*   **MSB** = `Valeur_Totale` / 256 (Division entière)
+*   **LSB** = `Valeur_Totale` % 256 (Modulo / Reste)
+
+**Exemple : Simuler une puissance de 500 VA**
+1.  **Calcul MSB** : 500 / 256 = **1**
+2.  **Calcul LSB** : 500 - (1 * 256) = 500 - 256 = **244**
+
+**Injection :**
+*   Clé **464** (MSB) : `1`
+*   Clé **463** (LSB) : `244`
+
 
 
 
