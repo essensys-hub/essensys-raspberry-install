@@ -121,6 +121,11 @@ if ! dpkg -l | grep -q redis-server; then
     log_info "Redis installé et démarré."
 else
     log_info "Redis est déjà installé."
+    if ! systemctl is-active --quiet redis-server; then
+        log_warn "Redis est installé mais inactif. Démarrage..."
+        systemctl enable redis-server
+        systemctl start redis-server
+    fi
 fi
 
 # Compiler dans le dépôt source
