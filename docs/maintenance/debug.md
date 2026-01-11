@@ -444,6 +444,47 @@ Permet d'activer ou désactiver la fonction de délestage (coupure automatique d
 | **0** | **Désactivé** : La fonction est inactive. |
 | **1** | **Activé** : La fonction est active (Défaut). |
 
+## Téléinformation Compteur ERDF
+
+Données reçues du compteur électrique (Linky/Electronique) et paramètres de répartition.
+
+### État Instantané & Option
+**Plage :** `460` à `464`
+
+| Clé | Variable | Description |
+| :--- | :--- | :--- |
+| **460** | `TeleInf_OPTARIF` | Option Tarifaire (Base, HC, EJP...) |
+| **461** | `TeleInf_PTEC` | Période Tarifaire en cours |
+| **462** | `TeleInf_ADPS` | Avertissement Dépassement Puissance |
+| **463** | `TeleInf_PAPP_LSB` | Puissance Apparente (LSB) |
+| **464** | `TeleInf_PAPP_MSB` | Puissance Apparente (MSB) |
+
+### Compteurs de Consommation (Index)
+Les compteurs sont sur 2 octets (LSB/MSB).
+
+**Heures Pleines / Base (HPB) :** `465` à `476`
+*   **465-466** : Global
+*   **467-468** : Chauffage
+*   **469-470** : Refroidissement
+*   **471-472** : Eau Chaude
+*   **473-474** : Prises
+*   **475-476** : Autres
+
+**Heures Creuses (HC) :** `477` à `488`
+*   Même ordre que HPB (Global, Chauffage, Refroid., Eau Ch., Prises, Autres).
+
+### Répartition Estimée (%)
+Paramètres pour définir la répartition de la consommation "Autre" (calcul théorique).
+
+| Clé | Variable | Usage |
+| :--- | :--- | :--- |
+| **489** | `TeleInf_Repartition_Chauffage` | Part Chauffage (%) |
+| **490** | `TeleInf_Repartition_Refroid` | Part Refroidissement (%) |
+| **491** | `TeleInf_Repartition_EauChaude` | Part Eau Chaude (%) |
+| **492** | `TeleInf_Repartition_Prises` | Part Prises (%) |
+| **493** | `TeleInf_Repartition_Autres` | Part Autres (%) |
+
+
 
 
 
