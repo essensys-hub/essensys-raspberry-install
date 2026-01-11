@@ -303,6 +303,26 @@ Vous pouvez régler la durée de course des volets ou le temps d'extinction auto
 *   Clé : `555` (550 + 5)
 *   Valeur : `5`
 
+## Configuration des Variateurs (Type de Sortie)
+
+Vous pouvez configurer le type de charge pilotée par les sorties variateurs.
+
+**Valeurs possibles :**
+*   `0` : **TOR avec Rampe** (Allumage/Extinction progressif type halogène)
+*   `1` : **Gradateur** (Dimmer variable)
+*   `2` : **TOR Sec** (Sans rampe, pour LED non dimmable ou Relais)
+
+| Zone | Clé de Base | Détail des Indices (Sorties Câblées) |
+| :--- | :--- | :--- |
+| **Variateurs PDV** | **494** | **494** = Salon<br>**495** = Salle à Manger<br>**496** = Bureau |
+| **Variateurs CHB** | **502** | **502** = Grande Chambre<br>**503** = Pt. Chambre 1<br>**504** = Pt. Chambre 2<br>**505** = Pt. Chambre 3 |
+| **Variateurs PDE** | **510** | **510** = Salle de Bain 1 |
+
+**Exemple :** Configurer la **Salle à Manger** (PDV + 1) en mode **Gradateur**.
+*   Clé : `495`
+*   Valeur : `1`
+
+
 
 
 
