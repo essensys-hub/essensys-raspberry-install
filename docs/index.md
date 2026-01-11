@@ -4,6 +4,8 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 
 ## 🚀 Démarrage rapide
 
+**🔍 [Voir les versions disponibles](versions.md)**
+
 1. **[Préparation du matériel](installation/preparation.md)** - SSD, adaptateur USB-SATA, Raspberry Pi 4
 2. **[Installation de l'OS](installation/os-installation.md)** - Installation de Raspberry Pi OS sur le SSD
 
