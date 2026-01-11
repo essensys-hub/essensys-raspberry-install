@@ -538,6 +538,15 @@ Lorsque vous injectez une valeur (ex: `464:1` pour le MSB puissance), le client 
     }
     ```
 
+## Entrées Physiques ( Boutons )
+
+Indices pour l'état des entrées physiques (Boutons Poussoirs).
+
+| Clé | Variable | Description |
+| :--- | :--- | :--- |
+| **920** | `EtatBP1` | État du Bouton Poussoir 1 (0 ou 1) |
+
+
 
 
 
