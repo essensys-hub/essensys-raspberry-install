@@ -4,7 +4,7 @@
 
 ### Composants requis
 
-!!!WARNING Attention : Évitez les Cartes SD pour le Stockage Principal
+!!!WARNING "Attention : Évitez les Cartes SD pour le Stockage Principal"
     L'utilisation d'une carte SD comme disque principal n'est pas recommandée pour ce type d'installation.
     Le système effectue de nombreuses écritures de journaux (logs), ce qui use très rapidement les cartes SD (nombre de cycles d'écriture limité) et peut entraîner des pannes du système.
     Il est fortement conseillé d'utiliser un SSD connecté en USB
