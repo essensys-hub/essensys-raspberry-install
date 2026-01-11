@@ -29,6 +29,10 @@ sudo ./install.sh
 
 Le script `install.sh` accepte les arguments suivants :
 
+!!! warning "Important : Utilisateur Personnalisé"
+    Si vous n'avez pas utilisé l'utilisateur par défaut `essensys`, vous **DEVEZ** spécifier votre nom d'utilisateur avec l'option `--user`.
+    Sinon, l'installation se fera dans `/home/essensys` (qui n'existe peut-être pas) et échouera.
+
 | Option | Description |
 | :--- | :--- |
 | `--staging` | Active l'environnement de test (staging) pour Let's Encrypt. Utile pour éviter les limites de taux (Rate Limiting) lors des tests d'installation. Les certificats générés ne seront pas reconnus comme sécurisés par les navigateurs. |

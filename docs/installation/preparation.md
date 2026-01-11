@@ -100,9 +100,11 @@ Avant de procéder à l'installation de l'OS, vérifier :
 - [ ] Câble Ethernet disponible
 - [ ] Carte microSD (si nécessaire pour l'installation initiale)
 
-## Note sur l'utilisateur
-
-Par défaut, l'installation d'Essensys utilise l'utilisateur `essensys`. Si vous prévoyez d'utiliser un autre nom d'utilisateur (par exemple `pi` ou un nom personnalisé) lors de l'installation de l'OS, notez-le bien car vous devrez l'indiquer lors de l'installation des scripts (`./install.sh --user <votre_user>`).
+!!! warning "Important : Choix de l'utilisateur"
+    Par défaut, l'installation d'Essensys utilise l'utilisateur `essensys`. 
+    **Si vous choisissez un autre nom d'utilisateur** (par exemple `pi` ou un nom personnalisé), **vous DEVEZ impérativement l'indiquer** lors de l'exécution du script d'installation via l'option `--user`.
+    
+    Exemple : `./install.sh --user <votre_user>`
 
 ## Prochaines étapes
 
