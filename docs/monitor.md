@@ -20,7 +20,10 @@ Cette interface permet de :
     *   **Utilisation Disque** : Affichage de l'espace utilisé sur la racine (`/`) et `/var/logs`.
     *   **Nombre de clients** : Connexions actives sur les ports 80, 443, 7070.
 *   **Réseau** : Affichage dynamique de toutes les interfaces réseau (IP et MAC), sans limitation à `eth0`/`wlan0`.
-*   **Logs en temps réel** : Affichage des logs du backend (`/var/logs/Essensys/backend/console.out.log`) via `tail -f`.
+*   **Logs en temps réel** : Affichage simultané ou individuel des logs :
+    *   **Backend** (`/var/logs/Essensys/backend/console.out.log`)
+    *   **Traefik** (`/var/log/traefik/traefik-error.log`)
+    *   **Nginx** (`/var/log/nginx/essensys-api-error.log`)
 
 ## Démarrage automatique
 
@@ -34,6 +37,17 @@ sudo ./setup_monitor.sh
 ```
 
 ## Utilisation
+
+### Vues (Logs)
+
+| Touche | Action |
+| :--- | :--- |
+| **0** | **Vue d'ensemble** : Affiche les 3 logs (Backend, Traefik, Nginx) simultanément |
+| **1** | **Backend** : Affiche uniquement les logs du Backend (Plein écran) |
+| **2** | **Traefik** : Affiche uniquement les logs de Traefik (Plein écran) |
+| **3** | **Nginx** : Affiche uniquement les logs Nginx (Plein écran) |
+
+### Contrôle
 
 | Touche | Action |
 | :--- | :--- |
