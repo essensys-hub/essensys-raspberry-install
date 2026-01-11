@@ -33,11 +33,16 @@ graph TB
     style Port2 fill:#c8e6c9
     style Port3 fill:#c8e6c9
 ```
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 **Connexions :**
 - **Port 2** : Raspberry Pi 4 (192.168.1.101)
 - **Port 3** : Client Essensys / Armoire (192.168.1.151)
 - Le client Essensys communique avec le Raspberry Pi via les API `/api/*`
+
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 ## NAT/Port Forwarding
 
@@ -53,14 +58,16 @@ graph TB
 - **Port externe** : 80
 - **Port interne** : 80
 - **IP interne** : 192.168.1.101
-
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 **Règle 2 : Port 443**
 - **Nom** : Essensys HTTPS
 - **Protocole** : TCP
 - **Port externe** : 443
 - **Port interne** : 443
 - **IP interne** : 192.168.1.101
-
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 ## Configuration DNS local
 
 ### Via l'interface SFR (DHCP)
@@ -74,7 +81,8 @@ Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau :
 5.  Dans **DNS Primaire**, entrer l'IP du Raspberry Pi : `192.168.1.101`.
 6.  Valider.
 7.  Redémarrer les appareils clients.
-
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 ## Vérification
 
 Vérifier que les règles sont actives dans l'interface du routeur.
