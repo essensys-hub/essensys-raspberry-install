@@ -57,6 +57,8 @@ graph TB
 - **Port externe** : 80
 - **Port interne** : 80
 - **IP interne** : 192.168.1.101
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 **Redirection 2 : Port 443**
 - **Nom** : Essensys HTTPS
@@ -64,6 +66,8 @@ graph TB
 - **Port externe** : 443
 - **Port interne** : 443
 - **IP interne** : 192.168.1.101
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 ## Configuration DNS local
 
@@ -76,7 +80,7 @@ Pour que la résolution `mon.essensys.fr` fonctionne sur tout le réseau :
 3.  Dans le champ **Serveur DNS 1**, entrer l'IP du Raspberry Pi : `192.168.1.101`.
 !!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
     Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
-    
+
 4.  Laisser les autres vides ou mettre un DNS public en secours (attention, si le Pi est éteint, `mon.essensys.fr` ne marchera plus).
 5.  Valider.
 6.  Redémarrer les appareils clients (ou désactiver/réactiver leur WiFi) pour qu'ils prennent en compte le nouveau DNS.
