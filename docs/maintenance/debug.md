@@ -227,49 +227,52 @@ Voici deux exemples complets pour illustrer la logique.
 Utilisez ce tableau pour calculer n'importe quelle clé de configuration.
 **Clé Finale = Base Scénario + Offset**
 
-| Offset | Variable C | Fonction / Description | Valeurs (Bitmask) |
-| :--- | :--- | :--- | :--- |
-| **+0** | `Scenario_Confirme_Scenario` | Demande Confirmation | `1`=Oui (Géré par écran) |
-| **+1** | `Scenario_Alarme_ON` | Activation Alarme | `1`=ON, `2`=OFF |
-| **+2** | `AlarmeConfig_Code` | Config : Code Requis | `1`=Oui, `0`=Non |
-| **+3** | `AlarmeConfig_Detect1` | Config : Détecteur Présence 1 | `1`=Utilisé, `0`=Désactivé |
-| **+4** | `AlarmeConfig_Detect2` | Config : Détecteur Présence 2 | `1`=Utilisé, `0`=Désactivé |
-| **+5** | `AlarmeConfig_DetectOuv` | Config : Détecteur Ouverture | `1`=Utilisé, `0`=Désactivé |
-| **+6** | `AlarmeConfig_Detect1SurVoie` | Config : Présence 1 sur Voie | `1`=Oui, `0`=Non |
-| **+7** | `AlarmeConfig_Detect2SurVoie` | Config : Présence 2 sur Voie | `1`=Oui, `0`=Non |
-| **+8** | `AlarmeConfig_DetectOuvSurVoie`| Config : Ouverture sur Voie | `1`=Oui, `0`=Non |
-| **+9** | `AlarmeConfig_SireneInt` | Config : Sirène Intérieure | `1`=Activée, `0`=Non |
-| **+10** | `AlarmeConfig_SireneExt` | Config : Sirène Extérieure | `1`=Activée, `0`=Non |
-| **+11** | `AlarmeConfig_BloqueVolets` | Config : Bloquer Volets si Alarme| `1`=Oui, `0`=Non |
-| **+12** | `AlarmeConfig_ForcerEclairage` | Config : Forcer Lumières si Alarme| `1`=Oui, `0`=Non |
-| **+13** | `Scenario_Eteindre_PDV_LSB` | **Éteindre** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
-| **+14** | `Scenario_Eteindre_PDV_MSB` | **Éteindre** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
-| **+15** | `Scenario_Eteindre_CHB_LSB` | **Éteindre** CHB (Lampes) | Bits 0-6 (Chambres...) |
-| **+16** | `Scenario_Eteindre_CHB_MSB` | **Éteindre** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
-| **+17** | `Scenario_Eteindre_PDE_LSB` | **Éteindre** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
-| **+18** | `Scenario_Eteindre_PDE_MSB` | **Éteindre** PDE (Lampes/Var) | Bits 0-4 + 7 |
-| **+19** | `Scenario_Allumer_PDV_LSB` | **Allumer** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
-| **+20** | `Scenario_Allumer_PDV_MSB` | **Allumer** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
-| **+21** | `Scenario_Allumer_CHB_LSB` | **Allumer** CHB (Lampes) | Bits 0-6 (Chambres...) |
-| **+22** | `Scenario_Allumer_CHB_MSB` | **Allumer** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
-| **+23** | `Scenario_Allumer_PDE_LSB` | **Allumer** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
-| **+24** | `Scenario_Allumer_PDE_MSB` | **Allumer** PDE (Lampes/Var) | Bits 0-4 + 7 |
-| **+25** | `Scenario_OuvrirVolets_PDV` | **Ouvrir** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
-| **+26** | `Scenario_OuvrirVolets_CHB` | **Ouvrir** Volets CHB | Bits 0-4 (Chambres) |
-| **+27** | `Scenario_OuvrirVolets_PDE` | **Ouvrir** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
-| **+28** | `Scenario_FermerVolets_PDV` | **Fermer** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
-| **+29** | `Scenario_FermerVolets_CHB` | **Fermer** Volets CHB | Bits 0-4 (Chambres) |
-| **+30** | `Scenario_FermerVolets_PDE` | **Fermer** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
-| **+31** | `Scenario_Securite` | Prises Commandées | `1`=Couper, `2`=Rétablir |
-| **+32** | `Scenario_Machines` | Machines à Laver | `1`=Couper, `2`=Rétablir |
-| **+33** | `Scenario_Chauf_zj` | Chauffage Jour | `0x00-0x05`=Auto, `0x10`=Force... |
-| **+34** | `Scenario_Chauf_zn` | Chauffage Nuit | Idem |
-| **+35** | `Scenario_Chauf_zsb1` | Chauffage SDB 1 | Idem |
-| **+36** | `Scenario_Chauf_zsb2` | Chauffage SDB 2 | Idem |
-| **+37** | `Scenario_Cumulus` | Cumulus | `0`=Auto, `1`=HC, `2`=OFF |
-| **+38** | `Scenario_Reveil_Reglage` | Réveil : Procédure Réglage | `1`=Lancer réglage |
-| **+39** | `Scenario_Reveil_ON` | Réveil : Activation | `1`=Armer, `2`=Désactiver |
-| **+40** | `Scenario_Efface` | Effacer Scénario | `1`=Reset Paramètres |
+*Exemple de calcul pour la colonne "Ex: Clé Scén 7" : Base 838 + Offset.*
+
+| Offset | Ex: Clé Scén 7 | Variable C | Fonction / Description | Valeurs (Bitmask) |
+| :--- | :--- | :--- | :--- | :--- |
+| **+0** | **838** | `Scenario_Confirme_Scenario` | Demande Confirmation | `1`=Oui (Géré par écran) |
+| **+1** | **839** | `Scenario_Alarme_ON` | Activation Alarme | `1`=ON, `2`=OFF |
+| **+2** | **840** | `AlarmeConfig_Code` | Config : Code Requis | `1`=Oui, `0`=Non |
+| **+3** | **841** | `AlarmeConfig_Detect1` | Config : Détecteur Présence 1 | `1`=Utilisé, `0`=Désactivé |
+| **+4** | **842** | `AlarmeConfig_Detect2` | Config : Détecteur Présence 2 | `1`=Utilisé, `0`=Désactivé |
+| **+5** | **843** | `AlarmeConfig_DetectOuv` | Config : Détecteur Ouverture | `1`=Utilisé, `0`=Désactivé |
+| **+6** | **844** | `AlarmeConfig_Detect1SurVoie` | Config : Présence 1 sur Voie | `1`=Oui, `0`=Non |
+| **+7** | **845** | `AlarmeConfig_Detect2SurVoie` | Config : Présence 2 sur Voie | `1`=Oui, `0`=Non |
+| **+8** | **846** | `AlarmeConfig_DetectOuvSurVoie`| Config : Ouverture sur Voie | `1`=Oui, `0`=Non |
+| **+9** | **847** | `AlarmeConfig_SireneInt` | Config : Sirène Intérieure | `1`=Activée, `0`=Non |
+| **+10** | **848** | `AlarmeConfig_SireneExt` | Config : Sirène Extérieure | `1`=Activée, `0`=Non |
+| **+11** | **849** | `AlarmeConfig_BloqueVolets` | Config : Bloquer Volets si Alarme| `1`=Oui, `0`=Non |
+| **+12** | **850** | `AlarmeConfig_ForcerEclairage` | Config : Forcer Lumières si Alarme| `1`=Oui, `0`=Non |
+| **+13** | **851** | `Scenario_Eteindre_PDV_LSB` | **Éteindre** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
+| **+14** | **852** | `Scenario_Eteindre_PDV_MSB` | **Éteindre** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
+| **+15** | **853** | `Scenario_Eteindre_CHB_LSB` | **Éteindre** CHB (Lampes) | Bits 0-6 (Chambres...) |
+| **+16** | **854** | `Scenario_Eteindre_CHB_MSB` | **Éteindre** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
+| **+17** | **855** | `Scenario_Eteindre_PDE_LSB` | **Éteindre** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
+| **+18** | **856** | `Scenario_Eteindre_PDE_MSB` | **Éteindre** PDE (Lampes/Var) | Bits 0-4 + 7 |
+| **+19** | **857** | `Scenario_Allumer_PDV_LSB` | **Allumer** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
+| **+20** | **858** | `Scenario_Allumer_PDV_MSB` | **Allumer** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
+| **+21** | **859** | `Scenario_Allumer_CHB_LSB` | **Allumer** CHB (Lampes) | Bits 0-6 (Chambres...) |
+| **+22** | **860** | `Scenario_Allumer_CHB_MSB` | **Allumer** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
+| **+23** | **861** | `Scenario_Allumer_PDE_LSB` | **Allumer** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
+| **+24** | **862** | `Scenario_Allumer_PDE_MSB` | **Allumer** PDE (Lampes/Var) | Bits 0-4 + 7 |
+| **+25** | **863** | `Scenario_OuvrirVolets_PDV` | **Ouvrir** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
+| **+26** | **864** | `Scenario_OuvrirVolets_CHB` | **Ouvrir** Volets CHB | Bits 0-4 (Chambres) |
+| **+27** | **865** | `Scenario_OuvrirVolets_PDE` | **Ouvrir** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
+| **+28** | **866** | `Scenario_FermerVolets_PDV` | **Fermer** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
+| **+29** | **867** | `Scenario_FermerVolets_CHB` | **Fermer** Volets CHB | Bits 0-4 (Chambres) |
+| **+30** | **868** | `Scenario_FermerVolets_PDE` | **Fermer** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
+| **+31** | **869** | `Scenario_Securite` | Prises Commandées | `1`=Couper, `2`=Rétablir |
+| **+32** | **870** | `Scenario_Machines` | Machines à Laver | `1`=Couper, `2`=Rétablir |
+| **+33** | **871** | `Scenario_Chauf_zj` | Chauffage Jour | `0x00...` |
+| **+34** | **872** | `Scenario_Chauf_zn` | Chauffage Nuit | Idem |
+| **+35** | **873** | `Scenario_Chauf_zsb1` | Chauffage SDB 1 | Idem |
+| **+36** | **874** | `Scenario_Chauf_zsb2` | Chauffage SDB 2 | Idem |
+| **+37** | **875** | `Scenario_Cumulus` | Cumulus | `0`=Auto, `1`=HC, `2`=OFF |
+| **+38** | **876** | `Scenario_Reveil_Reglage` | Réveil : Procédure Réglage | `1`=Lancer réglage |
+| **+39** | **877** | `Scenario_Reveil_ON` | Réveil : Activation | `1`=Armer, `2`=Désactiver |
+| **+40** | **878** | `Scenario_Efface` | Effacer Scénario | `1`=Reset Paramètres |
+
 
 
 
