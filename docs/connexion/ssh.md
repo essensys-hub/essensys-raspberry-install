@@ -60,6 +60,8 @@ Exemple :
 ```bash
 ssh essensys@192.168.1.101
 ```
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
 
 ### Connexion avec clé SSH (recommandé)
 
