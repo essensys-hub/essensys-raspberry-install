@@ -515,6 +515,30 @@ C'est la variable la plus courante à surveiller ou simuler.
 **Exemple :** Si 464 vaut `2` et 463 vaut `10`.
 `Puissance = (2 * 256) + 10 = 512 + 10 = 522 VA`
 
+## Cycle de Confirmation & Retour d'État
+
+Lorsque vous injectez une valeur (ex: `464:1` pour le MSB puissance), le client (la carte) procède en deux temps :
+
+1.  **Confirmation (ACK)** :
+    Le client reçoit l'ordre, l'exécute, et appelle `/api/done/{guid}`.
+    *Réponse :* `201 Created`. (Cette étape confirme juste la réception, pas la valeur).
+
+2.  **Mise à jour d'État (Sync)** :
+    Le client renvoie régulièrement son état complet (ou ses changements) via `/api/mystatus`.
+    C'est dans ce message JSON (champ `ek`) que le serveur reçoit la confirmation de la nouvelle valeur.
+
+    ```json
+    POST /api/mystatus
+    {
+      "version": "...",
+      "ek": [
+        { "k": 464, "v": "1" },
+        { "k": 463, "v": "244" }
+      ]
+    }
+    ```
+
+
 
 
 
