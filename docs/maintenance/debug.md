@@ -293,11 +293,16 @@ Vous pouvez régler la durée de course des volets ou le temps d'extinction auto
 ### Temps d'Extinction Automatique des Lampes (en Minutes)
 *Valeur : 1 à 255 minutes (0 = Pas d'extinction).*
 
-| Zone | Clé de Base | Description | Détail des Indices |
+| Zone | Clé de Base | Description | Détail des Indices Utiles |
 | :--- | :--- | :--- | :--- |
-| **Lampes PDV** | **518** | Entrée, Salon... | `518`=Lampe 1 ... `533`=Lampe 16 |
-| **Lampes CHB** | **534** | Chambres | `534`=Lampe 1 ... `549`=Lampe 16 |
-| **Lampes PDE** | **550** | SDB, WC, Couloir | `550`=Lampe 1 ... `565`=Lampe 16 |
+| **Lampes PDV** | **518** | Entrée, Salon... | *Non documenté dans le code C (marqué inutilisé)* |
+| **Lampes CHB** | **534** | Chambres | *Non documenté dans le code C (marqué inutilisé)* |
+| **Lampes PDE** | **550** | Pièces d'Eau | **555** = WC 1<br>**556** = WC 2<br>**557** = Service |
+
+**Exemple :** Éteindre la lumière du **WC 1** automatiquement après **5 minutes**.
+*   Clé : `555` (550 + 5)
+*   Valeur : `5`
+
 
 
 
