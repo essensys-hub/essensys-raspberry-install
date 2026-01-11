@@ -544,7 +544,7 @@ Indices pour l'état des entrées physiques (Boutons Poussoirs).
 
 | Clé | Variable | Description |
 | :--- | :--- | :--- |
-| **920** | `EtatBP1` | État du Bouton Poussoir 1 (0 ou 1) |
+| **920** | `EtatBP1` | État du Bouton Poussoir 1 (**Boîtier Principal**) |
 
 
 
