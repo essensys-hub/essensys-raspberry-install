@@ -38,14 +38,16 @@ arp -a | grep -i "b8:27:eb\|dc:a6:32\|e4:5f:01"
 nmap -sn 192.168.1.0/24
 ```
 
-### Méthode 3 : Via mDNS (si activé)
+### Méthode 3 : Via mDNS (hostname.local)
 
-Si mDNS est activé, vous pouvez utiliser le nom d'hôte :
+Si mDNS est actif (souvent par défaut), vous pouvez utiliser le nom d'hôte suivi de `.local` :
 
 ```bash
+# Si le hostname est "raspberrypi" (défaut) :
 ssh essensys@raspberrypi.local
-# ou
-ssh essensys@mon.essensys.fr  # Si DNS configuré
+
+# Si le hostname est "essensys-server" :
+ssh essensys@essensys-server.local
 ```
 
 ## Connexion SSH
