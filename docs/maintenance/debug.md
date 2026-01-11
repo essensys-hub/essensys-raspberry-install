@@ -36,37 +36,38 @@ Cette section affiche les traces de communication backend/client en temps réel.
 
 *   **Si vous voyez "Injected" mais jamais "Retrieved"** : Le client n'est probablement pas connecté ou ne poll pas l'API correctement. Vérifiez la connectivité réseau du boîtier.
 *   **Si vous voyez "Retrieved" mais jamais "Confirmed"** : Le client reçoit la commande mais échoue à la traiter (bug firmware) ou à envoyer la confirmation.
-*   **Si vous voyez "Confirmed" mais rien ne se passe** : La communication fonctionne parfaitement. Le problème est probablement dans la logique du scénario (conflit de variables, initialisation par défaut écrasant la commande, etc.).
+## Référence des Commandes (Basé sur Scenario 1)
 
-## Référence des Commandes
+Voici la liste des constantes pour l'injection manuelle, basées sur les indices du **Scenario 1** (Zone de test recommandée).
 
-Voici la liste des constantes extraites de `TableEchange.h` pour injecter des commandes manuellement.
-L'index (Clé) est calculé sur une base de **600 + Enum**.
+**Pour exécuter une commande :**
+1.  Injectez les valeurs dans les clés ci-dessous (ex: `611:1` pour allumer entrée).
+2.  (Optionnel) Si nécessaire, déclenchez le scénario 1 en injectant `590:1` (Index `Scenario`).
 
 ### Éclairage - ALLUMER
 
 | Constante | Clé | Valeur | Description |
 | :--- | :--- | :--- | :--- |
-| **Scenario_Allumer_PDV_LSB** | **619** | `1` | Lampe Entrée |
+| **Sce_Allumer_PDV_LSB** | **611** | `1` | Lampe Entrée |
 | | | `2` | Lampe Salon 1 |
 | | | `4` | Lampe Salon 2 |
 | | | `8` | Lampe Dressing 1 |
 | | | `16` | Lampe Dressing 2 |
-| **Scenario_Allumer_PDV_MSB** | **620** | `32` | Variateur Bureau |
+| **Sce_Allumer_PDV_MSB** | **612** | `32` | Variateur Bureau |
 | | | `64` | Variateur Salle à Manger |
 | | | `128` | Variateur Salon |
-| **Scenario_Allumer_CHB_LSB** | **621** | `1` | Lampe Escalier |
+| **Sce_Allumer_CHB_LSB** | **613** | `1` | Lampe Escalier |
 | | | `2` | Lampe Grande Chambre 1 |
 | | | `4` | Lampe Grande Chambre 2 |
 | | | `8` | Lampe Petite Chambre 1 (1) |
 | | | `16` | Lampe Petite Chambre 1 (2) |
 | | | `32` | Lampe Petite Chambre 2 |
 | | | `64` | Lampe Petite Chambre 3 |
-| **Scenario_Allumer_CHB_MSB** | **622** | `16` | Variateur Petite Chambre 3 |
+| **Sce_Allumer_CHB_MSB** | **614** | `16` | Variateur Petite Chambre 3 |
 | | | `32` | Variateur Petite Chambre 2 |
 | | | `64` | Variateur Petite Chambre 1 |
 | | | `128` | Variateur Grande Chambre |
-| **Scenario_Allumer_PDE_LSB** | **623** | `1` | Lampe Cuisine 1 |
+| **Sce_Allumer_PDE_LSB** | **615** | `1` | Lampe Cuisine 1 |
 | | | `2` | Lampe Cuisine 2 |
 | | | `4` | Lampe SDB 1 |
 | | | `8` | Lampe SDB 2 (1) |
@@ -74,31 +75,40 @@ L'index (Clé) est calculé sur une base de **600 + Enum**.
 | | | `32` | Lampe WC 1 |
 | | | `64` | Lampe WC 2 |
 | | | `128` | Lampe Service |
-| **Scenario_Allumer_PDE_MSB** | **624** | `1` | Lampe Dégagement 1 |
+| **Sce_Allumer_PDE_MSB** | **616** | `1` | Lampe Dégagement 1 |
 | | | `2` | Lampe Dégagement 2 |
 | | | `4` | Lampe Terrasse |
 | | | `8` | Lampe Annexe 1 |
 | | | `16` | Lampe Annexe 2 |
 | | | `128` | Variateur SDB 1 |
 
-*Note : Pour éteindre, utilisez les constantes `Scenario_Eteindre_...` (Indices 613 à 618) avec les mêmes valeurs binaires.*
+### Éclairage - ÉTEINDRE
+
+| Constante | Clé | Valeur | Description |
+| :--- | :--- | :--- | :--- |
+| **Sc_Eteindre_PDV_LSB** | **605** | `1...255` | Entrée, Salon, Dressing (Mêmes bits que Allumer) |
+| **Sc_Eteindre_PDV_MSB** | **606** | `32...128` | Variateurs PDV |
+| **Sc_Eteindre_CHB_LSB** | **607** | `1...64` | Lampes Chambres |
+| **Sc_Eteindre_CHB_MSB** | **608** | `16...128` | Variateurs Chambres |
+| **Sce_Eteindre_PDE_LSB** | **609** | `1...128` | Lampes Pièces d'Eau |
+| **Sce_Eteindre_PDE_MSB** | **610** | `1...128` | Lampes/Var Pièces d'Eau |
 
 ### Volets & Stores - OUVRIR
 
 | Constante | Clé | Valeur | Description |
 | :--- | :--- | :--- | :--- |
-| **Scenario_OuvrirVolets_PDV** | **625** | `1` | Volet Salon 1 |
+| **Sce_OuvrirVolets_PDV** | **617** | `1` | Volet Salon 1 |
 | | | `2` | Volet Salon 2 |
 | | | `4` | Volet Salon 3 |
 | | | `8` | Volet SAM 1 |
 | | | `16` | Volet SAM 2 |
 | | | `32` | Volet Bureau |
-| **Scenario_OuvrirVolets_CHB** | **626** | `1` | Volet Grande Chambre 1 |
+| **Sce_OuvrirVolets_CHB** | **618** | `1` | Volet Grande Chambre 1 |
 | | | `2` | Volet Grande Chambre 2 |
 | | | `4` | Volet Petite Chambre 1 |
 | | | `8` | Volet Petite Chambre 2 |
 | | | `16` | Volet Petite Chambre 3 |
-| **Scenario_OuvrirVolets_PDE** | **627** | `1` | Volet Cuisine 1 |
+| **Sce_OuvrirVolets_PDE** | **619** | `1` | Volet Cuisine 1 |
 | | | `2` | Volet Cuisine 2 |
 | | | `4` | Volet SDB 1 |
 | | | `8` | Remonter Store Terrasse |
@@ -107,30 +117,19 @@ L'index (Clé) est calculé sur une base de **600 + Enum**.
 
 | Constante | Clé | Valeur | Description |
 | :--- | :--- | :--- | :--- |
-| **Scenario_FermerVolets_PDV** | **628** | `1` | Volet Salon 1 |
-| | | `2` | Volet Salon 2 |
-| | | `4` | Volet Salon 3 |
-| | | `8` | Volet SAM 1 |
-| | | `16` | Volet SAM 2 |
-| | | `32` | Volet Bureau |
-| **Scenario_FermerVolets_CHB** | **629** | `1` | Volet Grande Chambre 1 |
-| | | `2` | Volet Grande Chambre 2 |
-| | | `4` | Volet Petite Chambre 1 |
-| | | `8` | Volet Petite Chambre 2 |
-| | | `16` | Volet Petite Chambre 3 |
-| **Scenario_FermerVolets_PDE** | **630** | `1` | Volet Cuisine 1 |
-| | | `2` | Volet Cuisine 2 |
-| | | `4` | Volet SDB 1 |
-| | | `8` | Sortir Store Terrasse |
+| **Sce_FermerVolets_PDV** | **620** | `1...32` | Volets PDV (Mêmes bits que Ouvrir) |
+| **Sce_FermerVolets_CHB** | **621** | `1...16` | Volets Chambres |
+| **Sce_FermerVolets_PDE** | **622** | `1...8` | Volets PDE / Sortir Store |
 
 ### Scénarios & Sécurité
 
 | Constante | Clé | Valeur | Description |
 | :--- | :--- | :--- | :--- |
-| **Scenario_Alarme_ON** | **601** | `1` | Mettre l'alarme |
+| **Sc_Alarme_ON** | **593** | `1` | Mettre l'alarme |
 | | | `2` | Enlever l'alarme |
-| **Scenario_Securite** | **631** | `1` | Couper prises sécurité |
+| **Sce_Securite** | **623** | `1` | Couper prises sécurité |
 | | | `2` | Remettre prises sécurité |
-| **Scenario_Machines** | **632** | `1` | Couper machines à laver |
+| **Sce_Machines** | **624** | `1` | Couper machines à laver |
 | | | `2` | Remettre machines à laver |
+| **Scenario** | **590** | `1...8` | **DÉCLENCHER UN SCÉNARIO** (1=Scen1) |
 
