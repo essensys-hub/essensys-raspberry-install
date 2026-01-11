@@ -238,6 +238,20 @@ else
     log_info "Paquet Nginx conservé"
 fi
 
+# Demander si on veut désinstaller le paquet Redis
+read -p "Voulez-vous désinstaller le paquet Redis (apt remove)? (oui/non): " remove_redis
+if [ "$remove_redis" = "oui" ]; then
+    log_info "Désinstallation du paquet Redis..."
+    apt-get remove -y redis-server
+    if [ -d "/var/lib/redis" ]; then
+        rm -rf /var/lib/redis
+        log_info "✓ Données Redis supprimées (/var/lib/redis)"
+    fi
+    log_info "✓ Paquet Redis désinstallé"
+else
+    log_info "Paquet Redis conservé"
+fi
+
 # Supprimer les fichiers d'installation
 log_info "Suppression des fichiers d'installation..."
 if [ -d "$INSTALL_DIR" ]; then

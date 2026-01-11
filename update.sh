@@ -101,6 +101,18 @@ if [ $? -ne 0 ]; then
     go mod tidy
 fi
 
+# Vérifier et installer Redis si nécessaire
+if ! dpkg -l | grep -q redis-server; then
+    log_info "Redis n'est pas installé. Installation de redis-server..."
+    apt-get update
+    apt-get install -y redis-server
+    systemctl enable redis-server
+    systemctl start redis-server
+    log_info "Redis installé et démarré."
+else
+    log_info "Redis est déjà installé."
+fi
+
 # Compiler dans le dépôt source
 log_info "Compilation du binaire..."
 go build -o server ./cmd/server

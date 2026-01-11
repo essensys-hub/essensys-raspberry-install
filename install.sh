@@ -108,7 +108,8 @@ apt-get install -y \
     python3-yaml \
     libcap2-bin \
     ca-certificates \
-    openssh-client
+    openssh-client \
+    redis-server
 
 # Installer Go
 log_info "Installation de Go..."
@@ -627,6 +628,7 @@ systemctl enable essensys-backend
 systemctl enable nginx
 systemctl enable traefik-block-service
 systemctl enable traefik
+systemctl enable redis-server
 
 # Démarrer les services
 log_info "Démarrage des autres services..."
@@ -700,11 +702,13 @@ log_info "  - Backend: systemctl status essensys-backend"
 log_info "  - Traefik: systemctl status traefik"
 log_info "  - Nginx: systemctl status nginx"
 log_info "  - Block Service: systemctl status traefik-block-service"
+log_info "  - Redis: systemctl status redis-server"
 log_info ""
 log_info "Logs:"
 log_info "  - Backend: tail -f /var/logs/Essensys/backend/console.out.log"
 log_info "  - Traefik: tail -f /var/log/traefik/traefik.log"
 log_info "  - Nginx: tail -f /var/log/nginx/essensys-error.log"
+log_info "  - Redis: journalctl -u redis-server -f"
 log_info ""
 log_info "Pour tester:"
 log_info "  curl http://localhost/health"
