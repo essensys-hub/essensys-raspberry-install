@@ -254,9 +254,14 @@ auth:
   clients:
     testclient: testpass
 
-logging:
+  logging:
   level: info
   format: text
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
 EOF
     fi
     
