@@ -61,6 +61,24 @@ Si vous perdez la connexion après avoir changé l'IP fixe sur le Raspberry Pi :
 1.  Connectez un écran et un clavier directement au Raspberry Pi.
 2.  Annulez la modification dans `/etc/dhcpcd.conf` (supprimez les lignes ajoutées) pour repasser en mode automatique.
 3.  Redémarrez avec `sudo reboot`.
+### Pré-requis : Identifier votre interface et votre réseau
+
+Avant de commencer, identifiez le nom de votre interface réseau (souvent `eth0` ou `end0`) et votre plage d'adresse IP actuelle.
+
+```bash
+ip -c addr show
+```
+*   Noter le nom de l'interface (ex: `eth0`, `end0`...).
+*   Noter votre IP actuelle (ex: `192.168.1.45`).
+
+!!!WARNING "IMPORTANT : Choix de l'Adresse IP"
+    L'adresse IP fixe que vous choisissez **DOIT correspondre à votre réseau local**.
+    
+    *   Si votre Box est en `192.168.1.1` (Orange, SFR...), votre IP fixe doit commencer par `192.168.1.xxx`.
+    *   Si votre Box est en `192.168.0.254` (Freebox...), votre IP fixe doit commencer par `192.168.0.xxx`.
+    
+    **Ne copiez pas aveuglément `192.168.1.101` si votre réseau est en `192.168.0.x` !** Vous perdriez la connexion.
+
 ### Configuration via nmtui (Recommandé sur Raspberry Pi OS récents)
 
 Sur les versions récentes de Raspberry Pi OS (Bookworm et ultérieur), la configuration se fait via NetworkManager.
@@ -85,7 +103,7 @@ Sur les versions récentes de Raspberry Pi OS (Bookworm et ultérieur), la confi
     sudo nmcli connection down "Wired connection 1" && sudo nmcli connection up "Wired connection 1"
     ```
 
-### Configuration via dhcpcd.conf (Anciennes versions / Legacy)
+### Configuration 
 
 *À utiliser uniquement si vous êtes sur Raspberry Pi OS Bullseye ou antérieur.*
 
@@ -94,7 +112,7 @@ Sur les versions récentes de Raspberry Pi OS (Bookworm et ultérieur), la confi
     sudo nano /etc/dhcpcd.conf
     ```
 
-2.  Ajoutez les lignes suivantes à la fin du fichier :
+2.  Ajoutez les lignes suivantes à la fin du fichier (remplacez `eth0` par votre interface si différent, ex: `end0`) :
 
     ```ini
     interface eth0
