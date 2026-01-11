@@ -10,33 +10,33 @@
     Il est fortement conseillé d'utiliser un SSD connecté en USB
     pour garantir la fiabilité et la longévité de votre serveur.
 
-1. **Raspberry Pi 4** (4 Go minimum recommandé)
-   
-   ![Raspberry Pi 4](../img/raspberry_pi_4.jpg)
-   
-   - [Acheter sur Amazon](https://www.amazon.fr/Raspberry-Pi-4595-modèles-Go/dp/B09TTNF8BT)
-   - Modèle 4 Go ou 8 Go recommandé
+1.  **Raspberry Pi 4** (4 Go minimum recommandé)
 
-2. **SSD SATA** (minimum 64 Go recommandé)
-   - [Lexar SSD SATA 240 Go](https://www.amazon.fr/Lexar-Lecture-Ordinateur-Portable-LNQ100X240G-RNNNG/dp/B0BJKPZGQK)
-   - Un SSD améliore considérablement les performances par rapport à une carte SD
+    ![Raspberry Pi 4](../img/raspberry_pi_4.jpg)
 
-3. **Adaptateur USB vers SATA**
-   
-   ![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
-   
-   - [Adaptateur USB 3.0 vers SATA](https://www.amazon.fr/dp/B07F7WDZGT)
-   - Nécessaire pour connecter le SSD au Raspberry Pi
+    *   [Acheter sur Amazon](https://www.amazon.fr/Raspberry-Pi-4595-modèles-Go/dp/B09TTNF8BT)
+    *   Modèle 4 Go ou 8 Go recommandé
 
-4. **Alimentation**
-   - Alimentation officielle Raspberry Pi 4 (5V, 3A minimum)
-   - Important pour la stabilité du système
+2.  **SSD SATA** (minimum 64 Go recommandé)
+    *   [Lexar SSD SATA 240 Go](https://www.amazon.fr/Lexar-Lecture-Ordinateur-Portable-LNQ100X240G-RNNNG/dp/B0BJKPZGQK)
+    *   Un SSD améliore considérablement les performances par rapport à une carte SD
 
-5. **Câble Ethernet**
-   - Pour la connexion réseau (recommandé pour la stabilité)
+3.  **Adaptateur USB vers SATA**
 
-6. **Carte microSD** (optionnelle, pour l'installation initiale)
-   - Minimum 8 Go, classe 10
+    ![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
+
+    *   [Adaptateur USB 3.0 vers SATA](https://www.amazon.fr/dp/B07F7WDZGT)
+    *   Nécessaire pour connecter le SSD au Raspberry Pi
+
+4.  **Alimentation**
+    *   Alimentation officielle Raspberry Pi 4 (5V, 3A minimum)
+    *   Important pour la stabilité du système
+
+5.  **Câble Ethernet**
+    *   Pour la connexion réseau (recommandé pour la stabilité)
+
+6.  **Carte microSD** (optionnelle, pour l'installation initiale)
+    *   Minimum 8 Go, classe 10
 
 ## Préparation du SSD
 
