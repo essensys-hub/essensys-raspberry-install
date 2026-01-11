@@ -39,6 +39,9 @@ graph TB
 - **Port 3** : Client Essensys / Armoire (192.168.1.151)
 - Le client Essensys communique avec le Raspberry Pi via les API `/api/*`
 
+> [!WARNING]
+> L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive. **Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi** sur votre réseau local pour configurer les redirections de port correctement.
+
 ## NAT/Port Forwarding
 
 ### Via l'interface Freebox
