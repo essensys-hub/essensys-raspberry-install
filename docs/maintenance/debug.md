@@ -429,7 +429,21 @@ Ces variables indiquent l'état global et les défauts en cours.
 | **b1** | `2` | Défaut Com. IHM (Ecran) |
 | **b2** | `4` | Défaut Com. Bus CAN (PDV) |
 | **b3** | `8` | Défaut Com. Bus CAN (CHB) |
+| **b3** | `8` | Défaut Com. Bus CAN (CHB) |
 | **b4** | `16` | Défaut Com. Bus CAN (PDE) |
+
+## Configuration du Délestage
+
+Permet d'activer ou désactiver la fonction de délestage (coupure automatique des gros consommateurs si dépassement puissance).
+
+### Activation (`Delestage`)
+**Clé :** `459`
+
+| Valeur | Description |
+| :--- | :--- |
+| **0** | **Désactivé** : La fonction est inactive. |
+| **1** | **Activé** : La fonction est active (Défaut). |
+
 
 
 
