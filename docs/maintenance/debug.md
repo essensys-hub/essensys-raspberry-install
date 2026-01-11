@@ -322,6 +322,32 @@ Vous pouvez configurer le type de charge pilotée par les sorties variateurs.
 *   Clé : `495`
 *   Valeur : `1`
 
+## Configuration de l'Arrosage
+
+Vous pouvez piloter le système d'arrosage automatique.
+
+### Mode de Fonctionnement (`Arrose_Mode`)
+**Clé :** `363`
+
+| Valeur | Description |
+| :--- | :--- |
+| **0** | **OFF** : Pas d'arrosage |
+| **1 à 254** | **Marche Forcée** : Durée en minutes |
+| **255** | **Automatique** : Selon planning horaire |
+
+### Détecteur de Pluie (`Arrose_Detect`)
+**Clé :** `406`
+
+| Valeur | Description |
+| :--- | :--- |
+| **0** | **Inactif** : Le détecteur est ignoré (Arrose même s'il pleut) |
+| **1** | **Actif** : S'il pleut, l'arrosage est coupé |
+
+**Exemple :** Forcer l'arrosage pendant **30 minutes**.
+*   Clé : `363`
+*   Valeur : `30`
+
+
 
 
 
