@@ -222,6 +222,44 @@ Voici deux exemples complets pour illustrer la logique.
 
 **Résumé :** Injectez `839:1`, `866:255`, `867:255`, `868:255`, `869:1` -> Puis lancez `590:7`.
 
+### Table Complète des Offsets (Programmation C)
+
+Utilisez ce tableau pour calculer n'importe quelle clé de configuration.
+**Clé Finale = Base Scénario + Offset**
+
+| Offset | Variable C | Fonction | Valeurs (Bitmask) |
+| :--- | :--- | :--- | :--- |
+| **+0** | `Scenario_Confirme_Scenario` | Demande Confirmation | `1`=Oui (Géré par écran) |
+| **+1** | `Scenario_Alarme_ON` | Activation Alarme | `1`=ON, `2`=OFF |
+| **+2 à +12** | `Scenario_AlarmeConfig` | Config Alarme (11 Octets) | Voir `enumAlarmeConfig` |
+| **+13** | `Scenario_Eteindre_PDV_LSB` | **Éteindre** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
+| **+14** | `Scenario_Eteindre_PDV_MSB` | **Éteindre** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
+| **+15** | `Scenario_Eteindre_CHB_LSB` | **Éteindre** CHB (Lampes) | Bits 0-6 (Chambres...) |
+| **+16** | `Scenario_Eteindre_CHB_MSB` | **Éteindre** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
+| **+17** | `Scenario_Eteindre_PDE_LSB` | **Éteindre** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
+| **+18** | `Scenario_Eteindre_PDE_MSB` | **Éteindre** PDE (Lampes/Var) | Bits 0-4 + 7 |
+| **+19** | `Scenario_Allumer_PDV_LSB` | **Allumer** PDV (Lampes) | Bits 0-7 (Entrée, Salon...) |
+| **+20** | `Scenario_Allumer_PDV_MSB` | **Allumer** PDV (Variateurs) | Bits 5-7 (Var Salon/Bureau...) |
+| **+21** | `Scenario_Allumer_CHB_LSB` | **Allumer** CHB (Lampes) | Bits 0-6 (Chambres...) |
+| **+22** | `Scenario_Allumer_CHB_MSB` | **Allumer** CHB (Variateurs) | Bits 4-7 (Var Chambres...) |
+| **+23** | `Scenario_Allumer_PDE_LSB` | **Allumer** PDE (Lampes) | Bits 0-7 (Cuis., SDB, WC...) |
+| **+24** | `Scenario_Allumer_PDE_MSB` | **Allumer** PDE (Lampes/Var) | Bits 0-4 + 7 |
+| **+25** | `Scenario_OuvrirVolets_PDV` | **Ouvrir** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
+| **+26** | `Scenario_OuvrirVolets_CHB` | **Ouvrir** Volets CHB | Bits 0-4 (Chambres) |
+| **+27** | `Scenario_OuvrirVolets_PDE` | **Ouvrir** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
+| **+28** | `Scenario_FermerVolets_PDV` | **Fermer** Volets PDV | Bits 0-5 (Salon, SAM, Bur.) |
+| **+29** | `Scenario_FermerVolets_CHB` | **Fermer** Volets CHB | Bits 0-4 (Chambres) |
+| **+30** | `Scenario_FermerVolets_PDE` | **Fermer** Volets PDE | Bits 0-3 (Cuis., SDB, Store) |
+| **+31** | `Scenario_Securite` | Prises Commandées | `1`=Couper, `2`=Rétablir |
+| **+32** | `Scenario_Machines` | Machines à Laver | `1`=Couper, `2`=Rétablir |
+| **+33** | `Scenario_Chauf_zj` | Chauffage Jour | `0x00-0x05`=Auto, `0x10`=Force... |
+| **+34** | `Scenario_Chauf_zn` | Chauffage Nuit | Idem |
+| **+35** | `Scenario_Chauf_zsb1` | Chauffage SDB 1 | Idem |
+| **+36** | `Scenario_Chauf_zsb2` | Chauffage SDB 2 | Idem |
+| **+37** | `Scenario_Cumulus` | Cumulus | `0`=Auto, `1`=HC, `2`=OFF |
+| **+39** | `Scenario_Reveil_ON` | Réveil | `1`=Armer, `2`=Désactiver |
+
+
 
 
 
