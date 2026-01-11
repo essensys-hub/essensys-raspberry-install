@@ -502,6 +502,20 @@ Pour simuler une valeur (ex: 500 VA), vous devez calculer les parties LSB (Poids
 *   Clé **464** (MSB) : `1`
 *   Clé **463** (LSB) : `244`
 
+### Consommation Instantanée (PAPP)
+
+C'est la variable la plus courante à surveiller ou simuler.
+
+*   **Variables** : `TeleInf_PAPP_LSB` (**463**) et `TeleInf_PAPP_MSB` (**464**).
+*   **Unité** : Volt-Ampère (VA). (≈ Watt).
+
+**Lecture (Reconstitution de la valeur) :**
+`Puissance_Totale = (Valeur_464 * 256) + Valeur_463`
+
+**Exemple :** Si 464 vaut `2` et 463 vaut `10`.
+`Puissance = (2 * 256) + 10 = 512 + 10 = 522 VA`
+
+
 
 
 
