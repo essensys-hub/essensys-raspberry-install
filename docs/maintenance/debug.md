@@ -386,6 +386,52 @@ La valeur combine la consigne (Bits 0-3) et le mode (Bits 4-5).
 *   `21` (0x15) : Forcé + Hors Gel (16 + 5)
 *   `128` (0x80) : Ne rien changer (Continuer)
 
+## Versions Système
+
+Informations sur les versions logicielles installées.
+
+| Clé | Variable C | Description |
+| :--- | :--- | :--- |
+| **0** | `Version_SoftBP_Embedded` (V_BP) | Version du micro-logiciel (Embedded) |
+| **1** | `Version_SoftBP_Web` (V_SoftBP) | Version Web (Publication serveur) |
+| **2** | `Version_SoftIHM_Majeur` (V_IHM) | Version Majeure IHM |
+| **3** | `Version_SoftIHM_Mineur` (V_SoftIHM)| Version Mineure IHM |
+| **4** | `Version_TableEchange` | Version de la table d'échange |
+
+## État du Système (Lecture Seule)
+
+Ces variables indiquent l'état global et les défauts en cours.
+
+### Statut Global (`Status`)
+**Clé :** `10`
+
+| Bit | Valeur | Signification |
+| :--- | :--- | :--- |
+| **b0** | `1` | Heures Creuses en cours |
+| **b1** | `2` | Délestage en cours |
+| **b2** | `4` | Mode Secouru (Batterie) |
+
+### Alertes (`Alerte`)
+**Clé :** `11`
+
+| Bit | Valeur | Signification |
+| :--- | :--- | :--- |
+| **b0** | `1` | Déclenchement Alarme (Intrusion) |
+| **b1** | `2` | Alerte Fuite d'Eau (Lave-Linge) |
+| **b2** | `4` | Alerte Fuite d'Eau (Lave-Vaisselle) |
+
+### Informations Techniques (`Information`)
+**Clé :** `12`
+
+| Bit | Valeur | Signification |
+| :--- | :--- | :--- |
+| **b0** | `1` | Défaut Com. Compteur ERDF |
+| **b1** | `2` | Défaut Com. IHM (Ecran) |
+| **b2** | `4` | Défaut Com. Bus CAN (PDV) |
+| **b3** | `8` | Défaut Com. Bus CAN (CHB) |
+| **b4** | `16` | Défaut Com. Bus CAN (PDE) |
+
+
 
 
 
