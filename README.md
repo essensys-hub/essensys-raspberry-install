@@ -2,6 +2,40 @@
 
 Ce projet contient les scripts d'installation pour déployer le backend et le frontend Essensys sur un Raspberry Pi 4.
 
+**📚 [Accéder à la documentation complète en ligne](https://essensys-hub.github.io/essensys-raspberry-install/)**
+
+## Historique de la solution Essensys
+
+La société Valentinéa a été créée en 2010 par Nicolas Gille afin de proposer un système domotique clé en main pour les maisons individuelles. En 2011 l’entreprise lance Essensys, un système entièrement filaire conçu pour couvrir 92 % des maisons construites en France. L’objectif est de proposer un produit standard, simple à installer et ne nécessitant pas d’études spécifiques.
+
+Le concept repose sur un tableau domotique intégré à la GTL (goulotte technique logement) qui regroupe l’ensemble des automatismes : éclairage, chauffage, volets roulants, arrosage, sécurité et suivi des consommations d’eau et d’énergie. L’utilisateur pilote ces fonctions depuis un écran tactile mural placé à l’entrée de la maison. Des « scénarios » préprogrammés (par ex. Je sors, Je vais me coucher, Je pars en vacances) permettent de fermer tous les volets, d’éteindre les lumières, de couper l’alimentation des prises de sécurité, de baisser le chauffage et d’armer l’alarme en appuyant sur un seul bouton. Le système comprend des détecteurs de mouvements, d’ouverture de porte, de pluie, de fuites d’eau et une électrovanne d’irrigation.
+
+### Évolution de Valentinéa et fin de la commercialisation d’Essensys
+
+Au fil des années, Valentinéa a fait évoluer son offre. En 2016 l’entreprise lance un kit domotique pré‑assemblé utilisant des connecteurs Pieuvre’n Play ; l’installation se réalise en quelques jours sans compétence particulière. En 2019 Valentinéa élargit sa gamme avec Electrikit, un kit d’électricité traditionnelle prêt‑à‑poser basé sur les mêmes connecteurs. L’année suivante voit apparaître Ventikit (kit de ventilation) et en 2022 Plombikit (kit de plomberie).
+
+En 2021, pour plus de lisibilité auprès de ses clients, Valentinéa change de nom et devient mon‑instal‑elec.com. Dans une interview, Nicolas Gille explique que les kits pré‑assemblés rencontraient un tel succès que l’entreprise a arrêté de vendre le système Essensys seul pour se spécialiser dans les kits prêts‑à‑poser. Cette évolution et le changement de nom marquent la fin de la commercialisation du produit Essensys.
+
+### Fermeture du site essensys.fr
+
+Le domaine essensys.fr (le site historique du produit) n’est plus accessible. Une tentative d’accès réalisée le 1er janvier 2024 renvoie une erreur 502 indiquant que le serveur ne répond plus, ce qui signifie que le site a été fermé ou mis hors ligne. Aucune annonce officielle ne précise la date exacte de cette fermeture, mais la transformation de Valentinéa en mon‑instal‑elec.com en 2021 et l’arrêt de la commercialisation d’Essensys laissent penser que le site a été abandonné au cours des années suivantes.
+
+### Projet open‑source de la communauté Essensys
+
+Après la fermeture d’Essensys, une communauté de passionnés a entrepris de libérer le code source du système avec l’accord du gérant de Valentinéa. Le code est diffusé sous licence MIT pour permettre une utilisation et une modification libres. Plusieurs projets sont disponibles :
+
+*   **Installation Essensys sur Raspberry Pi** – Le dépôt `essensys-raspberry-install` propose des scripts permettant de déployer l’architecture Essensys sur un Raspberry Pi 4. Le backend est écrit en Go et le frontend en React ; un serveur Nginx sert l’interface web et fait suivre les requêtes API au backend. Cette solution assure la compatibilité avec l’ancien client Essensys et permet d’auto‑héberger le service à domicile.
+*   **Application iOS** – Le projet `essensys‑ios‑phone‑apps` est une application native permettant de contrôler Essensys depuis un iPhone. Elle propose un tableau de bord complet pour la gestion des scénarios, des lumières et des volets.
+*   **Application Android** – Le dépôt `essensys‑android‑phone‑apps` contient l’application Android officielle développée en Kotlin avec Jetpack Compose, offrant les mêmes fonctionnalités de pilotage local et distant.
+
+Ces projets perpétuent l’esprit d’Essensys en offrant une alternative open‑source et communautaire. Ils permettent aux anciens utilisateurs de conserver leur installation et aux nouveaux passionnés de domotique d’expérimenter une solution filaire et auto‑hébergeable.
+
+### Licence et contributions
+
+Les dépôts mentionnés utilisent la licence MIT, ce qui autorise la libre utilisation, la modification et la distribution du code, à condition de conserver l’avis de copyright et la licence d’origine. Cette licence encourage la participation communautaire et facilite la reprise du projet par des bénévoles.
+
+---
+
 ## Architecture
 
 L'installation configure une architecture simplifiée avec deux modes de déploiement :
