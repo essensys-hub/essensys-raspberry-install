@@ -1,0 +1,154 @@
+/* ============================================================
+   TOC – Vertical timeline (inspiré Raspberry Pi Project)
+   ============================================================ */
+
+/* Container for secondary navigation (right-side TOC) */
+.md-nav--secondary .md-nav__list {
+    margin-left: 0.5rem;
+    padding-left: 0;
+    border-left: 2px solid var(--md-default-fg-color--lightest);
+}
+
+/* Individual TOC items */
+.md-nav--secondary .md-nav__item {
+    margin-left: -1px;
+}
+
+/* TOC links */
+.md-nav--secondary .md-nav__link {
+    position: relative;
+    padding-left: 1.5rem !important;
+    color: var(--md-default-fg-color--light);
+    transition: color 0.1s ease;
+}
+
+/* Timeline dots */
+.md-nav--secondary .md-nav__link::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 0.75rem;
+    width: 10px;
+    height: 10px;
+    background-color: var(--md-default-bg-color);
+    border: 2px solid var(--md-default-fg-color--lightest);
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+/* Active TOC item */
+.md-nav--secondary .md-nav__link--active {
+    color: var(--md-primary-fg-color);
+    font-weight: 700;
+}
+
+.md-nav--secondary .md-nav__link--active::before {
+    background-color: var(--md-primary-fg-color);
+    border-color: var(--md-primary-fg-color);
+    box-shadow: 0 0 0 3px rgba(var(--md-primary-fg-color--rgb), 0.1);
+    transform: scale(1.2);
+}
+
+/* Hover effect */
+.md-nav--secondary .md-nav__link:hover {
+    color: var(--md-primary-fg-color);
+}
+
+.md-nav--secondary .md-nav__link:hover::before {
+    border-color: var(--md-primary-fg-color);
+}
+
+/* ============================================================
+   Typography – Global adjustments
+   ============================================================ */
+
+:root {
+    --md-text-font-size: 1rem;
+    --md-code-font-size: 0.95rem;
+}
+
+body,
+.md-typeset {
+    font-size: 1.05rem;
+}
+
+/* Headings */
+.md-typeset h1 {
+    font-size: 2.2em;
+}
+
+.md-typeset h2 {
+    font-size: 1.8em;
+}
+
+.md-typeset h3 {
+    font-size: 1.4em;
+}
+
+/* Code blocks */
+.md-typeset pre code {
+    font-size: 0.95rem;
+}
+
+/* ============================================================
+   Navigation tabs (top header)
+   ============================================================ */
+
+.md-tabs__link {
+    font-size: 1rem;
+}
+
+/* ============================================================
+   Content Tabs (=== "Utilisateur essensys", etc.)
+   ============================================================ */
+
+/* Container labels */
+.md-typeset .tabbed-set>label {
+    padding: 14px 24px !important;
+    border-bottom: 0.15rem solid transparent;
+    transition: all 0.2s ease;
+}
+
+/* REAL tab title text (directly in label or a) */
+.md-typeset .tabbed-set>label,
+.md-typeset .tabbed-labels>label,
+.md-typeset .tabbed-set>label>a,
+.md-typeset .tabbed-labels>label>a {
+    font-size: 28px !important;
+    /* ⬅️ Base size for labels */
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+}
+
+/* If there IS a span/a inside for some reason, ensure it also gets it */
+.md-typeset .tabbed-set>label>span,
+.md-typeset .tabbed-labels>label>span {
+    font-size: 34px !important;
+    /* Keep the user's size here */
+    font-weight: 700 !important;
+}
+
+/* Specific button-like look for the tab labels */
+.md-typeset .tabbed-set>label,
+.md-typeset .tabbed-labels>label {
+    font-size: 34px !important;
+    /* Force 34px for the main label as requested */
+}
+
+/* Active tab */
+.md-typeset .tabbed-set>input:checked+label {
+    color: var(--md-primary-fg-color) !important;
+    border-bottom-color: var(--md-primary-fg-color) !important;
+    border-bottom-width: 0.4rem;
+}
+
+/* ============================================================
+   Optional – Responsive (reduce on small screens)
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .md-typeset .tabbed-set>label>span {
+        font-size: 24px !important;
+    }
+}

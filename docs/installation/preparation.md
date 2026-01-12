@@ -10,33 +10,22 @@
     Il est fortement conseillé d'utiliser un SSD connecté en USB
     pour garantir la fiabilité et la longévité de votre serveur.
 
-1.  **Raspberry Pi 4** (4 Go minimum recommandé)
-
+- [ ] **Raspberry Pi 4** (4 Go minimum recommandé)
     ![Raspberry Pi 4](../img/raspberry_pi_4.jpg)
+    * [Acheter sur Amazon](https://www.amazon.fr/Raspberry-Pi-4595-modèles-Go/dp/B09TTNF8BT)
+    * Modèle 4 Go ou 8 Go recommandé
 
-    *   [Acheter sur Amazon](https://www.amazon.fr/Raspberry-Pi-4595-modèles-Go/dp/B09TTNF8BT)
-    *   Modèle 4 Go ou 8 Go recommandé
+- [ ] **SSD SATA** (minimum 64 Go recommandé)
+    * [Lexar SSD SATA 240 Go](https://www.amazon.fr/Lexar-Lecture-Ordinateur-Portable-LNQ100X240G-RNNNG/dp/B0BJKPZGQK)
+    * Un SSD améliore considérablement les performances par rapport à une carte SD
 
-2.  **SSD SATA** (minimum 64 Go recommandé)
-    *   [Lexar SSD SATA 240 Go](https://www.amazon.fr/Lexar-Lecture-Ordinateur-Portable-LNQ100X240G-RNNNG/dp/B0BJKPZGQK)
-    *   Un SSD améliore considérablement les performances par rapport à une carte SD
-
-3.  **Adaptateur USB vers SATA**
-
+- [ ] **Adaptateur USB vers SATA**
     ![Adaptateur USB vers SATA](../img/adapteur_usb.jpg)
+    * [Adaptateur USB 3.0 vers SATA](https://www.amazon.fr/dp/B07F7WDZGT)
 
-    *   [Adaptateur USB 3.0 vers SATA](https://www.amazon.fr/dp/B07F7WDZGT)
-    *   Nécessaire pour connecter le SSD au Raspberry Pi
-
-4.  **Alimentation**
-    *   Alimentation officielle Raspberry Pi 4 (5V, 3A minimum)
-    *   Important pour la stabilité du système
-
-5.  **Câble Ethernet**
-    *   Pour la connexion réseau (recommandé pour la stabilité)
-
-6.  **Carte microSD** (optionnelle, pour l'installation initiale)
-    *   Minimum 8 Go, classe 10
+- [ ] **Alimentation** (5V, 3A minimum)
+- [ ] **Câble Ethernet**
+- [ ] **Carte microSD** (optionnelle, pour l'installation initiale)
 
 ## Préparation du SSD
 
@@ -100,13 +89,6 @@ Avant de procéder à l'installation de l'OS, vérifier :
 - [ ] Câble Ethernet disponible
 - [ ] Carte microSD (si nécessaire pour l'installation initiale)
 
-!!! warning "Important : Choix de l'utilisateur"
-    Par défaut, l'installation d'Essensys utilise l'utilisateur `essensys`. 
-    **Si vous choisissez un autre nom d'utilisateur** (par exemple `pi` ou un nom personnalisé), **vous DEVEZ impérativement l'indiquer** lors de l'exécution du script d'installation via l'option `--user`.
-    
-    Exemple : `./install.sh --user <votre_user>`
-
-## Prochaines étapes
-
-Une fois le matériel préparé, passer à l'[installation de l'OS](os-installation.md).
+---
+[:material-arrow-right-circle: **Étape suivante : Installation de l'OS**](os-installation.md){ .md-button .md-button--primary }
 

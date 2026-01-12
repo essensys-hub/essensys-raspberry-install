@@ -6,49 +6,23 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 
 **🔍 [Voir les versions disponibles](versions.md)**
 
+**[:material-play-circle: Débuter l'installation pas à pas](installation/index.md)**
+
 1. **[Préparation du matériel](installation/preparation.md)** - SSD, adaptateur USB-SATA, Raspberry Pi 4
 2. **[Installation de l'OS](installation/os-installation.md)** - Installation de Raspberry Pi OS sur le SSD
-
-### 2.1 Pré-requis système & Clonage
-Ouvrez un terminal sur votre Raspberry Pi et lancez cette commande pour installer Git et télécharger les sources :
-```bash
-sudo curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/main/requirements.sh | sudo bash
-```
-
-### 2.2 Choix du Domaine WAN
-Pour accéder à Essensys depuis l'extérieur, vous devez choisir une méthode de nom de domaine :
-*   **Option Recommandée (Gratuit)** : **[DuckDNS](acces/duckdns.md)** (Configuration automatique incluse)
-*   **Option Avancée** : Domaine personnalisé (OVH, etc.) - voir [Accès WAN](acces/wan.md)
-
-### 3. Installation Essensys
-Une fois le dépôt cloné (étape 2.1), suivre le guide détaillé ou lancer directement :
-**[Voir le guide complet d'installation](installation/essensys-installation.md)**
-
-!!! warning "IMPORTANT : Utiliser l'option Staging pour tester"
-    Lors de votre première installation ou pour des tests, **utilisez impérativement l'option `--staging`**.
-    Si vous tentez trop d'installations sans cette option, Let's Encrypt bloquera votre domaine pour cause de "Rate Limiting" pendant 1 semaine, rendant impossible l'obtention de certificats SSL valides et donc la connexion WAN.
-
-    ```bash
-    sudo ./install.sh --staging
-    ```
-
-```bash
-cd essensys-raspberry-install
-sudo ./install.sh
-# Si vous avez créé un utilisateur autre que 'essensys':
-# sudo ./install.sh --user <votre_user>
-```
-
-
-4. **[Configuration réseau](connexion/configuration-reseau.md)** - Configuration SSH et réseau
-5. **[Accès aux services](acces/index.md)** - URLs locales et WAN
+3. **[Choix du Domaine WAN](installation/wan.md)** - Choix du domaine pour l'accès extérieur (Optionnel)
+4. **[Installation Essensys](installation/essensys-installation.md)** - Installation automatique ou manuelle
+5. **[Configuration réseau](connexion/configuration-reseau.md)** - Configuration SSH et réseau
+6. **[Accès aux services](acces/index.md)** - URLs locales et WAN
 
 ## 📚 Sections principales
 
 ### Installation
-- [Préparation du matériel](installation/preparation.md)
-- [Installation de l'OS](installation/os-installation.md)
-- [Installation Essensys](installation/essensys-installation.md)
+- [Introduction](installation/index.md)
+- [1. Préparation du matériel](installation/preparation.md)
+- [2. Installation de l'OS](installation/os-installation.md)
+- [3. Choix du Domaine WAN](installation/wan.md)
+- [4. Installation d'Essensys](installation/essensys-installation.md)
 
 ### Connexion
 - [Connexion SSH](connexion/ssh.md)
