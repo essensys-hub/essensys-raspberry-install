@@ -7,7 +7,6 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 **🔍 [Voir les versions disponibles](versions.md)**
 
 **[:material-play-circle: Débuter l'installation pas à pas](installation/index.md)**
-
 1. **[Préparation du matériel](installation/preparation.md)** - SSD, adaptateur USB-SATA, Raspberry Pi 4
 2. **[Installation de l'OS](installation/os-installation.md)** - Installation de Raspberry Pi OS sur le SSD
 3. **[Choix du Domaine WAN](installation/wan.md)** - Choix du domaine pour l'accès extérieur (Optionnel)
