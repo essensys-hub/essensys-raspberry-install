@@ -96,6 +96,7 @@ def push_data(payload):
     req.add_header('User-Agent', 'Essensys-Monitor/1.0')
     
     try:
+        print(f"Pushing data to: {GATEWAY_URL} ...")
         with urllib.request.urlopen(req, timeout=10) as response:
             print(f"Push success. Code: {response.getcode()}")
             return True
