@@ -19,7 +19,9 @@ SERVICES = [
     {"name": "Backend", "service": "essensys-backend", "key": "b"},
     {"name": "Frontend", "service": "nginx", "key": "f"},
     {"name": "Traefik", "service": "traefik", "key": "t"},
-    {"name": "AdGuard", "service": "AdGuardHome", "key": "a"}
+    {"name": "AdGuard", "service": "AdGuardHome", "key": "a"},
+    {"name": "Blocker", "service": "traefik-block-service", "key": "k"},
+    {"name": "Push", "service": "essensys-push.timer", "key": "p"}
 ]
 REFRESH_RATE = 1.0  # seconds
 
@@ -428,7 +430,7 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "1:Bk 2:Tr 3:Ng 0:All | q:Logoff | r:Reboot | b/f/t/a:Rst Svc | c:Conf"
+                cmds = "1:Bk 2:Tr 3:Ng 0:All | q:Logoff | r:Reboot | b/f/t/a/k/p:Rst Svc | c:Conf"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
@@ -469,6 +471,14 @@ def main(stdscr):
             elif key == ord('a'):
                 monitor.restart_service("AdGuardHome")
                 last_restart_msg = "Restarting AdGuard..."
+                last_restart_time = time.time()
+            elif key == ord('k'):
+                monitor.restart_service("traefik-block-service")
+                last_restart_msg = "Restarting Blocker..."
+                last_restart_time = time.time()
+            elif key == ord('p'):
+                monitor.restart_service("essensys-push.timer")
+                last_restart_msg = "Restarting Push Timer..."
                 last_restart_time = time.time()
 
             stdscr.refresh()
