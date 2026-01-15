@@ -672,6 +672,46 @@ else
     log_warn "Fichier de configuration logrotate non trouvé: $SCRIPT_DIR/essensys-logrotate.conf"
 fi
 
+# Configurer le service de push status (intervalle 1 minute)
+log_info "Configuration du service de push status..."
+if [ -f "$SCRIPT_DIR/push_status.py" ]; then
+    cp "$SCRIPT_DIR/push_status.py" "$INSTALL_DIR/"
+    chmod +x "$INSTALL_DIR/push_status.py"
+
+    # Créer le service systemd
+    cat > /etc/systemd/system/essensys-push.service <<EOF
+[Unit]
+Description=Essensys Status Push Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 $INSTALL_DIR/push_status.py
+EOF
+
+    # Créer le timer systemd
+    cat > /etc/systemd/system/essensys-push.timer <<EOF
+[Unit]
+Description=Run Essensys Status Push every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    # Recharger et activer
+    systemctl daemon-reload
+    systemctl enable essensys-push.timer
+    systemctl start essensys-push.timer
+    log_info "Timer essensys-push activé (chaque minute)"
+else
+    log_warn "Script push_status.py non trouvé dans $SCRIPT_DIR"
+fi
+
 log_info ""
 log_info "=========================================="
 log_info "Installation terminée avec succès!"
