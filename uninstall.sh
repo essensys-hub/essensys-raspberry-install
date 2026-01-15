@@ -144,6 +144,21 @@ if systemctl is-enabled --quiet nginx 2>/dev/null; then
     systemctl disable nginx
 fi
 
+# Service Push Status (Timer & Service)
+if systemctl is-active --quiet essensys-push.timer 2>/dev/null; then
+    log_info "Arrêt du timer essensys-push..."
+    systemctl stop essensys-push.timer
+fi
+if systemctl is-enabled --quiet essensys-push.timer 2>/dev/null; then
+    log_info "Désactivation du timer essensys-push..."
+    systemctl disable essensys-push.timer
+fi
+
+if systemctl is-active --quiet essensys-push.service 2>/dev/null; then
+    log_info "Arrêt du service essensys-push..."
+    systemctl stop essensys-push.service
+fi
+
 # Supprimer les fichiers de service systemd
 log_info "Suppression des fichiers de service systemd..."
 SERVICES_REMOVED=false
@@ -163,6 +178,18 @@ fi
 if [ -f "/etc/systemd/system/traefik-block-service.service" ]; then
     rm -f /etc/systemd/system/traefik-block-service.service
     log_info "✓ Fichier traefik-block-service.service supprimé"
+    SERVICES_REMOVED=true
+fi
+
+if [ -f "/etc/systemd/system/essensys-push.service" ]; then
+    rm -f /etc/systemd/system/essensys-push.service
+    log_info "✓ Fichier essensys-push.service supprimé"
+    SERVICES_REMOVED=true
+fi
+
+if [ -f "/etc/systemd/system/essensys-push.timer" ]; then
+    rm -f /etc/systemd/system/essensys-push.timer
+    log_info "✓ Fichier essensys-push.timer supprimé"
     SERVICES_REMOVED=true
 fi
 
@@ -300,6 +327,12 @@ if [ -f "/usr/local/bin/traefik-block-service.py" ]; then
     log_info "✓ Script traefik-block-service.py supprimé"
 fi
 
+# Supprimer le script monitor.py (si copié dans /usr/local/bin)
+if [ -f "/usr/local/bin/monitor.py" ]; then
+    rm -f /usr/local/bin/monitor.py
+    log_info "✓ Script monitor.py supprimé de /usr/local/bin"
+fi
+
 # Supprimer les logs Traefik
 log_info "Suppression des logs Traefik..."
 if [ -d "/var/log/traefik" ]; then
@@ -375,7 +408,7 @@ log_info "Désinstallation terminée avec succès!"
 log_info "=========================================="
 log_info ""
 log_info "Résumé des suppressions:"
-log_info "  ✓ Services systemd supprimés (essensys-backend, traefik, traefik-block-service)"
+log_info "  ✓ Services systemd supprimés (essensys-backend, traefik, traefik-block-service, essensys-push)"
 log_info "  ✓ Configuration nginx supprimée (essensys, essensys-frontend-internal)"
 log_info "  ✓ Configuration Traefik supprimée (/etc/traefik)"
 log_info "  ✓ Binaires supprimés (traefik, traefik-block-service.py)"

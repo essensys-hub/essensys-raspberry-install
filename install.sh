@@ -205,7 +205,7 @@ if [ -d "$HOME_DIR/essensys-server-frontend" ]; then
         exit 1
     fi
 else
-    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone $FRONTEND_REPO"; then
+    if ! sudo -u "$SERVICE_USER" bash -c "cd $HOME_DIR && git clone -b V.1.0.0 $FRONTEND_REPO"; then
         log_error "Échec du clonage du frontend."
         log_error "Vérifiez que :"
         log_error "  1. La connexion Internet fonctionne"
@@ -683,6 +683,46 @@ if [ -f "$SCRIPT_DIR/essensys-logrotate.conf" ]; then
     log_info "Configuration logrotate installée dans /etc/logrotate.d/essensys"
 else
     log_warn "Fichier de configuration logrotate non trouvé: $SCRIPT_DIR/essensys-logrotate.conf"
+fi
+
+# Configurer le service de push status (intervalle 1 minute)
+log_info "Configuration du service de push status..."
+if [ -f "$SCRIPT_DIR/push_status.py" ]; then
+    cp "$SCRIPT_DIR/push_status.py" "$INSTALL_DIR/"
+    chmod +x "$INSTALL_DIR/push_status.py"
+
+    # Créer le service systemd
+    cat > /etc/systemd/system/essensys-push.service <<EOF
+[Unit]
+Description=Essensys Status Push Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 $INSTALL_DIR/push_status.py
+EOF
+
+    # Créer le timer systemd
+    cat > /etc/systemd/system/essensys-push.timer <<EOF
+[Unit]
+Description=Run Essensys Status Push every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    # Recharger et activer
+    systemctl daemon-reload
+    systemctl enable essensys-push.timer
+    systemctl start essensys-push.timer
+    log_info "Timer essensys-push activé (chaque minute)"
+else
+    log_warn "Script push_status.py non trouvé dans $SCRIPT_DIR"
 fi
 
 log_info ""

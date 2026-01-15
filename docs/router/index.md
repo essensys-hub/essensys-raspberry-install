@@ -34,10 +34,22 @@ graph TB
     style Port3 fill:#c8e6c9
 ```
 
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
+
+!!!WARNING "L'adresse IP `192.168.1.151` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre "essensys client" sur votre réseau local pour configurer les redirections de port correctement.
+
 **Configuration standard :**
 - **Port 2 du Switch** : Raspberry Pi 4 (192.168.1.101)
 - **Port 3 du Switch** : Client Essensys / Armoire (192.168.1.151)
 - Le client Essensys communique avec le Raspberry Pi via les API `/api/*` sur le réseau local
+
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
+
+!!!WARNING "L'adresse IP `192.168.1.151` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre "essensys client" sur votre réseau local pour configurer les redirections de port correctement.
 
 ## Sections
 
@@ -53,6 +65,11 @@ Pour permettre l'accès WAN, vous devez configurer :
 1. **NAT/Port forwarding** :
    - Port 80 → 192.168.1.101:80
    - Port 443 → 192.168.1.101:443
+
+!!!WARNING "L'adresse IP `192.168.1.101` utilisée dans cet exemple est fictive"
+    Vous devez impérativement identifier l'adresse IP réelle de votre Raspberry Pi sur votre réseau local pour configurer les redirections de port correctement.
+
+
 
 2. **DNS local** (optionnel) :
    - `mon.essensys.fr` → 192.168.1.101

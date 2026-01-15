@@ -1,4 +1,4 @@
-site_name: Essensys Raspberry Pi Installation
+site_name: Essensys (Production V.1.0.0)
 site_description: Documentation complète pour l'installation et la configuration d'Essensys sur Raspberry Pi 4
 site_author: Essensys Team
 site_url: https://essensys-hub.github.io/essensys-raspberry-install
@@ -47,11 +47,16 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - admonition
   - pymdownx.details
   - attr_list
   - md_in_html
   - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
 
@@ -64,15 +69,17 @@ plugins:
 
 nav:
   - Accueil: index.md
+  - Versions: versions.md
   - Client iOS: client-ios.md
   - Client Android: client-android.md
   - Moniteur Console (HMI): monitor.md
 
   - Installation:
-    - installation/index.md
-    - installation/preparation.md
-    - installation/os-installation.md
-    - installation/essensys-installation.md
+    - introduction: installation/index.md
+    - "Étape 1 : Préparation matérielle": installation/preparation.md
+    - "Étape 2 : Installation de l'OS": installation/os-installation.md
+    - "Étape 3 : Choix du Domaine WAN": installation/wan.md
+    - "Étape 4 : Installation d'Essensys": installation/essensys-installation.md
   - Connexion:
     - connexion/index.md
     - connexion/ssh.md
@@ -108,11 +115,14 @@ nav:
     - maintenance/troubleshooting.md
     - maintenance/debug.md
 
+extra_css:
+  - stylesheets/extra.css
+
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/essensys-hub
-  version:
-    provider: mike
+  # version:
+  #   provider: mike
 
 
