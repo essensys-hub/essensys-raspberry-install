@@ -298,8 +298,23 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Mettre à jour et configurer le script de push status
+log_info "Mise à jour de push_status.py..."
+if [ -f "$SCRIPT_DIR/push_status.py" ]; then
+    cp "$SCRIPT_DIR/push_status.py" "$INSTALL_DIR/"
+    chmod +x "$INSTALL_DIR/push_status.py"
+    log_info "push_status.py mis à jour"
+    
+    # Redémarrer le timer si le fichier a changé
+    if systemctl is-active --quiet essensys-push.timer; then
+        systemctl restart essensys-push.timer
+    fi
+else
+    log_warn "push_status.py non trouvé dans $SCRIPT_DIR"
+fi
+
 # Redémarrer Traefik (Traefik ne supporte pas reload, il faut restart)
-log_info "Redémarrage de Traefik..."
+log_info "Redémarrage de Traefik... (Port 80/443)"
 
 # Arrêter Traefik proprement avant de redémarrer
 log_info "Arrêt de Traefik..."
