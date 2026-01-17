@@ -110,7 +110,9 @@ apt-get install -y \
     libcap2-bin \
     ca-certificates \
     openssh-client \
-    redis-server
+    redis-server \
+    postgresql \
+    postgresql-contrib
 
 # Installer Go
 log_info "Installation de Go..."
@@ -724,6 +726,89 @@ EOF
 else
     log_warn "Script push_status.py non trouvé dans $SCRIPT_DIR"
 fi
+
+# ---------------------------------------------------------------------
+# Configuration PostgreSQL (Locale)
+# ---------------------------------------------------------------------
+log_info "Configuration de PostgreSQL..."
+if systemctl is-active --quiet postgresql; then
+    # Créer l'utilisateur essensys s'il n'existe pas
+    if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$SERVICE_USER'" | grep -q 1; then
+        log_info "Création du rôle PostgreSQL '$SERVICE_USER'..."
+        # Mot de passe par défaut généré ou statique pour le moment (à changer via env si besoin)
+        DB_PASS="essensys_db_pass" 
+        sudo -u postgres psql -c "CREATE USER $SERVICE_USER WITH PASSWORD '$DB_PASS';"
+    else
+        log_info "Rôle PostgreSQL '$SERVICE_USER' existe déjà."
+    fi
+
+    # Créer la base de données essensys si elle n'existe pas
+    if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='essensys'" | grep -q 1; then
+        log_info "Création de la base de données 'essensys'..."
+        sudo -u postgres psql -c "CREATE DATABASE essensys OWNER $SERVICE_USER;"
+    else
+        log_info "Base de données 'essensys' existe déjà."
+    fi
+else
+    log_error "Le service PostgreSQL n'est pas actif."
+fi
+
+# ---------------------------------------------------------------------
+# Configuration Backup Quotidien
+# ---------------------------------------------------------------------
+log_info "Configuration des backups PostgreSQL quotidiens..."
+BACKUP_DIR="/var/backups/essensys"
+mkdir -p "$BACKUP_DIR"
+chown postgres:postgres "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
+
+# Créer le script de backup
+cat > /usr/local/bin/essensys-backup-db.sh <<EOF
+#!/bin/bash
+set -e
+
+BACKUP_DIR="/var/backups/essensys"
+TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+FILENAME="\$BACKUP_DIR/essensys_db_\$TIMESTAMP.sql.gz"
+
+# Dump et compression
+pg_dump -U postgres essensys | gzip > "\$FILENAME"
+
+# Nettoyage > 7 jours
+find "\$BACKUP_DIR" -type f -name "essensys_db_*.sql.gz" -mtime +7 -delete
+EOF
+
+chmod +x /usr/local/bin/essensys-backup-db.sh
+
+# Service systemd pour le backup
+cat > /etc/systemd/system/essensys-backup.service <<EOF
+[Unit]
+Description=Essensys Database Backup
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/essensys-backup-db.sh
+EOF
+
+# Timer systemd (Tous les jours à 03:00)
+cat > /etc/systemd/system/essensys-backup.timer <<EOF
+[Unit]
+Description=Run Essensys Database Backup daily
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable essensys-backup.timer
+systemctl start essensys-backup.timer
+log_info "Backup quotidien configuré à 03:00."
 
 log_info ""
 log_info "=========================================="
