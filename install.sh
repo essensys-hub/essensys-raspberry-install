@@ -72,6 +72,16 @@ if [ -f "$DOMAIN_FILE" ]; then
     else
         log_warn "Domaine vide, domain.txt conserve tel quel"
     fi
+else
+    log_warn "domain.txt absent. Creation du fichier."
+    read -p "Domaine WAN (ex: mon.essensys.fr): " WAN_DOMAIN
+    if [ -n "$WAN_DOMAIN" ]; then
+        echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
+        chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
+        log_info "domain.txt cree dans $DOMAIN_FILE"
+    else
+        log_warn "Domaine vide, domain.txt non cree"
+    fi
 fi
 
 if command -v resize2fs_once >/dev/null 2>&1; then
