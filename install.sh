@@ -61,10 +61,12 @@ if [ ! -f "${BASH_SOURCE[0]}" ]; then
         sudo -u "$SERVICE_USER" git -C "$BOOTSTRAP_DIR" pull --ff-only
     fi
 fi
-
+echo "----------------------------------------"
+echo "DOMAIN_FILE: $DOMAIN_FILE"
+echo "----------------------------------------"
 if [ -f "$DOMAIN_FILE" ]; then
     log_info "domain.txt detecte. Saisissez le domaine WAN a utiliser."
-    read -p "Domaine WAN (ex: mon.essensys.fr): " WAN_DOMAIN
+    read -p "Domaine WAN (ex: mon.monwan.io):  ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ " WAN_DOMAIN
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
@@ -74,7 +76,7 @@ if [ -f "$DOMAIN_FILE" ]; then
     fi
 else
     log_warn "domain.txt absent. Creation du fichier."
-    read -p "Domaine WAN (ex: mon.essensys.fr): " WAN_DOMAIN
+    read -p "Domaine WAN (ex: mon.monwan.io): ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ " WAN_DOMAIN
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
