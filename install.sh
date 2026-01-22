@@ -34,6 +34,7 @@ BOOTSTRAP_DIR="$HOME_DIR/essensys-raspberry-install"
 REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
 ANSIBLE_REF="V.1.0.0"
+DOMAIN_FILE="$HOME_DIR/domain.txt"
 
 log_info "Verification des prerequis (git, ansible)..."
 
@@ -58,6 +59,18 @@ if [ ! -f "${BASH_SOURCE[0]}" ]; then
     else
         log_info "Depot essensys-raspberry-install deja present, mise a jour..."
         sudo -u "$SERVICE_USER" git -C "$BOOTSTRAP_DIR" pull --ff-only
+    fi
+fi
+
+if [ -f "$DOMAIN_FILE" ]; then
+    log_info "domain.txt detecte. Saisissez le domaine WAN a utiliser."
+    read -p "Domaine WAN (ex: mon.essensys.fr): " WAN_DOMAIN
+    if [ -n "$WAN_DOMAIN" ]; then
+        echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
+        chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
+        log_info "Domaine enregistre dans $DOMAIN_FILE"
+    else
+        log_warn "Domaine vide, domain.txt conserve tel quel"
     fi
 fi
 
