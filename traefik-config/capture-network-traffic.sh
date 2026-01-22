@@ -74,3 +74,5 @@ trap "kill $TCPDUMP_PID 2>/dev/null; log_info 'Capture arrêtée'; log_info 'Fic
 tail -f /tmp/traefik-capture-live.txt 2>/dev/null || wait $TCPDUMP_PID
 
 
+
+

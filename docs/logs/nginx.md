@@ -152,3 +152,5 @@ sudo nginx -t
 - Vérifier la configuration des logs dans `/etc/nginx/sites-available/essensys`
 
 
+
+

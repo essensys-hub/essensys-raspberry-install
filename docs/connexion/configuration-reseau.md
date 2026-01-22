@@ -125,3 +125,4 @@ Sur les versions récentes de Raspberry Pi OS (Bookworm et ultérieur), la confi
     ```bash
     sudo systemctl restart dhcpcd
     ```
+

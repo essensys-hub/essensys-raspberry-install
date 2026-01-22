@@ -103,3 +103,5 @@ sudo chown essensys:essensys /var/logs/Essensys/backend
 - Vérifier la configuration du backend dans `/opt/essensys/backend/config.yaml`
 
 
+
+
