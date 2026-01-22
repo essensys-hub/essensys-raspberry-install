@@ -84,8 +84,12 @@ fi
 
 log_info "Lancement du playbook d'installation Raspberry Pi..."
 if [ ! -f "$TARGET_DIR/inventory" ]; then
-    log_error "Fichier inventory introuvable dans $TARGET_DIR"
-    exit 1
+    log_warn "Fichier inventory introuvable dans $TARGET_DIR"
+    log_info "Creation d'un inventory local..."
+    cat > "$TARGET_DIR/inventory" <<'EOF'
+[raspberrypi]
+localhost ansible_connection=local
+EOF
 fi
 
 if [ ! -f "$TARGET_DIR/install.raspberrypi.yml" ]; then
