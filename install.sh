@@ -64,9 +64,19 @@ fi
 echo "----------------------------------------"
 echo "DOMAIN_FILE: $DOMAIN_FILE"
 echo "----------------------------------------"
+prompt_domain() {
+    local prompt_message="$1"
+    if [ -r /dev/tty ]; then
+        read -r -p "$prompt_message" WAN_DOMAIN < /dev/tty
+        return 0
+    fi
+    log_warn "Aucun TTY disponible pour la saisie interactive."
+    WAN_DOMAIN=""
+    return 1
+}
 if [ -f "$DOMAIN_FILE" ]; then
     log_info "domain.txt detecte. Saisissez le domaine WAN a utiliser."
-    read -p "Domaine WAN (ex: mon.monwan.io):  ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ " WAN_DOMAIN
+    prompt_domain "Domaine WAN (ex: mon.monwan.io):  ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ "
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
@@ -76,7 +86,7 @@ if [ -f "$DOMAIN_FILE" ]; then
     fi
 else
     log_warn "domain.txt absent. Creation du fichier."
-    read -p "Domaine WAN (ex: mon.monwan.io): ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ " WAN_DOMAIN
+    prompt_domain "Domaine WAN (ex: mon.monwan.io): ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ "
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
