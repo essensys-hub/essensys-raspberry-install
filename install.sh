@@ -31,6 +31,19 @@ fi
 SERVICE_USER="essensys"
 HOME_DIR="/home/$SERVICE_USER"
 BOOTSTRAP_DIR="$HOME_DIR/essensys-raspberry-install"
+REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
+TARGET_DIR="/opt/essensys-ansible"
+
+log_info "Verification des prerequis (git, ansible)..."
+
+apt-get update
+
+if ! command -v git >/dev/null 2>&1; then
+    log_warn "Git non trouve, installation..."
+    apt-get install -y git
+else
+    log_info "Git deja installe"
+fi
 
 if [ ! -f "${BASH_SOURCE[0]}" ]; then
     log_info "Execution via curl | bash detectee, bootstrap du depot..."
@@ -52,20 +65,6 @@ if command -v resize2fs_once >/dev/null 2>&1; then
     resize2fs_once
 else
     log_warn "resize2fs_once introuvable, etape ignoree"
-fi
-
-REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
-TARGET_DIR="/opt/essensys-ansible"
-
-log_info "Verification des prerequis (git, ansible)..."
-
-apt-get update
-
-if ! command -v git >/dev/null 2>&1; then
-    log_warn "Git non trouve, installation..."
-    apt-get install -y git
-else
-    log_info "Git deja installe"
 fi
 
 if ! command -v ansible-playbook >/dev/null 2>&1; then
