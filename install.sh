@@ -33,6 +33,7 @@ HOME_DIR="/home/$SERVICE_USER"
 BOOTSTRAP_DIR="$HOME_DIR/essensys-raspberry-install"
 REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
+ANSIBLE_REF="V.1.0.0"
 
 log_info "Verification des prerequis (git, ansible)..."
 
@@ -76,10 +77,12 @@ fi
 
 if [ -d "$TARGET_DIR/.git" ]; then
     log_info "Depot deja present, mise a jour..."
+    git -C "$TARGET_DIR" fetch --all --tags
+    git -C "$TARGET_DIR" checkout "$ANSIBLE_REF"
     git -C "$TARGET_DIR" pull --ff-only
 else
     log_info "Clonage du depot essensys-ansible..."
-    git clone "$REPO_URL" "$TARGET_DIR"
+    git clone -b "$ANSIBLE_REF" "$REPO_URL" "$TARGET_DIR"
 fi
 
 log_info "Lancement du playbook d'installation Raspberry Pi..."
