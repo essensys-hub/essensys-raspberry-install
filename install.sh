@@ -76,7 +76,8 @@ prompt_domain() {
 }
 if [ -f "$DOMAIN_FILE" ]; then
     log_info "domain.txt detecte. Saisissez le domaine WAN a utiliser."
-    prompt_domain "Domaine WAN (ex: mon.monwan.io):  ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ "
+    log_info "ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/"
+    prompt_domain "Domaine WAN (ex: mon.monwan.io):  "
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
@@ -86,7 +87,8 @@ if [ -f "$DOMAIN_FILE" ]; then
     fi
 else
     log_warn "domain.txt absent. Creation du fichier."
-    prompt_domain "Domaine WAN (ex: mon.monwan.io): ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/ "
+    log_info "ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/"
+    prompt_domain "Domaine WAN (ex: mon.monwan.io):  "
     if [ -n "$WAN_DOMAIN" ]; then
         echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
         chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"

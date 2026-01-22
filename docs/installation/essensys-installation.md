@@ -25,7 +25,7 @@ Choisissez la méthode correspondant à votre nom d'utilisateur configuré à l'
 
     2. **Lancez l'installation automatique** :
        ```bash
-       sudo curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/main/install.sh | sudo bash
+       sudo curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/refs/heads/V.1.1.0/install.sh | sudo bash
        ```
 
 === "Autre utilisateur (Personnalisé)"
