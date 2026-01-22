@@ -139,4 +139,11 @@ fi
 
 ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml"
 
+log_info "Configuration du mot de passe WAN (admin)..."
+if command -v generate-htpasswd-essensys.sh >/dev/null 2>&1; then
+    generate-htpasswd-essensys.sh admin
+else
+    log_warn "Script generate-htpasswd-essensys.sh introuvable."
+fi
+
 log_info "Termine. Installation lancee via Ansible."
