@@ -135,3 +135,5 @@ schema_version: 20
 rewrites:
   - domain: mon.essensys.fr
     answer: LOCAL_IP_PLACEHOLDER
+  - domain: mon.essensys.local
+    answer: LOCAL_IP_PLACEHOLDER
