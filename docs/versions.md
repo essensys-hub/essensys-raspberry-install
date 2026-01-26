@@ -6,7 +6,8 @@ Cette page répertorie les versions du système Essensys.
 
 | Version | Statut | Date de sortie | Description |
 | :--- | :--- | :--- | :--- |
-| V.1.1.0 | ** Dev version ** | 11 Janvier 2026 | **Version Actuelle.** Intégration complète de Redis pour la persistance et la fiabilité. |
+| V.1.2.0 | ** Dev version ** | 25 Janvier 2026 | **Version Actuelle.** Intégration Home Assistant. |
+| V.1.1.0 | **Production (Stable) Legacy** | 11 Janvier 2026 | Intégration complète de Redis pour la persistance et la fiabilité. |
 | **V.1.0.0** | **Production (Stable) Legacy ** | 11 Janvier 2026 | Ancienne version stable sans Redis. Support limité. |
 
 ## Détails de la Version V.1.1.0 (Redis)
