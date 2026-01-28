@@ -33,8 +33,20 @@ HOME_DIR="/home/$SERVICE_USER"
 BOOTSTRAP_DIR="$HOME_DIR/essensys-raspberry-install"
 REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
-ANSIBLE_REF="V.1.2.0"
+
+# Versions des dépôts (alignées avec ansible vars)
+ESSENSYS_VERSION="V.1.2.0"
+ANSIBLE_REF="$ESSENSYS_VERSION"
+INSTALL_REF="$ESSENSYS_VERSION"
+
 DOMAIN_FILE="$HOME_DIR/domain.txt"
+
+log_info "=========================================="
+log_info "Installation Essensys - Version $ESSENSYS_VERSION"
+log_info "=========================================="
+log_info "  - essensys-raspberry-install: $INSTALL_REF"
+log_info "  - essensys-ansible: $ANSIBLE_REF"
+log_info "=========================================="
 
 log_info "Verification des prerequis (git, ansible)..."
 
@@ -54,10 +66,12 @@ if [ ! -f "${BASH_SOURCE[0]}" ]; then
         useradd -m -s /bin/bash -d "$HOME_DIR" "$SERVICE_USER"
     fi
     if [ ! -d "$BOOTSTRAP_DIR/.git" ]; then
-        log_info "Clonage de essensys-raspberry-install dans $BOOTSTRAP_DIR..."
-        sudo -u "$SERVICE_USER" git clone "https://github.com/essensys-hub/essensys-raspberry-install.git" "$BOOTSTRAP_DIR"
+        log_info "Clonage de essensys-raspberry-install (branche $INSTALL_REF) dans $BOOTSTRAP_DIR..."
+        sudo -u "$SERVICE_USER" git clone -b "$INSTALL_REF" "https://github.com/essensys-hub/essensys-raspberry-install.git" "$BOOTSTRAP_DIR"
     else
-        log_info "Depot essensys-raspberry-install deja present, mise a jour..."
+        log_info "Depot essensys-raspberry-install deja present, mise a jour vers $INSTALL_REF..."
+        sudo -u "$SERVICE_USER" git -C "$BOOTSTRAP_DIR" fetch --all --tags
+        sudo -u "$SERVICE_USER" git -C "$BOOTSTRAP_DIR" checkout "$INSTALL_REF"
         sudo -u "$SERVICE_USER" git -C "$BOOTSTRAP_DIR" pull --ff-only
     fi
 fi
