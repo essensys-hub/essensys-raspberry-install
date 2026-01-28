@@ -1,0 +1,83 @@
+# Configuration Caddy pour accès WAN avec domaine public
+# Utilise Let's Encrypt pour HTTPS automatique
+# Généré automatiquement - Ne pas modifier manuellement
+
+{
+    # Options globales
+    admin off
+    email {$ACME_EMAIL:admin@essensys.local}
+    log {
+        output file /var/log/caddy/access.log
+        format console
+    }
+}
+
+# Domaine WAN avec Let's Encrypt
+{$WAN_DOMAIN} {
+    # Let's Encrypt automatique pour le domaine
+    tls {$ACME_EMAIL:admin@essensys.local}
+
+    # Définir les plages IP privées (RFC1918 + loopback)
+    @private_network {
+        remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
+    }
+    
+    # Définir les réseaux publics
+    @public_network {
+        not remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
+    }
+
+    # Route /health publique (monitoring)
+    @health path /health /api/health
+    handle @health {
+        reverse_proxy localhost:8080
+    }
+
+    # Routes depuis le WAN - AUTH OBLIGATOIRE
+    handle @public_network {
+        basicauth * {
+            import {{HTPASSWD_FILE}}
+        }
+        
+        @api path /api/*
+        handle @api {
+            reverse_proxy localhost:8080
+        }
+
+        handle {
+            reverse_proxy localhost:3000
+        }
+    }
+
+    # Routes depuis le LAN - conditionnel selon config
+    handle @private_network {
+        # Note: Ce template est pour WAN avec auth
+        # Pour LAN sans auth, utiliser Caddyfile.wan-lan-noauth
+        basicauth * {
+            import {{HTPASSWD_FILE}}
+        }
+        
+        @api path /api/*
+        handle @api {
+            reverse_proxy localhost:8080
+        }
+
+        handle {
+            reverse_proxy localhost:3000
+        }
+    }
+
+    # Headers de sécurité
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        -Server
+    }
+}
+
+# Redirection HTTP vers HTTPS
+http://{$WAN_DOMAIN} {
+    redir https://{host}{uri} permanent
+}

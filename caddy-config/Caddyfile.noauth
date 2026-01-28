@@ -1,0 +1,48 @@
+# Configuration Caddy SANS authentification
+# ⚠️ ATTENTION: Accès libre à tous - utilisez uniquement en développement
+# Généré automatiquement par essensys-auth - Ne pas modifier manuellement
+
+{
+    # Options globales
+    admin off
+    log {
+        output file /var/log/caddy/access.log
+        format console
+    }
+}
+
+# Serveur principal (HTTP avec redirection HTTPS en LAN)
+:80 {
+    redir https://{host}{uri} permanent
+}
+
+# Serveur HTTPS
+:443 {
+    # Certificat auto-signé pour le LAN
+    tls internal
+
+    # Route /health publique (monitoring)
+    @health path /health /api/health
+    handle @health {
+        reverse_proxy localhost:8080
+    }
+
+    # Routes API Backend
+    @api path /api/*
+    handle @api {
+        reverse_proxy localhost:8080
+    }
+
+    # Frontend (tout le reste)
+    handle {
+        reverse_proxy localhost:3000
+    }
+
+    # Headers de sécurité
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+}
