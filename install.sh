@@ -33,7 +33,7 @@ HOME_DIR="/home/$SERVICE_USER"
 BOOTSTRAP_DIR="$HOME_DIR/essensys-raspberry-install"
 REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
-ANSIBLE_REF="V.1.0.0"
+ANSIBLE_REF="V.1.2.0"
 DOMAIN_FILE="$HOME_DIR/domain.txt"
 
 log_info "Verification des prerequis (git, ansible)..."
