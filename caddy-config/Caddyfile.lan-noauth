@@ -1,78 +1,139 @@
-# Configuration Caddy avec authentification WAN uniquement
-# LAN (RFC1918 + loopback) sans authentification
-# Généré automatiquement par essensys-auth - Ne pas modifier manuellement
+# Configuration Caddy - LAN sans auth, WAN avec auth obligatoire
+# Réplique la config Nginx pour compatibilité client legacy
+# Généré par essensys-auth - Ne pas modifier manuellement
 
 {
-    # Options globales
     admin off
     log {
         output file /var/log/caddy/access.log
         format console
     }
+    # Désactiver la redirection HTTPS automatique
+    auto_https off
 }
 
-# Serveur principal (HTTP avec redirection HTTPS en LAN)
+# Port 80 - LAN uniquement (PAS de redirection HTTPS pour client legacy)
 :80 {
-    redir https://{host}{uri} permanent
+    # Bloquer le WAN sur port 80
+    @wan_on_80 {
+        not remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
+    }
+    respond @wan_on_80 "Forbidden - LAN only" 403
+
+    # Health check (public)
+    handle /health {
+        reverse_proxy localhost:7070
+    }
+
+    # Debug interface
+    handle /debug* {
+        reverse_proxy localhost:7070
+    }
+
+    # Table ref
+    handle /table_ref {
+        reverse_proxy localhost:7070
+    }
+
+    # API Backend
+    handle /api/* {
+        reverse_proxy localhost:7070 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Connection "close"
+            flush_interval -1
+        }
+    }
+
+    # Frontend - Fichiers statiques
+    handle {
+        root * /opt/essensys/frontend/dist
+        try_files {path} /index.html
+        file_server
+        
+        header {
+            X-Frame-Options "SAMEORIGIN"
+            X-Content-Type-Options "nosniff"
+        }
+    }
 }
 
-# Serveur HTTPS
+# Port 443 - LAN sans auth, WAN avec auth obligatoire
 :443 {
-    # Certificat auto-signé pour le LAN
     tls internal
 
-    # Définir les plages IP privées (RFC1918 + loopback)
-    @private_network {
+    # Définir LAN vs WAN
+    @lan {
         remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
     }
-    
-    # Définir les réseaux publics (tout ce qui n'est pas privé)
-    @public_network {
+    @wan {
         not remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
     }
 
-    # Route /health publique (monitoring) - toujours accessible
-    @health path /health /api/health
-    handle @health {
-        reverse_proxy localhost:8080
+    # Health check (toujours public)
+    handle /health {
+        reverse_proxy localhost:7070
     }
 
-    # Routes depuis le WAN (réseau public) - AUTH OBLIGATOIRE
-    handle @public_network {
-        basicauth * {
+    # Debug interface
+    handle /debug* {
+        reverse_proxy localhost:7070
+    }
+
+    # Table ref
+    handle /table_ref {
+        reverse_proxy localhost:7070
+    }
+
+    # WAN - Auth obligatoire
+    handle @wan {
+        basicauth {
             import {{HTPASSWD_FILE}}
         }
-        
-        # Routes API Backend
-        @api path /api/*
-        handle @api {
-            reverse_proxy localhost:8080
+
+        handle /api/* {
+            reverse_proxy localhost:7070 {
+                header_up Host {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+                header_up Connection "close"
+                flush_interval -1
+            }
         }
 
-        # Frontend
         handle {
-            reverse_proxy localhost:3000
+            root * /opt/essensys/frontend/dist
+            try_files {path} /index.html
+            file_server
         }
     }
 
-    # Routes depuis le LAN (réseau privé) - SANS AUTH
-    handle @private_network {
-        # Routes API Backend
-        @api path /api/*
-        handle @api {
-            reverse_proxy localhost:8080
+    # LAN - Pas d'auth
+    handle @lan {
+        handle /api/* {
+            reverse_proxy localhost:7070 {
+                header_up Host {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+                header_up Connection "close"
+                flush_interval -1
+            }
         }
 
-        # Frontend
         handle {
-            reverse_proxy localhost:3000
+            root * /opt/essensys/frontend/dist
+            try_files {path} /index.html
+            file_server
         }
     }
 
-    # Headers de sécurité
     header {
         X-Content-Type-Options nosniff
-        X-Frame-Options DENY
+        X-Frame-Options SAMEORIGIN
         Referrer-Policy strict-origin-when-cross-origin
         -Server
     }

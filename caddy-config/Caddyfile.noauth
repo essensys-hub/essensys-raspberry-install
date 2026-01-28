@@ -1,47 +1,107 @@
-# Configuration Caddy SANS authentification
-# ⚠️ ATTENTION: Accès libre à tous - utilisez uniquement en développement
-# Généré automatiquement par essensys-auth - Ne pas modifier manuellement
+# Configuration Caddy - SANS authentification
+# ⚠️ ATTENTION: Accès libre - utilisez uniquement en développement/debug
+# Réplique la config Nginx pour compatibilité client legacy
+# Généré par essensys-auth - Ne pas modifier manuellement
 
 {
-    # Options globales
     admin off
     log {
         output file /var/log/caddy/access.log
         format console
     }
+    # Désactiver la redirection HTTPS automatique
+    auto_https off
 }
 
-# Serveur principal (HTTP avec redirection HTTPS en LAN)
+# Port 80 - LAN uniquement (PAS de redirection HTTPS pour client legacy)
 :80 {
-    redir https://{host}{uri} permanent
+    # Bloquer le WAN sur port 80
+    @wan_on_80 {
+        not remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1 fd00::/8
+    }
+    respond @wan_on_80 "Forbidden - LAN only" 403
+
+    # Health check
+    handle /health {
+        reverse_proxy localhost:7070
+    }
+
+    # Debug interface
+    handle /debug* {
+        reverse_proxy localhost:7070
+    }
+
+    # Table ref
+    handle /table_ref {
+        reverse_proxy localhost:7070
+    }
+
+    # API Backend
+    handle /api/* {
+        reverse_proxy localhost:7070 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Connection "close"
+            flush_interval -1
+        }
+    }
+
+    # Frontend - Fichiers statiques
+    handle {
+        root * /opt/essensys/frontend/dist
+        try_files {path} /index.html
+        file_server
+        
+        header {
+            X-Frame-Options "SAMEORIGIN"
+            X-Content-Type-Options "nosniff"
+        }
+    }
 }
 
-# Serveur HTTPS
+# Port 443 - HTTPS sans auth (pour navigateurs)
 :443 {
-    # Certificat auto-signé pour le LAN
     tls internal
 
-    # Route /health publique (monitoring)
-    @health path /health /api/health
-    handle @health {
-        reverse_proxy localhost:8080
+    # Health check
+    handle /health {
+        reverse_proxy localhost:7070
     }
 
-    # Routes API Backend
-    @api path /api/*
-    handle @api {
-        reverse_proxy localhost:8080
+    # Debug interface
+    handle /debug* {
+        reverse_proxy localhost:7070
     }
 
-    # Frontend (tout le reste)
+    # Table ref
+    handle /table_ref {
+        reverse_proxy localhost:7070
+    }
+
+    # API Backend
+    handle /api/* {
+        reverse_proxy localhost:7070 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Connection "close"
+            flush_interval -1
+        }
+    }
+
+    # Frontend - Fichiers statiques
     handle {
-        reverse_proxy localhost:3000
+        root * /opt/essensys/frontend/dist
+        try_files {path} /index.html
+        file_server
     }
 
-    # Headers de sécurité
     header {
         X-Content-Type-Options nosniff
-        X-Frame-Options DENY
+        X-Frame-Options SAMEORIGIN
         Referrer-Policy strict-origin-when-cross-origin
         -Server
     }
