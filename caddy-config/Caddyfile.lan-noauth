@@ -43,8 +43,7 @@
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             header_up Connection "close"
-            # Buffer complet de la réponse avant envoi (compatible client legacy)
-            buffer_responses
+            # Sans flush_interval, Caddy bufferise par défaut (compatible client legacy)
         }
     }
 
@@ -101,8 +100,7 @@
                 header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
                 header_up Connection "close"
-                # Buffer complet de la réponse avant envoi (compatible client legacy)
-            buffer_responses
+                # Sans flush_interval, Caddy bufferise par défaut (compatible client legacy)
             }
         }
 
@@ -122,8 +120,7 @@
                 header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
                 header_up Connection "close"
-                # Buffer complet de la réponse avant envoi (compatible client legacy)
-            buffer_responses
+                # Sans flush_interval, Caddy bufferise par défaut (compatible client legacy)
             }
         }
 
