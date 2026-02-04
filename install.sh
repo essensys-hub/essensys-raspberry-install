@@ -159,6 +159,66 @@ fi
 
 ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml"
 
+log_info "Compilation et installation de essensys-mcp..."
+MCP_SRC_DIR="/opt/essensys-server-backend/cmd/mcp-server"
+if [ -d "$MCP_SRC_DIR" ]; then
+    # Ensure go is available or upgrade if too old
+    NEED_GO_INSTALL=true
+    if command -v go >/dev/null 2>&1; then
+        GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+        # Check if version starts with 1.23 or higher (basic string compare works for now)
+        if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
+             NEED_GO_INSTALL=false
+             log_info "Go version $GO_VERSION detectee (suffisant)"
+        fi
+    fi
+
+    if [ "$NEED_GO_INSTALL" = true ]; then
+        log_warn "Installation/Mise a jour de Go vers 1.23.4..."
+        wget https://go.dev/dl/go1.23.4.linux-arm64.tar.gz -O /tmp/go.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
+        export PATH=$PATH:/usr/local/go/bin
+        rm /tmp/go.tar.gz
+    fi
+    
+    # Build
+    log_info "Building essensys-mcp..."
+    export PATH=$PATH:/usr/local/go/bin
+    (cd "$MCP_SRC_DIR" && go mod tidy && go build -o essensys-mcp)
+    
+    # Install binary
+    if [ -f "$MCP_SRC_DIR/essensys-mcp" ]; then
+        cp "$MCP_SRC_DIR/essensys-mcp" /usr/local/bin/
+        chmod +x /usr/local/bin/essensys-mcp
+        log_info "essensys-mcp installe dans /usr/local/bin/essensys-mcp"
+        
+        # Create Systemd Service
+        log_info "Configuration du service systemd essensys-mcp..."
+        cat > /etc/systemd/system/essensys-mcp.service <<EOF
+[Unit]
+Description=Essensys MCP Server
+After=network.target redis-server.service
+
+[Service]
+ExecStart=/usr/local/bin/essensys-mcp -mode sse -port 8080
+Restart=always
+User=root
+# Adjust User if non-root access to Redis/Network is sufficient, but root is safe for internal Pi.
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        systemctl daemon-reload
+        systemctl enable essensys-mcp
+        systemctl start essensys-mcp
+        log_info "Service essensys-mcp demarre"
+    else
+        log_error "Echec de la compilation de essensys-mcp"
+    fi
+else
+    log_warn "Source MCP non trouvee dans $MCP_SRC_DIR (backend pas encore clone ?)"
+fi
+
 # ============================================
 # Configuration de l'authentification Caddy
 # ============================================

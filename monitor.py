@@ -20,7 +20,8 @@ SERVICES = [
     {"name": "Caddy", "service": "caddy", "key": "c"},
     {"name": "AdGuard", "service": "AdGuardHome", "key": "a"},
     {"name": "Push", "service": "essensys-push.timer", "key": "p"},
-    {"name": "HomeAss", "service": "homeassistant", "key": "h"}
+    {"name": "HomeAss", "service": "homeassistant", "key": "h"},
+    {"name": "MCP Srv", "service": "essensys-mcp", "key": "m"}
 ]
 REFRESH_RATE = 1.0  # seconds
 
@@ -425,7 +426,7 @@ def main(stdscr):
             if time.time() - last_restart_time < 3:
                 stdscr.addstr(h-1, 0, last_restart_msg, curses.color_pair(4) | curses.A_REVERSE)
             else:
-                cmds = "1:Bk 2:Cd 0:All | q:Off | r:Reb | b/c/a/p/h:Rst Svc | f:Conf"
+                cmds = "1:Bk 2:Cd 0:All | q:Off | r:Reb | b/c/a/p/h/m:Rst Svc | f:Conf"
                 stdscr.addstr(h-1, 0, cmds[:w-1], curses.color_pair(3))
 
             # --- Input Handling ---
@@ -468,6 +469,10 @@ def main(stdscr):
             elif key == ord('h'):
                 monitor.restart_service("homeassistant")
                 last_restart_msg = "Restarting Home Asst..."
+                last_restart_time = time.time()
+            elif key == ord('m'):
+                monitor.restart_service("essensys-mcp")
+                last_restart_msg = "Restarting MCP Server..."
                 last_restart_time = time.time()
 
             stdscr.refresh()
