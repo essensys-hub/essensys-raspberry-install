@@ -132,6 +132,41 @@ else
     log_info "Ansible deja installe"
 fi
 
+# ============================================
+# Installation de Go (Prerequis pour Backend/MCP)
+# ============================================
+check_go() {
+    log_info "Verification de Go..."
+    # Ensure go is available or upgrade if too old
+    NEED_GO_INSTALL=true
+    if command -v /usr/local/go/bin/go >/dev/null 2>&1; then
+        GO_VERSION=$(/usr/local/go/bin/go version | awk '{print $3}' | sed 's/go//')
+        # Check if version starts with 1.23 or higher (basic string compare works for now)
+        if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
+             NEED_GO_INSTALL=false
+             log_info "Go version $GO_VERSION detectee (suffisant)"
+        fi
+    elif command -v go >/dev/null 2>&1; then
+        # Check system go if /usr/local/go/bin/go not found
+         GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+         if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
+             NEED_GO_INSTALL=false
+             log_info "Go version $GO_VERSION (system) detectee (suffisant)"
+        fi
+    fi
+
+    if [ "$NEED_GO_INSTALL" = true ]; then
+        log_warn "Installation/Mise a jour de Go vers 1.23.4..."
+        wget https://go.dev/dl/go1.23.4.linux-arm64.tar.gz -O /tmp/go.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
+        export PATH=$PATH:/usr/local/go/bin
+        rm /tmp/go.tar.gz
+    else
+        export PATH=$PATH:/usr/local/go/bin
+    fi
+}
+check_go
+
 if [ -d "$TARGET_DIR/.git" ]; then
     log_info "Depot deja present, mise a jour..."
     git -C "$TARGET_DIR" fetch --all --tags
@@ -162,25 +197,6 @@ ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml
 log_info "Compilation et installation de essensys-mcp..."
 MCP_SRC_DIR="/opt/essensys-server-backend/cmd/mcp-server"
 if [ -d "$MCP_SRC_DIR" ]; then
-    # Ensure go is available or upgrade if too old
-    NEED_GO_INSTALL=true
-    if command -v go >/dev/null 2>&1; then
-        GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-        # Check if version starts with 1.23 or higher (basic string compare works for now)
-        if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
-             NEED_GO_INSTALL=false
-             log_info "Go version $GO_VERSION detectee (suffisant)"
-        fi
-    fi
-
-    if [ "$NEED_GO_INSTALL" = true ]; then
-        log_warn "Installation/Mise a jour de Go vers 1.23.4..."
-        wget https://go.dev/dl/go1.23.4.linux-arm64.tar.gz -O /tmp/go.tar.gz
-        rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
-        export PATH=$PATH:/usr/local/go/bin
-        rm /tmp/go.tar.gz
-    fi
-    
     # Build
     log_info "Building essensys-mcp..."
     export PATH=$PATH:/usr/local/go/bin
