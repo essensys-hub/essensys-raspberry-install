@@ -35,7 +35,7 @@ REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
 
 # Versions des dépôts (alignées avec ansible vars)
-ESSENSYS_VERSION="V.1.2.2"
+ESSENSYS_VERSION="V.1.2.3"
 ANSIBLE_REF="$ESSENSYS_VERSION"
 INSTALL_REF="$ESSENSYS_VERSION"
 
