@@ -208,6 +208,17 @@ if [ -d "$MCP_SRC_DIR" ]; then
         chmod +x /usr/local/bin/essensys-mcp
         log_info "essensys-mcp installe dans /usr/local/bin/essensys-mcp"
         
+        # Generate or Read Token
+        TOKEN_FILE="/etc/essensys/mcp.token"
+        mkdir -p /etc/essensys
+        if [ ! -f "$TOKEN_FILE" ]; then
+            # Generate random token
+            openssl rand -hex 32 > "$TOKEN_FILE"
+            chmod 600 "$TOKEN_FILE"
+            log_info "Nouveau token MCP généré dans $TOKEN_FILE"
+        fi
+        MCP_TOKEN=$(cat "$TOKEN_FILE")
+        
         # Create Systemd Service
         log_info "Configuration du service systemd essensys-mcp..."
         cat > /etc/systemd/system/essensys-mcp.service <<EOF
@@ -216,7 +227,7 @@ Description=Essensys MCP Server
 After=network.target redis-server.service
 
 [Service]
-ExecStart=/usr/local/bin/essensys-mcp -mode sse -port 8080
+ExecStart=/usr/local/bin/essensys-mcp -mode sse -port 8080 -token ${MCP_TOKEN}
 Restart=always
 User=root
 # Adjust User if non-root access to Redis/Network is sufficient, but root is safe for internal Pi.
@@ -228,6 +239,7 @@ EOF
         systemctl enable essensys-mcp
         systemctl start essensys-mcp
         log_info "Service essensys-mcp demarre"
+        log_warn "TOKEN MCP: $MCP_TOKEN"
     else
         log_error "Echec de la compilation de essensys-mcp"
     fi
