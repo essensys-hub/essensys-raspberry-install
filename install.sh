@@ -194,58 +194,7 @@ fi
 
 ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml"
 
-log_info "Compilation et installation de essensys-mcp..."
-MCP_SRC_DIR="/opt/essensys-server-backend/cmd/mcp-server"
-if [ -d "$MCP_SRC_DIR" ]; then
-    # Build
-    log_info "Building essensys-mcp..."
-    export PATH=$PATH:/usr/local/go/bin
-    (cd "$MCP_SRC_DIR" && go mod tidy && go build -o essensys-mcp)
-    
-    # Install binary
-    if [ -f "$MCP_SRC_DIR/essensys-mcp" ]; then
-        cp "$MCP_SRC_DIR/essensys-mcp" /usr/local/bin/
-        chmod +x /usr/local/bin/essensys-mcp
-        log_info "essensys-mcp installe dans /usr/local/bin/essensys-mcp"
-        
-        # Generate or Read Token
-        TOKEN_FILE="/etc/essensys/mcp.token"
-        mkdir -p /etc/essensys
-        if [ ! -f "$TOKEN_FILE" ]; then
-            # Generate random token
-            openssl rand -hex 32 > "$TOKEN_FILE"
-            chmod 600 "$TOKEN_FILE"
-            log_info "Nouveau token MCP généré dans $TOKEN_FILE"
-        fi
-        MCP_TOKEN=$(cat "$TOKEN_FILE")
-        
-        # Create Systemd Service
-        log_info "Configuration du service systemd essensys-mcp..."
-        cat > /etc/systemd/system/essensys-mcp.service <<EOF
-[Unit]
-Description=Essensys MCP Server
-After=network.target redis-server.service
-
-[Service]
-ExecStart=/usr/local/bin/essensys-mcp -mode sse -port 8080 -token ${MCP_TOKEN}
-Restart=always
-User=root
-# Adjust User if non-root access to Redis/Network is sufficient, but root is safe for internal Pi.
-
-[Install]
-WantedBy=multi-user.target
-EOF
-        systemctl daemon-reload
-        systemctl enable essensys-mcp
-        systemctl start essensys-mcp
-        log_info "Service essensys-mcp demarre"
-        log_warn "TOKEN MCP: $MCP_TOKEN"
-    else
-        log_error "Echec de la compilation de essensys-mcp"
-    fi
-else
-    log_warn "Source MCP non trouvee dans $MCP_SRC_DIR (backend pas encore clone ?)"
-fi
+# Note: MCP configuration is now handled by Ansible role 'raspberry_mcp'
 
 # ============================================
 # Configuration de l'authentification Caddy
