@@ -39,14 +39,7 @@ ESSENSYS_VERSION="V.1.2.2"
 ANSIBLE_REF="$ESSENSYS_VERSION"
 INSTALL_REF="$ESSENSYS_VERSION"
 
-# Chemins de configuration auth
-AUTH_DIR="/etc/essensys/auth"
-CONFIG_FILE="$AUTH_DIR/config.env"
-HTPASSWD_FILE="$AUTH_DIR/users.htpasswd"
-CADDY_TEMPLATES="/opt/essensys-caddy"
-
 DOMAIN_FILE="$HOME_DIR/domain.txt"
-PASSWORD_CONFIRM_FILE="$HOME_DIR/password_confirm.txt"
 
 log_info "=========================================="
 log_info "Installation Essensys - Version $ESSENSYS_VERSION"
@@ -204,183 +197,22 @@ ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml
 
 # Note: MCP configuration is now handled by Ansible role 'raspberry_mcp'
 
-# ============================================
-# Configuration de l'authentification Caddy
-# ============================================
-
-setup_auth() {
-    log_info "Configuration de l'authentification..."
-    
-    # Créer le répertoire auth
-    mkdir -p "$AUTH_DIR"
-    chmod 700 "$AUTH_DIR"
-    
-    # Installer les templates Caddy
-    mkdir -p "$CADDY_TEMPLATES"
-    cp "$BOOTSTRAP_DIR/caddy-config/"Caddyfile.* "$CADDY_TEMPLATES/"
-    chmod 644 "$CADDY_TEMPLATES/"*
-    
-    # Installer le script essensys-auth
-    cp "$BOOTSTRAP_DIR/scripts/essensys-auth" /usr/local/bin/
-    chmod 755 /usr/local/bin/essensys-auth
-    
-    # Créer le répertoire de logs Caddy
-    mkdir -p /var/log/caddy
-    chown caddy:caddy /var/log/caddy
-    
-    # Configuration interactive
-    local auth_enabled=1
-    local lan_noauth=0
-    local username=""
-    local password=""
-    
-    # Vérifier si password_confirm.txt existe et contient "true"
-    local use_default_credentials=false
-    if [ -f "$PASSWORD_CONFIRM_FILE" ]; then
-        local confirm_value=$(cat "$PASSWORD_CONFIRM_FILE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-        if [ "$confirm_value" = "true" ]; then
-            use_default_credentials=true
-            log_info "password_confirm.txt detecte avec 'true' - utilisation des credentials par defaut"
-        fi
-    fi
-    
-    echo
-    log_info "=== Configuration authentification Essensys ==="
-    echo
-    
-    # Si password_confirm.txt contient "true", utiliser les valeurs par défaut
-    if [ "$use_default_credentials" = true ]; then
-        auth_enabled=1
-        lan_noauth=0
-        username="admin"
-        password="Essensys"
-        log_info "Utilisation des credentials par defaut: admin/Essensys"
-    # Sinon, demander interactivement
-    elif [ -r /dev/tty ]; then
-        read -r -p "Activer l'authentification? (O/n): " auth_choice < /dev/tty
-        case "$auth_choice" in
-            [Nn]*)
-                auth_enabled=0
-                log_warn "⚠️  Authentification désactivée - Accès libre!"
-                ;;
-            *)
-                auth_enabled=1
-                log_info "Authentification activée"
-                
-                # Demander LAN sans auth
-                read -r -p "Autoriser l'accès LAN sans mot de passe? (o/N): " lan_choice < /dev/tty
-                case "$lan_choice" in
-                    [Oo]*)
-                        lan_noauth=1
-                        log_warn "⚠️  LAN sans authentification activé"
-                        ;;
-                    *)
-                        lan_noauth=0
-                        log_info "Authentification requise partout"
-                        ;;
-                esac
-                
-                # Créer l'utilisateur admin
-                echo
-                log_info "Création du compte administrateur..."
-                read -r -p "Nom d'utilisateur (défaut: admin): " username < /dev/tty
-                username="${username:-admin}"
-                
-                while true; do
-                    echo -n "Mot de passe: "
-                    read -rs password < /dev/tty
-                    echo
-                    echo -n "Confirmer le mot de passe: "
-                    read -rs password_confirm < /dev/tty
-                    echo
-                    
-                    if [ "$password" = "$password_confirm" ] && [ -n "$password" ]; then
-                        break
-                    else
-                        log_error "Les mots de passe ne correspondent pas ou sont vides"
-                    fi
-                done
-                ;;
-        esac
-    else
-        log_warn "Pas de TTY disponible, utilisation des valeurs par défaut"
-        auth_enabled=1
-        lan_noauth=0
-        username="admin"
-        password="essensys"
-        log_warn "⚠️  Mot de passe par défaut: essensys - Changez-le immédiatement!"
-    fi
-    
-    # Créer config.env
-    cat > "$CONFIG_FILE" <<EOF
-# Configuration authentification Essensys
-# Généré automatiquement le $(date)
-
-ESSENSYS_AUTH_ENABLED=$auth_enabled
-ESSENSYS_LAN_NOAUTH=$lan_noauth
-ESSENSYS_AUTH_REALM="Essensys"
-EOF
-    chmod 600 "$CONFIG_FILE"
-    
-    # Créer htpasswd avec l'utilisateur initial
-    if [ "$auth_enabled" = "1" ] && [ -n "$password" ]; then
-        # Générer le hash bcrypt avec caddy
-        local hash
-        hash=$(caddy hash-password --plaintext "$password" 2>/dev/null)
-        echo "${username}:${hash}" > "$HTPASSWD_FILE"
-        chmod 600 "$HTPASSWD_FILE"
-        log_info "Utilisateur '$username' créé"
-    else
-        touch "$HTPASSWD_FILE"
-        chmod 600 "$HTPASSWD_FILE"
-    fi
-    
-    # Générer la configuration Caddy initiale
-    essensys-auth status || true
-    
-    log_info "Configuration authentification terminée"
+cleanup_caddy() {
+    log_info "Suppression de Caddy (stack Traefik only)..."
+    systemctl disable --now caddy >/dev/null 2>&1 || true
+    apt-get purge -y caddy >/dev/null 2>&1 || true
+    apt-get autoremove -y >/dev/null 2>&1 || true
+    rm -rf /etc/caddy /var/log/caddy /opt/essensys-caddy
+    rm -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    rm -f /etc/apt/sources.list.d/caddy-stable.list
 }
 
-# Installer Caddy si nécessaire
-install_caddy() {
-    if command -v caddy >/dev/null 2>&1; then
-        log_info "Caddy déjà installé"
-        return
-    fi
-    
-    log_info "Installation de Caddy..."
-    
-    # Installer les dépendances
-    apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl
-    
-    # Ajouter le repo Caddy
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
-    
-    apt-get update
-    apt-get install -y caddy
-    
-    # Désactiver le démarrage automatique (sera géré après config)
-    systemctl stop caddy || true
-    
-    log_info "Caddy installé"
-}
-
-# Appeler l'installation de Caddy et la configuration auth
-log_info "Installation du reverse-proxy Caddy..."
-install_caddy
-
-log_info "Configuration de l'authentification..."
-setup_auth
-
-log_info "Démarrage de Caddy..."
-systemctl enable caddy
-systemctl start caddy
+cleanup_caddy
 
 log_info "Termine. Installation complete."
 log_info ""
 log_info "=== Commandes utiles ==="
-log_info "  essensys-auth status     - Voir le statut d'authentification"
-log_info "  essensys-auth add-user   - Ajouter un utilisateur"
-log_info "  essensys-auth lan-noauth - Configurer l'accès LAN"
+log_info "  systemctl status nginx traefik"
+log_info "  ss -ltnp | grep -E ':80|:443'"
+log_info "  /usr/local/bin/generate-htpasswd-essensys.sh"
 log_info ""
