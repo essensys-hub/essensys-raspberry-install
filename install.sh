@@ -207,7 +207,16 @@ cleanup_caddy() {
     rm -f /etc/apt/sources.list.d/caddy-stable.list
 }
 
+cleanup_homeassistant() {
+    log_info "Suppression de Home Assistant..."
+    systemctl disable --now homeassistant >/dev/null 2>&1 || true
+    rm -f /etc/systemd/system/homeassistant.service
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    rm -rf /opt/essensys/homeassistant
+}
+
 cleanup_caddy
+cleanup_homeassistant
 
 log_info "Termine. Installation complete."
 log_info ""

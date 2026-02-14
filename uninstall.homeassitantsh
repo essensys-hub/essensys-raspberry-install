@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# Désinstalle Home Assistant et nettoie les dépendances non utilisées.
+# Nom volontairement aligné sur la demande utilisateur: uninstall.homeassitantsh
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+HA_DIR="/opt/essensys/homeassistant"
+HA_SERVICE="/etc/systemd/system/homeassistant.service"
+YES_MODE=false
+PURGE_UNUSED=false
+
+log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+usage() {
+  cat <<'EOF'
+Usage: sudo ./uninstall.homeassitantsh [options]
+
+Options:
+  --yes            Exécute sans confirmation interactive
+  --purge-unused   Purge Docker/Compose si non utilisés après suppression HA
+  --help           Affiche cette aide
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --yes) YES_MODE=true; shift ;;
+    --purge-unused) PURGE_UNUSED=true; shift ;;
+    --help) usage; exit 0 ;;
+    *)
+      log_error "Option inconnue: $1"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ "$EUID" -ne 0 ]]; then
+  log_error "Ce script doit être exécuté en root (sudo)."
+  exit 1
+fi
+
+confirm() {
+  if [[ "$YES_MODE" == "true" ]]; then
+    return 0
+  fi
+  read -r -p "$1 (oui/non): " ans
+  [[ "$ans" == "oui" ]]
+}
+
+log_info "=========================================="
+log_info "Désinstallation Home Assistant"
+log_info "=========================================="
+
+if ! confirm "Confirmer la désinstallation de Home Assistant"; then
+  log_warn "Annulé par l'utilisateur."
+  exit 0
+fi
+
+log_info "Arrêt/désactivation du service homeassistant..."
+systemctl disable --now homeassistant >/dev/null 2>&1 || true
+
+if [[ -f "$HA_SERVICE" ]]; then
+  rm -f "$HA_SERVICE"
+  log_info "Service systemd supprimé: $HA_SERVICE"
+fi
+
+systemctl daemon-reload
+
+if command -v docker >/dev/null 2>&1; then
+  log_info "Suppression du conteneur Home Assistant (si présent)..."
+  docker rm -f homeassistant >/dev/null 2>&1 || true
+
+  # Nettoyage des images HA seulement
+  ha_image_ids="$(docker images --format '{{.Repository}} {{.ID}}' | awk '/home-assistant/ {print $2}' | sort -u || true)"
+  if [[ -n "${ha_image_ids}" ]]; then
+    while IFS= read -r img; do
+      [[ -n "$img" ]] && docker rmi -f "$img" >/dev/null 2>&1 || true
+    done <<< "${ha_image_ids}"
+    log_info "Images Home Assistant supprimées."
+  fi
+
+  # Nettoyage réseaux/volumes orphelins
+  docker network prune -f >/dev/null 2>&1 || true
+  docker volume prune -f >/dev/null 2>&1 || true
+fi
+
+if [[ -d "$HA_DIR" ]]; then
+  rm -rf "$HA_DIR"
+  log_info "Répertoire supprimé: $HA_DIR"
+fi
+
+# Détection d'usage Docker résiduel
+docker_in_use=false
+if command -v docker >/dev/null 2>&1; then
+  if [[ -n "$(docker ps -aq 2>/dev/null)" ]]; then
+    docker_in_use=true
+  fi
+fi
+
+if [[ "$PURGE_UNUSED" == "true" ]]; then
+  if [[ "$docker_in_use" == "false" ]]; then
+    log_info "Purge des dépendances non utilisées (Docker/Compose)..."
+    apt-get purge -y docker.io docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose >/dev/null 2>&1 || true
+    apt-get autoremove -y >/dev/null 2>&1 || true
+    log_info "Dépendances Docker/Compose purgées."
+  else
+    log_warn "Docker est encore utilisé (conteneurs existants). Purge ignorée."
+  fi
+else
+  log_info "Purge des dépendances non utilisée non demandée."
+  if [[ "$docker_in_use" == "false" ]]; then
+    log_info "Tip: relancer avec --purge-unused pour retirer Docker/Compose."
+  fi
+fi
+
+log_info "Nettoyage terminé."
+log_info "Commande de vérification: systemctl status homeassistant --no-pager"
