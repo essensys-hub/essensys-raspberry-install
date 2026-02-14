@@ -1,0 +1,1175 @@
+En jaune = sauvegardé 
+
+En gras = valeur en dur 
+
+Pas surligné et pas gras = non sauvegardé. 
+
+ 
+
+ 
+
+Tb_Echange[000 : V_BP                                    ] : 2.0x02 0x03 
+
+Tb_Echange[001 : V_SoftBP                                ] : 1.0x01 0x00 pour l'instant avant version diffusée 
+
+Tb_Echange[002 : V_IHM                                   ] : 1.0x01 0x00 (mais écrit immédiatement par IHM dès que branché) 
+
+Tb_Echange[003 : V_SoftIHM                               ] : 1.0x01 0x00 (mais écrit immédiatement par IHM dès que branché) 
+
+Tb_Echange[004 : V_TableEchange                          ] : 23.0x17 A mettre à jour en prenant en compte ajouts en pieds de table. 
+
+Tb_Echange[005 : Min                                     ] : 0.0x00 OK 
+
+Tb_Echange[006 : H                                       ] : 0.0x00 OK 
+
+Tb_Echange[007 : J                                       ] : 1.0x01 OK 
+
+Tb_Echange[008 : M                                       ] : 1.0x01 OK 
+
+Tb_Echange[009 : A                                       ] : 0.0x00 OK 
+
+Tb_Echange[010 : Status                                  ] : 0.0x00 OK 
+
+Tb_Echange[011 : Alerte                                  ] : 0.0x00 OK 
+
+Tb_Echange[012 : Information                             ] : 0.0x00 OK 
+
+Tb_Echange[013 : Chauf_zj_Auto] : PLANNING CHAUFFAGE OK 
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11  
+
+Tb_Echange[097 : Chauf_zn_Auto] : PLANNING CHAUFFAGE OK 
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11  
+
+Tb_Echange[181 : Chauf_zsb1_Auto] : PLANNING CHAUFFAGE OK 
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11  
+
+Tb_Echange[265 : Chauf_zsb2_Auto] : PLANNING CHAUFFAGE OK 
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11 0x17.11  
+
+0x17.11 0x17.11 0x17.11 0x17.11  
+
+Tb_Echange[349 : Chauf_zj_Mode                           ] : 1.0x01 OK 
+
+Tb_Echange[350 : Chauf_zn_Mode                           ] : 1.0x01 OK 
+
+Tb_Echange[351 : Chauf_zsb1_Mode                         ] : 1.0x01 OK 
+
+Tb_Echange[352 : Chauf_zsb2_Mode                         ] : 1.0x01 OK 
+
+Tb_Echange[353 : Cumulus_Mode                            ] : 0.0x00 OK 
+
+Tb_Echange[354 : VacanceFin_H                            ] : 0.0x00 OK 
+
+Tb_Echange[355 : VacanceFin_Mn                           ] : 0.0x00 OK 
+
+Tb_Echange[356 : VacanceFin_J                            ] : 1.0x01 OK 
+
+Tb_Echange[357 : VacanceFin_M                            ] : 1.0x01 OK 
+
+Tb_Echange[358 : VacanceFin_A                            ] : 0.0x00 OK 
+
+ 
+
+Tb_Echange[359 : VacanceFin_zj_Force                     ] : 0.0x00 0x11 
+
+Tb_Echange[360 : VacanceFin_zn_Force                     ] : 0.0x00 0x11 
+
+Tb_Echange[361 : VacanceFin_zsb1_Force                   ] : 0.0x00 0x80 
+
+Tb_Echange[362 : VacanceFin_zsb2_Force                   ] : 0.0x00 0x80 
+
+ 
+
+Tb_Echange[363 : Arrose_Mode                             ] : 0.0x00 OK 
+
+Tb_Echange[364 : Arrose_Auto] : PLANNING ARROSAGE OK si 0=OFF 
+
+0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 
+
+0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00  
+
+0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00  
+
+0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00  
+
+0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00 0.0x00  
+
+0.0x00 0.0x00  
+
+Tb_Echange[406 : Arrose_Detect                           ] : 0.0x00 OK 
+
+Tb_Echange[407 : Alarme_AccesADistance                   ] : 0.0x00 OK 
+
+Tb_Echange[408 : Alarme_Mode                             ] : 0.0x00 OK 
+
+Tb_Echange[409 : Alarme_Commande                         ] : 0.0x00 OK 
+
+Tb_Echange[410 : Alarme_CodeSaisiLSB                     ] : 255.0xFF OK 
+
+Tb_Echange[411 : Alarme_CodeSaisiMSB                     ] : 255.0xFF OK 
+
+Tb_Echange[412 : Alarme_Autorisation                     ] : 0.0x00 OK 
+
+Tb_Echange[413 : Alarme_SuiviAlarme                      ] : 0.0x00 OK 
+
+Tb_Echange[414 : Alarme_Detection                        ] : 0.0x00 OK 
+
+Tb_Echange[415 : Alarme_Fraude                           ] : 0.0x00 OK 
+
+Tb_Echange[416 : Alarme_SuiviChangementCode              ] : 0.0x00 OK 
+
+Tb_Echange[417 : Alarme_CodeUser1LSB                     ] : 0.0x00 OK 
+
+Tb_Echange[418 : Alarme_CodeUser1MSB                     ] : 0.0x00 OK 
+
+Tb_Echange[419 : Alarme_CodeUser2LSB                     ] : 0.0x00 OK 
+
+Tb_Echange[420 : Alarme_CodeUser2MSB                     ] : 0.0x00 OK 
+
+Tb_Echange[421 : Alarme_CompteARebours                   ] : 0.0x00 OK 
+
+Tb_Echange[422 : Alarme_Reserve                          ] : 0.0x00 OK 
+
+Tb_Echange[423 : Alarme_TestRAZPresence                  ] : 0.0x00 OK 
+
+Tb_Echange[424 : Alarme_TestSirenes                      ] : 0.0x00 OK 
+
+Tb_Echange[425 : AlarmeConfig] : CONFIG ALARME (indépendante) 
+
+425 AlarmeConfig_Code	0.0x00 0x01 
+
+426 AlarmeConfig_Detect1	0.0x00 0x01 
+
+427 AlarmeConfig_Detect2	0.0x00 0x01 
+
+428 AlarmeConfig_DetectOuv	0.0x00 0x01 
+
+429 AlarmeConfig_Detect1SurVoieAcces	0.0x00 0x01 
+
+430 AlarmeConfig_Detect2SurVoieAcces	0.0x00 0x01 
+
+431 AlarmeConfig_DetectOuvSurVoieAcces	0.0x00 0x01 
+
+432 AlarmeConfig_SireneInt	0.0x00 0x01 
+
+433 AlarmeConfig_SireneExt	0.0x00 0x01 
+
+434 AlarmeConfig_BloqueVolets	0.0x00 OK 
+
+435 AlarmeConfig_ForcerEclairage	0.0x00 OK 
+
+Tb_Echange[436 : Alerte_Intensite                        ] : 50.0x32 OK 
+
+Tb_Echange[437 : Alerte_Duree                            ] : 30.0x1E OK 
+
+Tb_Echange[438 : Alerte_TestSirene                       ] : 0.0x00 OK 
+
+Tb_Echange[439 : Alerte_Acquit                           ] : 0.0x00 OK 
+
+Tb_Echange[440 : Securite_PriseCoupe                     ] : 0.0x00 OK 
+
+Tb_Echange[441 : Securite_FuiteLinge                     ] : 1.0x01 OK 
+
+Tb_Echange[442 : Securite_FuiteVaisselle                 ] : 1.0x01 OK 
+
+Tb_Echange[443 : Securite_FuiteAlerte                    ] : 1.0x01 OK 
+
+Tb_Echange[444 : Reveil_ChambreGr_H                      ] : 7.0x07 OK 
+
+Tb_Echange[445 : Reveil_ChambreGr_Mn                     ] : 0.0x00 OK 
+
+Tb_Echange[446 : Reveil_ChambreGr_ON                     ] : 1.0x01 0x00 
+
+Tb_Echange[447 : Reveil_Chambre1_H                       ] : 7.0x07 OK 
+
+Tb_Echange[448 : Reveil_Chambre1_Mn                      ] : 30.0x1E 0x00 
+
+Tb_Echange[449 : Reveil_Chambre1_ON                      ] : 0.0x00 OK 
+
+Tb_Echange[450 : Reveil_Chambre2_H                       ] : 7.0x07 OK 
+
+Tb_Echange[451 : Reveil_Chambre2_Mn                      ] : 30.0x1E 0x00 
+
+Tb_Echange[452 : Reveil_Chambre2_ON                      ] : 0.0x00 OK 
+
+Tb_Echange[453 : Reveil_Chambre3_H                       ] : 6.0x06 0x07 
+
+Tb_Echange[454 : Reveil_Chambre3_Mn                      ] : 15.0x0F 0x00 
+
+Tb_Echange[455 : Reveil_Chambre3_ON                      ] : 0.0x00 OK 
+
+Tb_Echange[456 : Reveil_Bureau_H                         ] : 7.0x07 OK 
+
+Tb_Echange[457 : Reveil_Bureau_Mn                        ] : 0.0x00 OK 
+
+Tb_Echange[458 : Reveil_Bureau_ON                        ] : 0.0x00 OK 
+
+Tb_Echange[459 : Delestage                               ] : 1.0x01 OK 
+
+Tb_Echange[460 : TeleInf_OPTARIF                         ] : 0.0x00 OK 
+
+Tb_Echange[461 : TeleInf_PTEC                            ] : 0.0x00 OK 
+
+Tb_Echange[462 : TeleInf_ADPS                            ] : 0.0x00 OK 
+
+Tb_Echange[463 : TeleInf_PAPP_LSB                        ] : 0.0x00 OK 
+
+Tb_Echange[464 : TeleInf_PAPP_MSB                        ] : 0.0x00 OK 
+
+Tb_Echange[465 : TeleInf_HPB_Global_LSB                  ] : 0.0x00 OK 
+
+Tb_Echange[466 : TeleInf_HPB_Global_MSB                  ] : 0.0x00 OK 
+
+Tb_Echange[467 : TeleInf_HPB_Chauffage_LSB               ] : 0.0x00 OK 
+
+Tb_Echange[468 : TeleInf_HPB_Chauffage_MSB               ] : 0.0x00 OK 
+
+Tb_Echange[469 : TeleInf_HPB_Refroid_LSB                 ] : 0.0x00 OK 
+
+Tb_Echange[470 : TeleInf_HPB_Refroid_MSB                 ] : 0.0x00 OK 
+
+Tb_Echange[471 : TeleInf_HPB_EauChaude_LSB               ] : 0.0x00 OK 
+
+Tb_Echange[472 : TeleInf_HPB_EauChaude_MSB               ] : 0.0x00 OK 
+
+Tb_Echange[473 : TeleInf_HPB_Prises_LSB                  ] : 0.0x00 OK 
+
+Tb_Echange[474 : TeleInf_HPB_Prises_MSB                  ] : 0.0x00 OK 
+
+Tb_Echange[475 : TeleInf_HPB_Autres_LSB                  ] : 0.0x00 OK 
+
+Tb_Echange[476 : TeleInf_HPB_Autres_MSB                  ] : 0.0x00 OK 
+
+Tb_Echange[477 : TeleInf_HC_Global_LSB                   ] : 0.0x00 OK 
+
+Tb_Echange[478 : TeleInf_HC_Global_MSB                   ] : 0.0x00 OK 
+
+Tb_Echange[479 : TeleInf_HC_Chauffage_LSB                ] : 0.0x00 OK 
+
+Tb_Echange[480 : TeleInf_HC_Chauffage_MSB                ] : 0.0x00 OK 
+
+Tb_Echange[481 : TeleInf_HC_Refroid_LSB                  ] : 0.0x00 OK 
+
+Tb_Echange[482 : TeleInf_HC_Refroid_MSB                  ] : 0.0x00 OK              
+
+Tb_Echange[483 : TeleInf_HC_EauChaude_LSB               ] : 0.0x00 OK 
+
+Tb_Echange[484 : TeleInf_HC_EauChaude_MSB               ] : 0.0x00 OK 
+
+Tb_Echange[485 : TeleInf_HC_Prises_LSB                  ] : 0.0x00 OK 
+
+Tb_Echange[486 : TeleInf_HC_Prises_MSB                  ] : 0.0x00 OK 
+
+Tb_Echange[487 : TeleInf_HC_Autres_LSB                   ] : 0.0x00 OK 
+
+Tb_Echange[488 : TeleInf_HC_Autres_MSB                   ] : 0.0x00 OK 
+
+Tb_Echange[489 : TeleInf_Repartition_Chauffage           ] : 0.0x00 21d 
+
+Tb_Echange[490 : TeleInf_Repartition_Refroid             ] : 0.0x00 0d 
+
+Tb_Echange[491 : TeleInf_Repartition_EauChaude           ] : 0.0x00 11d 
+
+Tb_Echange[492 : TeleInf_Repartition_Prises              ] : 0.0x00 6d 
+
+Tb_Echange[493 : TeleInf_Repartition_Autres              ] : 0.0x00 62d 
+
+Tb_Echange[494 : Var_PDV_Conf] : CONFIG VARIATEURS 
+
+Salon 0.0x00 0x01 
+
+Salle à manger 0.0x00 0x01 
+
+Bureau 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+Tb_Echange[502 : Var_CHB_Conf] : CONFIG VARIATEURS 
+
+Grande chambre 0.0x00 0x01 
+
+Petite chambre 1 0.0x00 0x01 
+
+Petite chambre 2 0.0x00 0x01 
+
+Petite chambre 3 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+Tb_Echange[510 : Var_PDE_Conf] : CONFIG VARIATEURS 
+
+Salle de bain 1 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+NA 0.0x00 0x01 
+
+Tb_Echange[518 : Lampes_PDV_Tps] : CONFIG LAMPES 
+
+0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00 OK 
+
+Tb_Echange[534 : Lampes_CHB_Tps] : CONFIG LAMPES 
+
+0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00 OK 
+
+Tb_Echange[550 : Lampes_PDE_Tps] : CONFIG LAMPES 
+
+0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00	0.0x00 OK 
+
+Tb_Echange[566 : Volets_PDV_Tps] : CONFIG VOLETS 
+
+120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 
+
+Tb_Echange[574 : Volets_CHB_Tps] : CONFIG VOLETS 
+
+120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 
+
+Tb_Echange[582 : Volets_PDE_Tps] : CONFIG VOLETS 
+
+120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 120.0x78 
+
+Tb_Echange[590 : Scenario                                ] : 0.0x00 OK 
+
+Tb_Echange[591 : Scenario_DernierLance                   ] : 0.0x00 OK 
+
+Tb_Echange[592 : Scenario1] : SCENARIO Réservé accès à distance 
+
+[592]Sc_Confirme_Scenario                     : 0.0x00 OK 
+
+[593]Sc_Alarme_ON                             : 0.0x00 OK 
+
+Tb_Echange[594 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+[605]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[606]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[607]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[608]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[609]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[610]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[611]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[612]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[613]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[614]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[615]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[616]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[617]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[618]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[619]Sce_OuvrirVolets_PDE                     : 0.0x00 OK 
+
+[620]Sce_FermerVolets_PDV                     : 0.0x00 OK 
+
+[621]Sce_FermerVolets_CHB                     : 0.0x00 OK 
+
+[622]Sce_FermerVolets_PDE                     : 0.0x00 OK 
+
+[623]Sce_Securite                             : 0.0x00 OK 
+
+[624]Sce_Machines                             : 0.0x00 OK 
+
+[625]Sce_Chauf_zj                             : 0.0x00 OK 
+
+[626]Sce_Chauf_zn                             : 0.0x00 OK 
+
+[627]Sce_Chauf_zsb1                           : 0.0x00 OK 
+
+[628]Sce_Chauf_zsb2                           : 0.0x00 OK 
+
+[629]Sce_Cumulus                              : 0.0x00 OK 
+
+[630]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[631]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[632]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[633 : Scenario2] : SCENARIO JE SORS 
+
+[633]Sc_Confirme_Scenario                     : 1.0x01 OK 
+
+[634]Sc_Alarme_ON                             : 1.0x01 OK 
+
+Tb_Echange[635 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+1.0x01 0x00 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+[646]Sc_Eteindre_PDV_LSB                      : 255.0xFF OK 
+
+[647]Sc_Eteindre_PDV_MSB                      : 255.0xFF OK 
+
+[648]Sc_Eteindre_CHB_LSB                      : 255.0xFF OK 
+
+[649]Sc_Eteindre_CHB_MSB                      : 255.0xFF OK 
+
+[650]Sce_Eteindre_PDE_LSB                     : 255.0xFF OK 
+
+[651]Sce_Eteindre_PDE_MSB                     : 255.0xFF OK 
+
+[652]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[653]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[654]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[655]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[656]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[657]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[658]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[659]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[660]Sce_OuvrirVolets_PDE                     : 0.0x00 0x08 
+
+[661]Sce_FermerVolets_PDV                     : 255.0xFF 0x3F 
+
+[662]Sce_FermerVolets_CHB                     : 255.0xFF 0x1F 
+
+[663]Sce_FermerVolets_PDE                     : 255.0xFF 0x07 
+
+[664]Sce_Securite                             : 1.0x01 OK 
+
+[665]Sce_Machines                             : 0.0x00 OK 
+
+[666]Sce_Chauf_zj                             : 0.0x00 0x80 
+
+[667]Sce_Chauf_zn                             : 0.0x00 0x80 
+
+[668]Sce_Chauf_zsb1                           : 0.0x00 0x80 
+
+[669]Sce_Chauf_zsb2                           : 0.0x00 0x80 
+
+[670]Sce_Cumulus                              : 0.0x00 0x80 
+
+[671]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[672]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[673]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[674 : Scenario3] : SCENARIO JE PARS EN VOYAGE 
+
+[674]Sc_Confirme_Scenario                     : 1.0x01 OK 
+
+[675]Sc_Alarme_ON                             : 1.0x01 OK 
+
+Tb_Echange[676 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+1.0x01 0x00 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+1.0x01 OK 
+
+[687]Sc_Eteindre_PDV_LSB                      : 255.0xFF OK 
+
+[688]Sc_Eteindre_PDV_MSB                      : 255.0xFF OK 
+
+[689]Sc_Eteindre_CHB_LSB                      : 255.0xFF OK 
+
+[690]Sc_Eteindre_CHB_MSB                      : 255.0xFF OK 
+
+[691]Sce_Eteindre_PDE_LSB                     : 255.0xFF OK 
+
+[692]Sce_Eteindre_PDE_MSB                     : 255.0xFF OK 
+
+[693]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[694]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[695]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[696]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[697]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[698]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[699]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[700]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[701]Sce_OuvrirVolets_PDE                     : 0.0x00 0x08 
+
+[702]Sce_FermerVolets_PDV                     : 255.0xFF 0x3F 
+
+[703]Sce_FermerVolets_CHB                     : 255.0xFF 0x1F 
+
+[704]Sce_FermerVolets_PDE                     : 255.0xFF 0x07 
+
+[705]Sce_Securite                             : 1.0x01 OK 
+
+[706]Sce_Machines                             : 1.0x01 0x00 
+
+[707]Sce_Chauf_zj                             : 15.0x0F 0x15 
+
+[708]Sce_Chauf_zn                             : 15.0x0F 0x15 
+
+[709]Sce_Chauf_zsb1                           : 10.0x0A 0x10 
+
+[710]Sce_Chauf_zsb2                           : 10.0x0A 0x10 
+
+[711]Sce_Cumulus                              : 3.0x03 0x02 
+
+[712]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[713]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[714]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[715 : Scenario4] : SCENARIO JE RENTRE 
+
+[715]Sc_Confirme_Scenario                     : 0.0x00 OK 
+
+[716]Sc_Alarme_ON                             : 0.0x00 OK 
+
+Tb_Echange[717 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+1.0x01 0x00 
+
+[728]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[729]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[730]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[731]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[732]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[733]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[734]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[735]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[736]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[737]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[738]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[739]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[740]Sce_OuvrirVolets_PDV                     : 255.0xFF 0x3F 
+
+[741]Sce_OuvrirVolets_CHB                     : 255.0xFF 0x1F 
+
+[742]Sce_OuvrirVolets_PDE                     : 255.0xFF 0x07 
+
+[743]Sce_FermerVolets_PDV                     : 0.0x00 OK 
+
+[744]Sce_FermerVolets_CHB                     : 0.0x00 OK 
+
+[745]Sce_FermerVolets_PDE                     : 0.0x00 OK 
+
+[746]Sce_Securite                             : 2.0x02 OK 
+
+[747]Sce_Machines                             : 2.0x02 0x00 
+
+[748]Sce_Chauf_zj                             : 1.0x01 0x40 
+
+[749]Sce_Chauf_zn                             : 1.0x01 0x40 
+
+[750]Sce_Chauf_zsb1                           : 1.0x01 0x40 
+
+[751]Sce_Chauf_zsb2                           : 1.0x01 0x40 
+
+[752]Sce_Cumulus                              : 1.0x01 0x40 
+
+[753]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[754]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[755]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[756 : Scenario5] : SCENARIO JE VAIS ME COUCHER 
+
+[756]Sc_Confirme_Scenario                     : 1.0x01 OK 
+
+[757]Sc_Alarme_ON                             : 0.0x00 0x01 
+
+Tb_Echange[758 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 0x01 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 0x01 
+
+0.0x00 0x01 
+
+0.0x00 0x01 
+
+0.0x00 OK 
+
+1.0x01 OK 
+
+[769]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[770]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[771]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[772]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[773]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[774]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[775]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[776]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[777]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[778]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[779]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[780]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[781]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[782]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[783]Sce_OuvrirVolets_PDE                     : 0.0x00 0x08 
+
+[784]Sce_FermerVolets_PDV                     : 255.0xFF 0x3F 
+
+[785]Sce_FermerVolets_CHB                     : 255.0xFF 0x1F 
+
+[786]Sce_FermerVolets_PDE                     : 255.0xFF 0x07 
+
+[787]Sce_Securite                             : 1.0x01 OK 
+
+[788]Sce_Machines                             : 0.0x00 OK 
+
+[789]Sce_Chauf_zj                             : 0.0x00 0x80 
+
+[790]Sce_Chauf_zn                             : 0.0x00 0x80 
+
+[791]Sce_Chauf_zsb1                           : 0.0x00 0x80 
+
+[792]Sce_Chauf_zsb2                           : 0.0x00 0x80 
+
+[793]Sce_Cumulus                              : 0.0x00 0x80 
+
+[794]Sce_Reveil_Reglage                       : 1.0x01 OK 
+
+[795]Sce_Reveil_ON                            : 1.0x01 0x00 
+
+[796]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[797 : Scenario6] : SCENARIO JE ME LEVE 
+
+[797]Sc_Confirme_Scenario                     : 0.0x00 OK 
+
+[798]Sc_Alarme_ON                             : 0.0x00 OK 
+
+Tb_Echange[799 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+1.0x01 0x00 
+
+[810]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[811]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[812]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[813]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[814]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[815]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[816]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[817]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[818]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[819]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[820]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[821]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[822]Sce_OuvrirVolets_PDV                     : 255.0xFF 0x3F 
+
+[823]Sce_OuvrirVolets_CHB                     : 255.0xFF 0x1F 
+
+[824]Sce_OuvrirVolets_PDE                     : 255.0xFF 0x07 
+
+[825]Sce_FermerVolets_PDV                     : 0.0x00 OK 
+
+[826]Sce_FermerVolets_CHB                     : 0.0x00 OK 
+
+[827]Sce_FermerVolets_PDE                     : 0.0x00 OK 
+
+[828]Sce_Securite                             : 2.0x02 OK 
+
+[829]Sce_Machines                             : 0.0x00 OK 
+
+[830]Sce_Chauf_zj                             : 0.0x00 0x80 
+
+[831]Sce_Chauf_zn                             : 0.0x00 0x80 
+
+[832]Sce_Chauf_zsb1                           : 0.0x00 0x80 
+
+[833]Sce_Chauf_zsb2                           : 0.0x00 0x80 
+
+[834]Sce_Cumulus                              : 0.0x00 0x80 
+
+[835]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[836]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[837]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[838 : Scenario7] : SCENARIO PERSONNALISE 1 
+
+[838]Sc_Confirme_Scenario                     : 0.0x00 0x01 
+
+[839]Sc_Alarme_ON                             : 0.0x00 OK 
+
+Tb_Echange[840 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+[851]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[852]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[853]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[854]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[855]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[856]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[857]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[858]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[859]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[860]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[861]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[862]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[863]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[864]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[865]Sce_OuvrirVolets_PDE                     : 0.0x00 OK 
+
+[866]Sce_FermerVolets_PDV                     : 0.0x00 OK 
+
+[867]Sce_FermerVolets_CHB                     : 0.0x00 OK 
+
+[868]Sce_FermerVolets_PDE                     : 0.0x00 OK 
+
+[869]Sce_Securite                             : 0.0x00 OK 
+
+[870]Sce_Machines                             : 0.0x00 OK 
+
+[871]Sce_Chauf_zj                             : 0.0x00 0x80 
+
+[872]Sce_Chauf_zn                             : 0.0x00 0x80 
+
+[873]Sce_Chauf_zsb1                           : 0.0x00 0x80 
+
+[874]Sce_Chauf_zsb2                           : 0.0x00 0x80 
+
+[875]Sce_Cumulus                              : 0.0x00 0x80 
+
+[876]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[877]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[878]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[879 : Scenario8] : SCENARIO PERSONNALISE 2 
+
+[879]Sc_Confirme_Scenario                     : 0.0x00 0x01 
+
+[880]Sc_Alarme_ON                             : 0.0x00 OK 
+
+Tb_Echange[881 : Scenario_AlarmeConfig] : CONFIG ALARME 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+0.0x00 OK 
+
+[892]Sc_Eteindre_PDV_LSB                      : 0.0x00 OK 
+
+[893]Sc_Eteindre_PDV_MSB                      : 0.0x00 OK 
+
+[894]Sc_Eteindre_CHB_LSB                      : 0.0x00 OK 
+
+[895]Sc_Eteindre_CHB_MSB                      : 0.0x00 OK 
+
+[896]Sce_Eteindre_PDE_LSB                     : 0.0x00 OK 
+
+[897]Sce_Eteindre_PDE_MSB                     : 0.0x00 OK 
+
+[898]Sce_Allumer_PDV_LSB                      : 0.0x00 OK 
+
+[899]Sce_Allumer_PDV_MSB                      : 0.0x00 OK 
+
+[900]Sce_Allumer_CHB_LSB                      : 0.0x00 OK 
+
+[901]Sce_Allumer_CHB_MSB                      : 0.0x00 OK 
+
+[902]Sce_Allumer_PDE_LSB                      : 0.0x00 OK 
+
+[903]Sce_Allumer_PDE_MSB                      : 0.0x00 OK 
+
+[904]Sce_OuvrirVolets_PDV                     : 0.0x00 OK 
+
+[905]Sce_OuvrirVolets_CHB                     : 0.0x00 OK 
+
+[906]Sce_OuvrirVolets_PDE                     : 0.0x00 OK 
+
+[907]Sce_FermerVolets_PDV                     : 0.0x00 OK 
+
+[908]Sce_FermerVolets_CHB                     : 0.0x00 OK 
+
+[909]Sce_FermerVolets_PDE                     : 0.0x00 OK 
+
+[910]Sce_Securite                             : 0.0x00 OK 
+
+[911]Sce_Machines                             : 0.0x00 OK 
+
+[912]Sce_Chauf_zj                             : 0.0x00 0x80 
+
+[913]Sce_Chauf_zn                             : 0.0x00 0x80 
+
+[914]Sce_Chauf_zsb1                           : 0.0x00 0x80 
+
+[915]Sce_Chauf_zsb2                           : 0.0x00 0x80 
+
+[916]Sce_Cumulus                              : 0.0x00 0x80 
+
+[917]Sce_Reveil_Reglage                       : 0.0x00 OK 
+
+[918]Sce_Reveil_ON                            : 0.0x00 OK 
+
+[919]Sce_Efface                               : 0.0x00 OK 
+
+Tb_Echange[920 : EtatBP1                                 ] : 0.0x00 OK <-  Je ne sais pas 
+
+Tb_Echange[921 : EtatBP2                                 ] : 0.0x00 OK <-  Je ne sais pas 
+
+922 Clef 0x00 
+
+923 Clef 0x00 
+
+924 Clef 0x00 
+
+925 Clef 0x00 
+
+926 Clef 0x00 
+
+927 Clef 0x00 
+
+928 Clef 0x00 
+
+929 Clef 0x00 
+
+930 Clef 0x00 
+
+931 Clef 0x00 
+
+932 Clef 0x00 
+
+933 Clef 0x00 
+
+934 Clef 0x00 
+
+935 Clef 0x00 
+
+936 Clef 0x00 
+
+937 Clef 0x00 
+
+938 Store_VR 0x00 
+
+939 Store_Vitesse_Vent_Repliage 0x00 
+
+940 Store_Vitesse_Vent_Instantane 0x00 
+
+941 Constructeur_CodeLSB 0x11 
+
+942 Constructeur_CodeMSB 0x19 
+
+ 
