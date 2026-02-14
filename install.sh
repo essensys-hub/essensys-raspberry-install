@@ -46,6 +46,7 @@ HTPASSWD_FILE="$AUTH_DIR/users.htpasswd"
 CADDY_TEMPLATES="/opt/essensys-caddy"
 
 DOMAIN_FILE="$HOME_DIR/domain.txt"
+PASSWORD_CONFIRM_FILE="$HOME_DIR/password_confirm.txt"
 
 log_info "=========================================="
 log_info "Installation Essensys - Version $ESSENSYS_VERSION"
@@ -233,12 +234,29 @@ setup_auth() {
     local username=""
     local password=""
     
+    # Vérifier si password_confirm.txt existe et contient "true"
+    local use_default_credentials=false
+    if [ -f "$PASSWORD_CONFIRM_FILE" ]; then
+        local confirm_value=$(cat "$PASSWORD_CONFIRM_FILE" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+        if [ "$confirm_value" = "true" ]; then
+            use_default_credentials=true
+            log_info "password_confirm.txt detecte avec 'true' - utilisation des credentials par defaut"
+        fi
+    fi
+    
     echo
     log_info "=== Configuration authentification Essensys ==="
     echo
     
-    # Demander si auth activée
-    if [ -r /dev/tty ]; then
+    # Si password_confirm.txt contient "true", utiliser les valeurs par défaut
+    if [ "$use_default_credentials" = true ]; then
+        auth_enabled=1
+        lan_noauth=0
+        username="admin"
+        password="Essensys"
+        log_info "Utilisation des credentials par defaut: admin/Essensys"
+    # Sinon, demander interactivement
+    elif [ -r /dev/tty ]; then
         read -r -p "Activer l'authentification? (O/n): " auth_choice < /dev/tty
         case "$auth_choice" in
             [Nn]*)
