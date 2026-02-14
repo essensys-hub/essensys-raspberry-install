@@ -95,15 +95,22 @@ prompt_domain() {
     return 1
 }
 if [ -f "$DOMAIN_FILE" ]; then
-    log_info "domain.txt detecte. Saisissez le domaine WAN a utiliser."
-    log_info "ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/"
-    prompt_domain "Domaine WAN (ex: mon.monwan.io):  "
-    if [ -n "$WAN_DOMAIN" ]; then
-        echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
-        chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
-        log_info "Domaine enregistre dans $DOMAIN_FILE"
+    # Lire le domaine depuis le fichier (enlever les espaces et sauts de ligne)
+    EXISTING_DOMAIN=$(cat "$DOMAIN_FILE" | tr -d '[:space:]')
+    if [ -n "$EXISTING_DOMAIN" ]; then
+        log_info "domain.txt detecte avec le domaine: $EXISTING_DOMAIN"
+        log_info "Utilisation du domaine existant, pas de saisie necessaire."
     else
-        log_warn "Domaine vide, domain.txt conserve tel quel"
+        log_warn "domain.txt existe mais est vide. Saisissez le domaine WAN a utiliser."
+        log_info "ref: https://essensys-hub.github.io/essensys-raspberry-install/installation/wan/"
+        prompt_domain "Domaine WAN (ex: mon.monwan.io):  "
+        if [ -n "$WAN_DOMAIN" ]; then
+            echo "$WAN_DOMAIN" > "$DOMAIN_FILE"
+            chown "$SERVICE_USER:$SERVICE_USER" "$DOMAIN_FILE"
+            log_info "Domaine enregistre dans $DOMAIN_FILE"
+        else
+            log_warn "Domaine vide, domain.txt reste vide"
+        fi
     fi
 else
     log_warn "domain.txt absent. Creation du fichier."
