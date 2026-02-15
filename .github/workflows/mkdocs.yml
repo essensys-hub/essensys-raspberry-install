@@ -1,9 +1,11 @@
-name: Deploy MkDocs
+name: Deploy MkDocs (Versioned)
 
 on:
   push:
     branches:
       - master
+      - main
+      - 'V.*'
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
@@ -19,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -31,6 +35,7 @@ jobs:
           pip install mkdocs-minify-plugin
           pip install mkdocs-git-revision-date-localized-plugin
           pip install pymdown-extensions
+          pip install mike
 
       - name: Setup Node.js for Mermaid
         uses: actions/setup-node@v4
@@ -40,19 +45,32 @@ jobs:
       - name: Install Mermaid CLI
         run: npm install -g @mermaid-js/mermaid-cli
 
-      - name: Build MkDocs site
-        run: mkdocs build
-
       - name: Configure Git
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          cname: false
+      - name: Determine version alias
+        id: version
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
+          # Map branch name to a version alias
+          if [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+            echo "alias=latest" >> "$GITHUB_OUTPUT"
+            echo "set_default=true" >> "$GITHUB_OUTPUT"
+          else
+            # Use branch name directly as alias (e.g. V.1.0.0, V.1.2.2)
+            echo "alias=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "set_default=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy with mike
+        run: |
+          mike deploy --push --update-aliases ${{ steps.version.outputs.alias }}
+
+      - name: Set default version
+        if: steps.version.outputs.set_default == 'true'
+        run: |
+          mike set-default --push latest
