@@ -40,7 +40,7 @@ ANSIBLE_REF="$ESSENSYS_VERSION"
 INSTALL_REF="$ESSENSYS_VERSION"
 
 # Docker images
-CONTROL_PLANE_IMAGE="essensyshub/essensys-control-plane:$ESSENSYS_VERSION"
+CONTROL_PLANE_IMAGE="essensyshub/essensys-control-plane:latest"
 CONTROL_PLANE_PORT=9100
 CONTROL_PLANE_DATA="/opt/essensys/control-plane"
 
