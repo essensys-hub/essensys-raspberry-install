@@ -145,6 +145,34 @@
          <lastmod>2026-02-15</lastmod>
     </url>
     <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/cicd/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/control-plane/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/docker-compose/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/mcp-standalone/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/migration-plan/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
+         <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/migration-architecture/n8n-openclaw-prometheus/</loc>
+         <lastmod>2026-02-15</lastmod>
+    </url>
+    <url>
          <loc>https://essensys-hub.github.io/essensys-raspberry-install/V.1.2.2/router/</loc>
          <lastmod>2026-02-15</lastmod>
     </url>
