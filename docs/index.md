@@ -55,6 +55,7 @@ Bienvenue dans la documentation complète pour l'installation et la configuratio
 - [Désinstallation](maintenance/uninstall.md)
 - [Dépannage](maintenance/troubleshooting.md)
 - [Interface de Débogage](maintenance/debug.md)
+- [MCP Essensys](maintenance/mcp.md)
 
 ## 🏗️ Architecture
 

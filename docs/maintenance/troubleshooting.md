@@ -4,6 +4,19 @@ Guide de dépannage pour les problèmes courants.
 
 ## Services ne démarrent pas
 
+### Diagnostic automatique (recommandé)
+
+Via MCP, lancer d'abord :
+
+- `run_self_diagnostic`
+- puis `run_self_diagnostic` avec `auto_repair=true` si besoin
+
+Ensuite affiner avec :
+
+- `list_service_status`
+- `read_service_logs` sur le service concerné
+- `get_port_diagnostics`
+
 ### Backend
 
 ```bash
@@ -41,6 +54,19 @@ sudo cat /etc/traefik/traefik.yml
 
 # Vérifier les ports
 sudo netstat -tlnp | grep -E ':(80|443)'
+```
+
+### MCP
+
+```bash
+# Service MCP
+sudo systemctl status essensys-mcp --no-pager -l
+
+# Logs MCP
+sudo journalctl -u essensys-mcp -n 80 --no-pager
+
+# Port MCP
+sudo ss -ltnp | grep :8083
 ```
 
 ## Problèmes de connexion
@@ -82,3 +108,13 @@ sudo kill <PID>
 ### Conflit entre Nginx et Traefik
 
 Nginx et Traefik peuvent coexister sur le port 80 grâce aux `server_name` différents. Si problème, vérifier la configuration.
+
+### Conflit avec Caddy (legacy)
+
+Si `caddy` est encore présent, il peut bloquer `:443`.
+
+```bash
+sudo systemctl disable --now caddy
+sudo apt-get purge -y caddy
+sudo ss -ltnp | grep :443
+```

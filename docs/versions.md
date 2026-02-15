@@ -21,6 +21,8 @@ La version V.1.2.2 ajoute l'intégration UniFi Protect pour l'affichage des cam�
 *   **Proxy API UniFi** : Le backend fait office de proxy sécurisé vers l'API UniFi Protect.
 *   **Snapshots en temps réel** : Rafraîchissement automatique des images des caméras toutes les 10-15 secondes.
 *   **Interface utilisateur** : Nouvelle page "UniFi Protect" avec filtres et grille responsive.
+*   **Documentation MCP** : Ajout d'un guide opérationnel MCP avec outils actifs, exemples de commandes et texte prêt pour intégration OpenClaw (`docs/maintenance/mcp.md`).
+*   **MCP Ops** : Ajout d'outils de diagnostic/réparation (`list_service_status`, `read_service_logs`, `restart_service`, `get_port_diagnostics`, `get_system_metrics`, `run_self_diagnostic`).
 
 > [!NOTE]
 > Cette version nécessite un UniFi Dream Machine Pro (UDM Pro) accessible via HTTPS. La configuration se fait dans `config.yaml` du backend.

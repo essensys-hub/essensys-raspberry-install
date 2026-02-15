@@ -7,6 +7,26 @@ L'interface de débogage (`/debug`) est un outil intégré au backend pour teste
 L'interface est accessible à l'adresse suivante :
 `http://mon.essensys.fr/debug`
 
+## Diagnostic MCP (Ops)
+
+En complément de `/debug`, le serveur MCP fournit des outils d'exploitation pour accélérer le diagnostic et la remédiation.
+
+### Outils recommandés
+
+- `list_service_status` : état `active/enabled` des services clés.
+- `read_service_logs` : lecture `journalctl` d'un service.
+- `restart_service` : redémarrage ciblé d'un service autorisé.
+- `get_port_diagnostics` : vérifie les ports clés (`80`, `443`, `7070`, `8083`, `6379`).
+- `get_system_metrics` : uptime, mémoire, disque, interfaces, clients.
+- `run_self_diagnostic` : état global + recommandations, avec `auto_repair=true` possible.
+
+### Workflow conseillé (MCP)
+
+1. Exécuter `run_self_diagnostic`.
+2. Lire `recommendations`.
+3. Si nécessaire, relancer avec `auto_repair=true`.
+4. Vérifier avec `list_service_status` puis `read_service_logs` sur les services encore KO.
+
 ## Fonctionnalités
 
 ![Interface de debug](../img/debug-interface.png)

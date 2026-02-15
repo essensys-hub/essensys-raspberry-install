@@ -8,6 +8,39 @@ Le backend Essensys est écrit en Go et gère les API REST et la communication a
 - **Port** : 7070
 - **Emplacement** : `/opt/essensys/backend/`
 - **Configuration** : `/opt/essensys/backend/config.yaml`
+- **Dépendance file d'ordres** : Redis (`essensys:global:actions`)
+
+## MCP (Model Context Protocol)
+
+Le serveur MCP Essensys est embarqué côté backend et expose :
+
+- `GET /sse` (stream)
+- `POST /messages` (JSON-RPC)
+
+Il permet deux familles d'usage :
+
+- **Pilotage** : recherche d'index, lecture/écriture table d'échange, envoi d'ordres.
+- **Ops/diagnostic** : statut services, logs système, ports, métriques et auto-diagnostic.
+
+### Outils MCP de pilotage
+
+- `read_exchange_table`
+- `read_exchange_value`
+- `set_exchange_value` (debug uniquement)
+- `find_device_index`
+- `send_order`
+
+### Outils MCP de diagnostic et réparation
+
+- `list_service_status`
+- `read_service_logs`
+- `restart_service`
+- `get_port_diagnostics`
+- `get_system_metrics`
+- `run_self_diagnostic` (option `auto_repair=true`)
+
+> [!NOTE]
+> `send_order` complète automatiquement le bloc legacy (`590` + `605..622`) si une commande lumières/volets est détectée.
 
 ## API Endpoints
 
