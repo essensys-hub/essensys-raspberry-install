@@ -108,6 +108,14 @@ nav:
     - architecture/traefik.md
     - architecture/adguard.md
     - architecture/ports.md
+  - Migration Docker:
+    - migration-architecture/index.md
+    - migration-architecture/control-plane.md
+    - migration-architecture/mcp-standalone.md
+    - migration-architecture/n8n-openclaw-prometheus.md
+    - migration-architecture/docker-compose.md
+    - migration-architecture/cicd.md
+    - migration-architecture/migration-plan.md
   - Maintenance:
     - maintenance/index.md
     - maintenance/update.md
