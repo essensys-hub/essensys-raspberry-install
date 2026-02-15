@@ -59,11 +59,9 @@ jobs:
           # Map branch name to a version alias
           if [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
             echo "alias=latest" >> "$GITHUB_OUTPUT"
-            echo "set_default=true" >> "$GITHUB_OUTPUT"
           else
             # Use branch name directly as alias (e.g. V.1.0.0, V.1.2.2)
             echo "alias=$BRANCH" >> "$GITHUB_OUTPUT"
-            echo "set_default=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deploy with mike
@@ -71,6 +69,5 @@ jobs:
           mike deploy --push --update-aliases ${{ steps.version.outputs.alias }}
 
       - name: Set default version
-        if: steps.version.outputs.set_default == 'true'
         run: |
-          mike set-default --push latest
+          mike set-default --push ${{ steps.version.outputs.alias }}
