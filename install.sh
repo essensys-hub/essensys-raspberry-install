@@ -35,9 +35,14 @@ REPO_URL="https://github.com/essensys-hub/essensys-ansible.git"
 TARGET_DIR="/opt/essensys-ansible"
 
 # Versions des dépôts (alignées avec ansible vars)
-ESSENSYS_VERSION="V.1.2.2"
+ESSENSYS_VERSION="V.1.3.0"
 ANSIBLE_REF="$ESSENSYS_VERSION"
 INSTALL_REF="$ESSENSYS_VERSION"
+
+# Docker images
+CONTROL_PLANE_IMAGE="essensyshub/essensys-control-plane:$ESSENSYS_VERSION"
+CONTROL_PLANE_PORT=9100
+CONTROL_PLANE_DATA="/opt/essensys/control-plane"
 
 DOMAIN_FILE="$HOME_DIR/domain.txt"
 
@@ -46,6 +51,7 @@ log_info "Installation Essensys - Version $ESSENSYS_VERSION"
 log_info "=========================================="
 log_info "  - essensys-raspberry-install: $INSTALL_REF"
 log_info "  - essensys-ansible: $ANSIBLE_REF"
+log_info "  - control-plane: $CONTROL_PLANE_IMAGE"
 log_info "=========================================="
 
 log_info "Verification des prerequis (git, ansible)..."
@@ -138,17 +144,14 @@ fi
 # ============================================
 check_go() {
     log_info "Verification de Go..."
-    # Ensure go is available or upgrade if too old
     NEED_GO_INSTALL=true
     if command -v /usr/local/go/bin/go >/dev/null 2>&1; then
         GO_VERSION=$(/usr/local/go/bin/go version | awk '{print $3}' | sed 's/go//')
-        # Check if version starts with 1.23 or higher (basic string compare works for now)
         if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
              NEED_GO_INSTALL=false
              log_info "Go version $GO_VERSION detectee (suffisant)"
         fi
     elif command -v go >/dev/null 2>&1; then
-        # Check system go if /usr/local/go/bin/go not found
          GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
          if [[ "$GO_VERSION" > "1.23" ]] || [[ "$GO_VERSION" == "1.23"* ]]; then
              NEED_GO_INSTALL=false
@@ -167,6 +170,32 @@ check_go() {
     fi
 }
 check_go
+
+# ============================================
+# Installation de Docker (Prerequis pour Control Plane)
+# ============================================
+check_docker() {
+    log_info "Verification de Docker..."
+    if command -v docker >/dev/null 2>&1; then
+        DOCKER_VERSION=$(docker --version | awk '{print $3}' | tr -d ',')
+        log_info "Docker version $DOCKER_VERSION detectee"
+    else
+        log_warn "Docker non trouve, installation..."
+        curl -fsSL https://get.docker.com | sh
+        # Ajouter l'utilisateur essensys au groupe docker
+        usermod -aG docker "$SERVICE_USER" || true
+        systemctl enable docker
+        systemctl start docker
+        log_info "Docker installe avec succes"
+    fi
+
+    # S'assurer que Docker est demarre
+    if ! systemctl is-active --quiet docker; then
+        log_warn "Docker n'est pas actif, demarrage..."
+        systemctl start docker
+    fi
+}
+check_docker
 
 if [ -d "$TARGET_DIR/.git" ]; then
     log_info "Depot deja present, mise a jour..."
@@ -197,6 +226,75 @@ ansible-playbook -i "$TARGET_DIR/inventory" "$TARGET_DIR/install.raspberrypi.yml
 
 # Note: MCP configuration is now handled by Ansible role 'raspberry_mcp'
 
+# ============================================
+# Deploiement du Control Plane (Docker)
+# ============================================
+deploy_control_plane() {
+    log_info "Deploiement du Control Plane..."
+
+    # Creer les repertoires de donnees
+    mkdir -p "$CONTROL_PLANE_DATA"
+    chown -R "$SERVICE_USER:$SERVICE_USER" "$CONTROL_PLANE_DATA"
+
+    # Creer le fichier de configuration si absent
+    if [ ! -f "$CONTROL_PLANE_DATA/config.yaml" ]; then
+        log_info "Creation de la configuration Control Plane..."
+        cat > "$CONTROL_PLANE_DATA/config.yaml" <<CPEOF
+server:
+  port: $CONTROL_PLANE_PORT
+  auth_token: "$(openssl rand -hex 32)"
+
+docker:
+  socket: /var/run/docker.sock
+
+redis:
+  addr: "localhost:6379"
+  db: 0
+
+store:
+  path: /data/controlplane.db
+
+log:
+  level: info
+CPEOF
+        chown "$SERVICE_USER:$SERVICE_USER" "$CONTROL_PLANE_DATA/config.yaml"
+    else
+        log_info "Configuration Control Plane existante conservee"
+    fi
+
+    # Tirer l'image
+    log_info "Pull de l'image $CONTROL_PLANE_IMAGE..."
+    docker pull "$CONTROL_PLANE_IMAGE"
+
+    # Arreter et supprimer l'ancien conteneur si present
+    if docker ps -a --format '{{.Names}}' | grep -q "^essensys-control-plane$"; then
+        log_info "Arret du conteneur existant..."
+        docker stop essensys-control-plane >/dev/null 2>&1 || true
+        docker rm essensys-control-plane >/dev/null 2>&1 || true
+    fi
+
+    # Lancer le conteneur
+    log_info "Demarrage du Control Plane..."
+    docker run -d \
+        --name essensys-control-plane \
+        --restart unless-stopped \
+        --network host \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v "$CONTROL_PLANE_DATA":/data \
+        -v "$CONTROL_PLANE_DATA/config.yaml":/etc/controlplane/config.yaml:ro \
+        "$CONTROL_PLANE_IMAGE"
+
+    # Verifier que le conteneur est bien lance
+    sleep 3
+    if docker ps --format '{{.Names}}' | grep -q "^essensys-control-plane$"; then
+        log_info "Control Plane demarre avec succes sur le port $CONTROL_PLANE_PORT"
+    else
+        log_error "Echec du demarrage du Control Plane"
+        docker logs essensys-control-plane 2>&1 | tail -20
+    fi
+}
+deploy_control_plane
+
 cleanup_caddy() {
     log_info "Suppression de Caddy (stack Traefik only)..."
     systemctl disable --now caddy >/dev/null 2>&1 || true
@@ -221,7 +319,14 @@ cleanup_homeassistant
 log_info "Termine. Installation complete."
 log_info ""
 log_info "=== Commandes utiles ==="
-log_info "  systemctl status nginx traefik"
-log_info "  ss -ltnp | grep -E ':80|:443'"
+log_info "  systemctl status nginx traefik docker"
+log_info "  docker ps                                  # Conteneurs actifs"
+log_info "  docker logs essensys-control-plane         # Logs Control Plane"
+log_info "  ss -ltnp | grep -E ':80|:443|:$CONTROL_PLANE_PORT'"
 log_info "  /usr/local/bin/generate-htpasswd-essensys.sh"
+log_info ""
+log_info "=== Control Plane ==="
+log_info "  URL: http://$(hostname -I | awk '{print $1}'):$CONTROL_PLANE_PORT"
+log_info "  Config: $CONTROL_PLANE_DATA/config.yaml"
+log_info "  Data: $CONTROL_PLANE_DATA/"
 log_info ""
