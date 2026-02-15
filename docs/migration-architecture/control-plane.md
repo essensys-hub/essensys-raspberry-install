@@ -205,7 +205,7 @@ Le Control Plane **query Prometheus** via PromQL pour afficher les graphes dans 
 
 **Alertes** : Prometheus Alertmanager envoie les alertes vers :
 
-- **N8N** (webhook) : pour les workflows de notification (email, SMS, Telegram, etc.)
+- **N8N** (webhook) : pour les workflows de notification (email, WhatsApp, Signal, Telegram, etc.)
 - **OpenClaw** (webhook) : pour l'auto-diagnostic et la réparation automatique via MCP
 
 En cas d'alerte :
@@ -280,7 +280,7 @@ graph TB
 | Mettre à jour | Bouton update | Futur: `update_service` | Workflow update | - |
 | Rollback | Bouton rollback | Futur: `rollback_service` | Workflow rollback | - |
 | Métriques | Graphes Prometheus | `get_system_metrics` | - | Analyse IA |
-| Notifications | UI events | - | Email/SMS/Telegram | Résumé vocal |
+| Notifications | UI events | - | Email/WhatsApp/Signal/Telegram | Résumé vocal |
 | Auto-réparation | - | `run_self_diagnostic` | Workflow triggered | Décision IA |
 
 Le MCP est **l'interface programmatique** du Control Plane. OpenClaw est **l'intelligence** qui prend les décisions. N8N est **l'orchestrateur** qui automatise les workflows entre humains et IA.

@@ -388,7 +388,7 @@ Supprimer les containers Prometheus et node-exporter. Le Control Plane repasse e
     ```
 
 3. **Créer les workflows N8N essentiels** :
-    - Notification d'alerte Prometheus (email/Telegram)
+    - Notification d'alerte Prometheus (email/WhatsApp/Signal/Telegram)
     - Mise à jour semi-automatique (check registry → notification → approbation → deploy)
     - Forward message utilisateur → OpenClaw → réponse
     - Rapport quotidien (métriques + events)
@@ -397,13 +397,13 @@ Supprimer les containers Prometheus et node-exporter. Le Control Plane repasse e
     - Alertes `critical` → OpenClaw (auto-diagnostic) + N8N (notification)
     - Alertes `warning` → N8N (notification admin)
 
-5. **Tester le flux complet** : envoyer un message Telegram → N8N → OpenClaw → MCP → action exécutée → réponse
+5. **Tester le flux complet** : envoyer un message (WhatsApp/Signal/Telegram) → N8N → OpenClaw → MCP → action exécutée → réponse
 
 ### Critère de validation
 
 - OpenClaw pilote les équipements via MCP depuis une commande texte
 - N8N reçoit les alertes Prometheus et envoie des notifications
-- Le flux utilisateur → Telegram → N8N → OpenClaw → MCP → action fonctionne end-to-end
+- Le flux utilisateur → (WhatsApp/Signal/Telegram) → N8N → OpenClaw → MCP → action fonctionne end-to-end
 - OpenClaw auto-diagnostique quand un service est down
 
 ### Rollback

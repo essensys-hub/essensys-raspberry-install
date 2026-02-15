@@ -148,7 +148,7 @@ graph LR
     A[Prometheus Alert<br/>webhook] --> B[N8N Trigger]
     B --> C{Sévérité?}
     C -->|Warning| D[Email admin]
-    C -->|Critical| E[SMS + Telegram]
+    C -->|Critical| E[WhatsApp + Signal + Telegram]
     C -->|Critical| F[OpenClaw<br/>auto-diagnostic]
     F --> G{Résolu?}
     G -->|Oui| H[Notification OK]
@@ -164,7 +164,7 @@ graph LR
     A[Cron<br/>toutes les heures] --> B[N8N: Check registry]
     B --> C{Nouvelle version?}
     C -->|Non| D[Fin]
-    C -->|Oui| E[Notification admin<br/>Telegram]
+    C -->|Oui| E[Notification admin<br/>WhatsApp / Signal / Telegram]
     E --> F{Admin approuve?}
     F -->|Oui| G[N8N: Call Control Plane<br/>POST /api/update/apply]
     G --> H[Health check]
@@ -179,7 +179,7 @@ graph LR
 
 ```mermaid
 graph LR
-    A[Utilisateur<br/>Telegram / SMS] --> B[N8N Trigger<br/>message reçu]
+    A[Utilisateur<br/>WhatsApp / Signal / Telegram] --> B[N8N Trigger<br/>message reçu]
     B --> C[N8N: Forward à<br/>OpenClaw]
     C --> D[OpenClaw:<br/>Interprète commande]
     D --> E[MCP:<br/>Exécute action]
@@ -450,7 +450,7 @@ essensys_mcp_version_info{version="V.1.2.2", commit="abc123"}  # Info version
 
 ```mermaid
 sequenceDiagram
-    participant User as Utilisateur (Telegram)
+    participant User as Utilisateur (WhatsApp / Signal / Telegram)
     participant N8N as N8N
     participant OC as OpenClaw
     participant MCP as MCP :8083
