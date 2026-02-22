@@ -240,6 +240,22 @@ sudo -u essensys bash -c "cd /home/essensys && git clone https://github.com/esse
 └── logs/               # Logs de l'application
 ```
 
+## Installation du GitHub Actions Runner (Optionnel)
+
+Si vous souhaitez utiliser ce Raspberry Pi pour compiler et packager automatiquement vos projets Essensys via GitHub Actions (CI/CD), vous pouvez installer un Runner auto-hébergé.
+
+1. Allez sur votre dépôt GitHub (ex: `essensys-control-plane`) > **Settings > Actions > Runners > New self-hosted runner**
+2. Copiez le **Token** fourni (ex: `ABLCI...`)
+3. Exécutez la commande suivante sur le Raspberry Pi en remplaçant par vos valeurs :
+
+```bash
+export GITHUB_REPO_URL="https://github.com/essensys-hub"
+export GITHUB_RUNNER_TOKEN="XXXXXXXXXXXXXX"
+curl -sL https://raw.githubusercontent.com/essensys-hub/essensys-raspberry-install/refs/heads/V.1.3.0/install.github.runner.sh | bash
+```
+
+Le runner sera enregistré sous le nom de votre Raspberry Pi et apparaîtra comme "Idle" (vert) dans l'interface GitHub, prêt à exécuter vos workflows ARM64.
+
 ## Configuration
 
 ### Backend
