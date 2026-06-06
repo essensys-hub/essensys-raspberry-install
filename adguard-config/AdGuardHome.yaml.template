@@ -30,8 +30,7 @@ dns:
   ratelimit_whitelist: []
   refuse_any: true
   upstream_dns:
-  - https://dns.adguard-dns.com/dns-query
-  - https://dns.quad9.net/dns-query
+  - <ETH0_GATEWAY_IP> # REPLACE_WITH_DEFAULT_GATEWAY_OF_ETH0_SUBNET
   upstream_dns_file: ""
   bootstrap_dns:
   - 9.9.9.10

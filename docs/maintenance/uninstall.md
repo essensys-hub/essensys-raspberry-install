@@ -4,6 +4,37 @@ Guide pour désinstaller complètement Essensys du Raspberry Pi.
 
 ## Désinstallation automatique
 
+## Gateway CM5 (Ansible)
+
+Pour la **CM5 Essensys** (stack Docker + dual-NIC + NVMe) :
+
+```bash
+cd essensys-ansible
+ansible-playbook uninstall.cm5.yml -i inventory.gateway \
+  -e confirm_cm5_uninstall=true
+```
+
+Options :
+
+| Variable | Effet |
+|----------|--------|
+| `cm5_remove_nvme_fstab=true` | Retire le montage NVMe du fstab |
+| `cm5_wipe_nvme_data=true` | Efface la partition NVMe (**irréversible**) |
+| `cm5_remove_docker_packages=true` | Désinstalle Docker |
+
+Voir `essensys-ansible/roles/raspberry_cm5_uninstall/README.md`.
+
+## Migration NixOS CM5
+
+Préparation du flake NixOS (clone, Nix, script repartition eMMC **offline**) :
+
+```bash
+ansible-playbook prepare.nixos-cm5.yml -i inventory.gateway \
+  -e confirm_cm5_nixos_prep=true
+```
+
+Documentation : `essensys-raspberry-gateway/docs/nixos-install-cm5.md` et role `raspberry_cm5_nixos`.
+
 ### Script uninstall.sh
 
 Le script `uninstall.sh` automatise la désinstallation complète :
