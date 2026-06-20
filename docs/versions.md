@@ -6,11 +6,20 @@ Cette page répertorie les versions du système Essensys.
 
 | Version | Statut | Date de sortie | Description |
 | :--- | :--- | :--- | :--- |
+| V.1.4.0 | **Gateway CM5 pilote** | Juin 2026 | Gestion scénarios (UI `/scenarios`, API, sync cloud 591–919) |
+| V.1.3.1 | **Gateway CM5 pilote** | Juin 2026 | Sync cloud scheduler (profils 3 h, pull/push planifié) — voir `essensys-raspberry-gateway/docs` |
 | V.1.2.2 | ** Dev version ** | 30 Janvier 2026 | **Version Actuelle.** Intégration UniFi Protect. |
 | V.1.2.1 | ** Dev version ** | 25 Janvier 2026 | Intégration Home Assistant via MQTT. |
 | V.1.2.0 | ** Dev version ** | 25 Janvier 2026 | Intégration Home Assistant. |
 | V.1.1.0 | **Production (Stable) Legacy** | 11 Janvier 2026 | Intégration complète de Redis pour la persistance et la fiabilité. |
 | **V.1.0.0** | **Production (Stable) Legacy ** | 11 Janvier 2026 | Ancienne version stable sans Redis. Support limité. |
+
+## Détails de la Version V.1.4.0 (Scénarios)
+
+- Page **Scénarios** dans le frontend LAN et portail distant
+- API ` /api/scenarios/*` (gateway) et `/api/portal/scenarios/*` (OVH)
+- Profil sync cloud **Scénarios** (591–919) ; exclusion trigger 590 du push
+- Documentation : `essensys-raspberry-gateway/docs/maintenance/scenarios.md`
 
 ## Détails de la Version V.1.2.2 (UniFi Protect)
 

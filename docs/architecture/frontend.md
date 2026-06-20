@@ -12,6 +12,7 @@ Le frontend Essensys est une application React moderne.
 ## Fonctionnalités
 
 - Interface utilisateur moderne
+- Page **Scénarios** (`/scenarios`) — boutons Je sors / vacances / Perso, éditeur (juin 2026)
 - Configuration dynamique du backend
 - Détection automatique du domaine WAN
 - Compatible avec les navigateurs modernes

@@ -50,6 +50,11 @@ Il permet deux familles d'usage :
 - `POST /api/myactions` - Actions utilisateur
 - `POST /api/done` - Confirmation
 - `POST /api/admin/inject` - Injection de commandes
+- `GET/PUT/POST /api/scenarios/*` - CRUD et lancement scénarios mémorisés (juin 2026)
+- `GET /api/scenarios/meta/bitmasks` - Labels masques lumières/volets
+- `GET/PUT /api/admin/scenarios/sync` - Toggle sync cloud profil Scénarios
+
+Package domaine : `internal/scenario/` (Mode A `590=2..8`, Mode B `590=1` + 605–622).
 
 ## Compatibilité client legacy
 
