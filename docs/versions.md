@@ -20,6 +20,7 @@ Cette page répertorie les versions du système Essensys.
 - API ` /api/scenarios/*` (gateway) et `/api/portal/scenarios/*` (OVH)
 - Profil sync cloud **Scénarios** (591–919) ; exclusion trigger 590 du push
 - Documentation : `essensys-raspberry-gateway/docs/maintenance/scenarios.md`
+- **LAN IAM (preview)** : comptes `lan_users`, login UI `/login`, pages `/settings/account` et `/settings/users` — voir [Authentification](installation/authentication.md#mode-lan-iam-openspec-2026-06-017)
 
 ## Détails de la Version V.1.2.2 (UniFi Protect)
 

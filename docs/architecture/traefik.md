@@ -108,10 +108,12 @@ flowchart TD
 C'est une distinction cruciale de l'architecture Essensys sur Raspberry Pi.
 
 ### 1. Réseau Local (LAN)
-- **URL** : `http://mon.essensys.fr` (ou IP locale).
-- **Serveur** : **Nginx** répond directement.
-- **Sécurité** : Aucune authentification requise (confiance réseau local).
-- **API** : Toutes les APIs (`/api/serverinfos`, `/api/myactions`, etc.) sont accessibles.
+- **URL** : `http://mon.essensys.fr` (ou IP locale), ou `https://mon.essensys.local` (profil CM5 dual-NIC).
+- **Serveur** : **Nginx** répond directement (ou Traefik routes `frontend-local` / `api-local` **sans** middleware `auth-wan`).
+- **Sécurité** :
+    - **Sans LAN IAM** : aucune authentification requise (confiance réseau local).
+    - **Avec LAN IAM** : session applicative (`/login`) — **ne pas** ajouter Basic Auth Traefik sur les routes locales pour éviter une double authentification.
+- **API** : Toutes les APIs (`/api/serverinfos`, `/api/myactions`, etc.) sont accessibles (routes legacy IoT allowlistées sans session).
 
 ### 2. Réseau Distant (WAN)
 - **URL** : `https://[votre-id].essensys.fr`.

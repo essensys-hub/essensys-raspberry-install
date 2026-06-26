@@ -55,9 +55,10 @@ curl http://mon.essensys.fr/api/serverinfos
 
 ## Sécurité locale
 
-- **Pas d'authentification** : L'accès local est ouvert (pas de mot de passe)
-- **HTTP uniquement** : Pas de HTTPS en local
-- **Réseau local uniquement** : Les services ne sont pas accessibles depuis Internet
+- **Sans LAN IAM** : accès local ouvert (pas de mot de passe applicatif) — voir configuration Nginx.
+- **Avec LAN IAM** (`lan_iam.enabled: true`) : connexion obligatoire via `/login` ; session cookie 7 jours. Voir [Authentification](../installation/authentication.md#mode-lan-iam-openspec-2026-06-017).
+- **HTTP / HTTPS local** : selon profil gateway (Nginx port 80 ou Traefik `mon.essensys.local` sans Basic Auth WAN).
+- **Réseau local uniquement** : les services ne sont pas exposés sur Internet sans Traefik WAN.
 
 ## Dépannage
 

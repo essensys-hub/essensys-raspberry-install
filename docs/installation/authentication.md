@@ -2,7 +2,41 @@
 
 Cette page décrit le système d'authentification de Mon Essensys, introduit dans la version V.1.2.1.
 
-## Vue d'ensemble
+## Mode LAN IAM (OpenSpec 2026-06.017)
+
+Lorsque `lan_iam.enabled: true` dans `config.yaml` du backend gateway :
+
+- **Authentification applicative** : page `/login` sur `mon.essensys.local` (build frontend avec `VITE_LAN_IAM=true`).
+- **Comptes** : table PostgreSQL `lan_users` (rôles `lan_admin`, `lan_user`, `lan_guest`).
+- **Session** : cookie HttpOnly, durée **7 jours** (sliding).
+- **Premier admin** : bootstrap one-shot via token Ansible (`/opt/data/config/lan_bootstrap.token`).
+
+### Bootstrap installateur
+
+1. Activer dans Ansible : `lan_iam_enabled: true` (rôle `raspberry_backend`).
+2. Appliquer la migration SQL `003_lan_users.up.sql` sur PostgreSQL gateway.
+3. Lire le token : `sudo cat /opt/data/config/lan_bootstrap.token`
+4. Créer le premier admin :
+
+```bash
+curl -k -X POST https://mon.essensys.local/api/admin/lan-users/bootstrap \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@local","password":"MotDePasseFort12!","bootstrap_token":"TOKEN_ICI"}'
+```
+
+5. Se connecter via l'UI (`/login`) et **changer le mot de passe** dans Paramètres → Mon compte.
+
+### Gestion des utilisateurs (UI)
+
+- **Mon compte** : `/settings/account` — changement de mot de passe.
+- **Admin LAN** : `/settings/users` — CRUD comptes (réservé `lan_admin`).
+
+### Coexistence Traefik / Nginx
+
+- **LAN** (`mon.essensys.local`) : routes Traefik locales **sans** middleware `auth-wan` — pas de double Basic Auth avec la session app.
+- **WAN** : Basic Auth Traefik (`auth-wan`) reste en place pour l'accès distant ; la session cookie LAN IAM s'applique aux routes API/UI servies par le backend.
+
+## Vue d'ensemble (legacy Caddy / Basic Auth)
 
 L'authentification est gérée au niveau du **reverse-proxy Caddy**, pas dans le code applicatif. Cela offre plusieurs avantages :
 
