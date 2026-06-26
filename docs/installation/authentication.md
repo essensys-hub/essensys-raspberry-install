@@ -11,12 +11,16 @@ Lorsque `lan_iam.enabled: true` dans `config.yaml` du backend gateway :
 - **Session** : cookie HttpOnly, durée **7 jours** (sliding).
 - **Premier admin** : bootstrap one-shot via token Ansible (`/opt/data/config/lan_bootstrap.token`).
 
-### Bootstrap installateur
+### Bootstrap installateur (Ansible)
 
-1. Activer dans Ansible : `lan_iam_enabled: true` (rôle `raspberry_backend`).
-2. Appliquer la migration SQL `003_lan_users.up.sql` sur PostgreSQL gateway.
-3. Lire le token : `sudo cat /opt/data/config/lan_bootstrap.token`
-4. Créer le premier admin :
+1. Déployer avec LAN IAM :
+   ```bash
+   ansible-playbook -i inventory.gateway update.raspberrypi.yml -e lan_iam_enabled=true
+   ```
+2. Le rôle **`raspberry_postgresql`** installe PostgreSQL, injecte le bloc `database:` dans `config.yaml`, et le backend applique la migration `003_lan_users`.
+3. Le frontend est rebuild avec **`VITE_LAN_IAM=true`** (rôle `raspberry_frontend`) — pas l'image Docker par défaut.
+4. Lire le token bootstrap : `sudo cat /opt/data/config/lan_bootstrap.token`
+5. Créer le premier admin (si pas encore fait) :
 
 ```bash
 curl -k -X POST https://mon.essensys.local/api/admin/lan-users/bootstrap \
@@ -24,7 +28,7 @@ curl -k -X POST https://mon.essensys.local/api/admin/lan-users/bootstrap \
   -d '{"email":"admin@local","password":"MotDePasseFort12!","bootstrap_token":"TOKEN_ICI"}'
 ```
 
-5. Se connecter via l'UI (`/login`) et **changer le mot de passe** dans Paramètres → Mon compte.
+6. Se connecter via l'UI (`/login`) et **changer le mot de passe** dans Paramètres → Mon compte.
 
 ### Gestion des utilisateurs (UI)
 
