@@ -57,3 +57,14 @@ sudo systemctl status traefik
 # Tester l'accès
 curl http://mon.essensys.fr/health
 ```
+
+## Temporisations des lumières (routes ajoutées au backend)
+
+La fonction « Temporisations » des lumières (menu et fiche lumière des applications et portails) ajoute des routes au backend gateway :
+
+- `GET /api/admin/lights/timers` : lit les six délais d'extinction (clés 521, 555, 556, 557, 561, 562) ;
+- `PUT /api/admin/lights/timers/{id}` : règle une lumière (`{"minutes": 0 à 255}`), réservé à l'administrateur.
+
+**Rien à changer dans l'installation du Raspberry Pi.** Le script `install.sh` ne fait que le bootstrap : il clone `essensys-ansible` (référence `V.1.3.0`) et lance `install.raspberrypi.yml`, qui récupère et compile le dépôt `essensys-server-backend`. Les routes et la lecture des six clés font partie du binaire du backend : une mise à jour du backend (`update.sh` ou la procédure manuelle ci-dessus, ou le playbook Ansible) suffit. Aucune variable de configuration, aucun service et aucune règle Nginx ou Traefik n'est à ajouter (les routes passent par le préfixe `/api` existant). Redis (file d'ordres) est déjà utilisé par le backend ; aucune base PostgreSQL n'est requise pour ces routes.
+
+Limite de cette vérification : le contenu du rôle Ansible n'est pas dans ce dépôt et n'a pas été relu ici ; l'absence de changement se déduit de ce que ce dépôt ne contient aucun code ni configuration propre au backend. La vérification des routes sur une installation réelle reste à faire au déploiement.
