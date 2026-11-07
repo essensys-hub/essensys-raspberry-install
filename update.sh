@@ -171,6 +171,11 @@ if [ -f "$BACKEND_DIR/config.yaml" ]; then
     fi
 fi
 
+# Noms personnalisés des lumières : répertoire en écriture pour le service et clé light_names.path
+# (le service systemd est durci : le répertoire reste sous $INSTALL_DIR). Idempotent.
+log_info "Configuration du stockage des noms de lumières..."
+"$SCRIPT_DIR/scripts/setup-light-names.sh" "$BACKEND_DIR/config.yaml" "$INSTALL_DIR/names" "$SERVICE_USER"
+
 # Mettre à jour le frontend
 log_info "Mise à jour du frontend (Branch ${ESSENSYS_VERSION})..."
 cd "$HOME_DIR/essensys-server-frontend"

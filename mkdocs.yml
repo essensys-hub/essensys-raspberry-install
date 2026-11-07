@@ -122,6 +122,7 @@ nav:
     - maintenance/uninstall.md
     - maintenance/troubleshooting.md
     - maintenance/debug.md
+    - maintenance/noms-lumieres.md
 
 extra_css:
   - stylesheets/extra.css
