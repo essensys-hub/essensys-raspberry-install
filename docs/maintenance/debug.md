@@ -311,17 +311,34 @@ Vous pouvez régler la durée de course des volets ou le temps d'extinction auto
 *   Valeur : `20`
 
 ### Temps d'Extinction Automatique des Lampes (en Minutes)
-*Valeur : 1 à 255 minutes (0 = Pas d'extinction).*
+*Valeur : un octet, de 0 à 255 minutes (0 = Jamais, la lumière reste allumée).*
 
-| Zone | Clé de Base | Description | Détail des Indices Utiles |
-| :--- | :--- | :--- | :--- |
-| **Lampes PDV** | **518** | Entrée, Salon... | *Non documenté dans le code C (marqué inutilisé)* |
-| **Lampes CHB** | **534** | Chambres | *Non documenté dans le code C (marqué inutilisé)* |
-| **Lampes PDE** | **550** | Pièces d'Eau | **555** = WC 1<br>**556** = WC 2<br>**557** = Service |
+Le boîtier de la lumière arme un compteur de `minutes × 60 × 0,994` secondes (15 min ≈ 894 s). La clé d'une lumière est la clé de base du boîtier plus l'index de sa sortie. Six lumières ont un délai réglable :
+
+| Zone | Clé de Base | Lumière | Clé | Calcul |
+| :--- | :--- | :--- | :--- | :--- |
+| **Lampes PDV** (pièces de vie) | **518** | Dressing | **521** | 518 + 3 |
+| **Lampes CHB** (chambres) | **534** | aucune lumière réglable | - | - |
+| **Lampes PDE** (pièces d'eau) | **550** | WC 1 | **555** | 550 + 5 |
+| | | WC 2 | **556** | 550 + 6 |
+| | | Service (buanderie) | **557** | 550 + 7 |
+| | | Annexe 1 | **561** | 550 + 11 |
+| | | Annexe 2 | **562** | 550 + 12 |
+
+Les autres cases des trois blocs sont marquées « non utilisé » dans le BP (table d'échange du firmware 099-37).
 
 **Exemple :** Éteindre la lumière du **WC 1** automatiquement après **5 minutes**.
 *   Clé : `555` (550 + 5)
 *   Valeur : `5`
+
+**Exemple :** Éteindre l'**Annexe 2** après **1 heure**.
+*   Clé : `562` (550 + 12)
+*   Valeur : `60`
+
+!!! warning "Écran tactile de l'armoire"
+    L'écran de l'armoire propose seulement 15 min, 30 min, 1 h et Jamais (valeurs 15, 30, 60 et 0). Une valeur libre (par exemple 7 min) est acceptée par le boîtier mais n'est cochée sur aucune case de l'écran, qui pourrait l'écraser à sa validation. Ce comportement doit être vérifié sur un banc, jamais sur une armoire réelle.
+
+Les applications et portails proposent ce réglage dans le menu « Temporisations » et dans la fiche de chaque lumière (administrateur de l'armoire uniquement).
 
 ## Configuration des Variateurs (Type de Sortie)
 
