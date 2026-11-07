@@ -9,3 +9,4 @@ Guide de maintenance pour l'installation Essensys sur Raspberry Pi.
 *   **[Dépannage](troubleshooting.md)** : Résoudre les problèmes courants.
 *   **[Interface de Débogage](debug.md)** : Utiliser l'outil d'injection et de visualization des logs (`/debug`).
 *   **[MCP Essensys](mcp.md)** : Outils MCP actifs, usage, et texte prêt pour OpenClaw.
+*   **[Noms des lumières](noms-lumieres.md)** : Stockage, sauvegarde et dépannage (503 `names_unavailable`) des noms personnalisés.
